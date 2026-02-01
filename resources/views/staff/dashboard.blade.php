@@ -186,7 +186,91 @@
         font-size: 13px;
         color: var(--secondary);
     }
+
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--medium-gray);
+    }
+
+    .dashboard-header h2 {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 0;
+    }
+
+    .profile-link-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        text-decoration: none;
+        color: var(--primary);
+        transition: all 0.3s ease;
+    }
+
+    .profile-link-header:hover {
+        opacity: 0.8;
+    }
+
+    .profile-link-header .avatar-img {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        border: 2px solid var(--accent);
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, var(--accent) 0%, #c19a2f 100%);
+        color: var(--primary);
+        font-weight: bold;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+
+    .profile-link-header .avatar-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .profile-info-header {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .profile-info-header .user-name {
+        font-weight: 600;
+        color: var(--primary);
+    }
+
+    .profile-info-header .user-role {
+        font-size: 14px;
+        color: var(--secondary);
+    }
 </style>
+
+<div class="dashboard-header">
+    <h2>Dashboard</h2>
+    <a href="{{ route('staff.profile.show') }}" class="profile-link-header">
+        <div class="avatar-img">
+            @if(Auth::user()->profile_image)
+                <img src="{{ asset(Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
+            @else
+                {{ substr(Auth::user()->name, 0, 1) }}{{ substr(Auth::user()->name, strrpos(Auth::user()->name, ' ') + 1, 1) }}
+            @endif
+        </div>
+        <div class="profile-info-header">
+            <span class="user-name">{{ Auth::user()->name }}</span>
+            <span class="user-role">{{ Auth::user()->position ?? 'Staff Member' }}</span>
+        </div>
+    </a>
+</div>
 
 <div class="dashboard-grid">
     <div class="stat-card">

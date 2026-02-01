@@ -101,7 +101,7 @@
                                 <i class="fas fa-calendar-check"></i>
                             </div>
                             <div class="stat-content">
-                               
+                                <div class="stat-value">{{ $totalAppointments }}</div>
                                 <div class="stat-label">Total Appointments</div>
                             </div>
                         </div>
@@ -111,6 +111,7 @@
                                 <i class="fas fa-check-circle"></i>
                             </div>
                             <div class="stat-content">
+                                <div class="stat-value">{{ $completedAppointments }}</div>
                                 <div class="stat-label">Completed</div>
                             </div>
                         </div>
@@ -120,6 +121,7 @@
                                 <i class="fas fa-clock"></i>
                             </div>
                             <div class="stat-content">
+                                <div class="stat-value">{{ $upcomingAppointments }}</div>
                                 <div class="stat-label">Upcoming</div>
                             </div>
                         </div>
@@ -129,6 +131,7 @@
                                 <i class="fas fa-dollar-sign"></i>
                             </div>
                             <div class="stat-content">
+                                <div class="stat-value">RM{{ number_format($totalSpent, 2) }}</div>
                                 <div class="stat-label">Total Spent</div>
                             </div>
                         </div>
@@ -140,12 +143,47 @@
         <!-- Recent Appointments Card -->
         <div class="detail-card full-width">
             <div class="detail-card-header">
-                <h3><i class="fas fa-history"></i> Recent Appointments</h3>
-                <a href="#" class="btn btn-small btn-secondary">
-                    View All <i class="fas fa-arrow-right"></i>
-                </a>
+                <h3><i class="fas fa-history"></i> Appointment History ({{ $totalAppointments }})</h3>
             </div>
-            
+            <div class="detail-card-body">
+                @if($appointments->count() > 0)
+                    <div class="appointments-table-container">
+                        <table class="appointments-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Service</th>
+                                    <th>Barber</th>
+                                    <th>Price</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($appointments as $appointment)
+                                    <tr>
+                                        <td>{{ $appointment->appointment_date->format('M d, Y') }}</td>
+                                        <td>{{ $appointment->start_time }} - {{ $appointment->end_time }}</td>
+                                        <td>{{ $appointment->service->name ?? '-' }}</td>
+                                        <td>{{ $appointment->barber->name ?? '-' }}</td>
+                                        <td>RM{{ number_format($appointment->price, 2) }}</td>
+                                        <td>
+                                            <span class="status-badge {{ $appointment->status }}">
+                                                {{ ucfirst($appointment->status) }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-times"></i>
+                        <p>No appointments yet</p>
+                    </div>
+                @endif
+            </div>
         </div>
 
         <!-- Action Buttons -->

@@ -3,287 +3,556 @@
 @section('page-title', 'Edit Profile')
 
 @section('content')
+<div class="profile-container">
+    <!-- Header -->
+    <div class="profile-header">
+        <h2>Edit Staff Profile</h2>
+        <p>Update your personal information and profile picture</p>
+    </div>
+
+    <!-- Alert Messages -->
+    @if($errors->any())
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-circle"></i>
+            <div>
+                <h4>Validation Errors</h4>
+                <ul>
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i>
+            <div>
+                <h4>Success</h4>
+                <p>{{ session('success') }}</p>
+            </div>
+        </div>
+    @endif
+
+    <!-- Profile Edit Card -->
+    <div class="card">
+        <form action="{{ route('staff.profile.update') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            @method('PATCH')
+
+            <!-- Profile Picture Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-image"></i> Profile Picture
+                </h3>
+                <div class="picture-section">
+                    <div class="current-avatar">
+                        <div class="avatar-circle">
+                            <img src="{{ $user->profile_image ? asset($user->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=d4af37&color=fff&bold=true&size=400' }}"
+                                 id="previewImage" alt="Profile Picture">
+                        </div>
+                        <p class="avatar-text">Current Profile Picture</p>
+                    </div>
+
+                    <div class="upload-zone" id="uploadZone">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drag and drop your image here</p>
+                        <p class="or-text">or</p>
+                        <label class="upload-btn">
+                            Click to browse
+                            <input type="file" id="profileImage" name="profile_image" accept="image/*" style="display: none;">
+                        </label>
+                        <p class="file-info">JPG, PNG, GIF up to 2MB</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-user"></i> Personal Information
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" class="form-control" value="{{ old('name', $user->name) }}" required>
+                        @error('name')<span class="error-text">{{ $message }}</span>@enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" class="form-control" value="{{ old('email', $user->email) }}" required>
+                        @error('email')<span class="error-text">{{ $message }}</span>@enderror
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="form-control" value="{{ old('phone', $user->phone) }}" placeholder="+60123456789">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="position">Position</label>
+                        <input type="text" id="position" name="position" class="form-control" value="{{ old('position', $user->position) }}" placeholder="Senior Barber">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="address">Address</label>
+                    <textarea id="address" name="address" class="form-control" rows="3" placeholder="Your address">{{ old('address', $user->address) }}</textarea>
+                </div>
+            </div>
+
+            <!-- Password Section -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-lock"></i> Change Password
+                </h3>
+                <p class="section-description">Leave blank to keep your current password</p>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">New Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="password" name="password" class="form-control" placeholder="Enter new password">
+                            <button type="button" class="toggle-password" data-target="password">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password_confirmation">Confirm Password</label>
+                        <div class="password-input-wrapper">
+                            <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Confirm password">
+                            <button type="button" class="toggle-password" data-target="password_confirmation">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a href="{{ route('staff.profile.show') }}" class="btn-cancel">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <style>
-    .form-container {
+    :root {
+        --primary: #1a1f36;
+        --secondary: #4a5568;
+        --accent: #d4af37;
+        --light-gray: #f7fafc;
+        --medium-gray: #e2e8f0;
+        --dark-gray: #718096;
+        --danger: #f56565;
+        --success: #48bb78;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --transition: all 0.3s ease;
+    }
+
+    .profile-container {
+        max-width: 900px;
+    }
+
+    .profile-header {
+        margin-bottom: 2rem;
+    }
+
+    .profile-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-header p {
+        font-size: 1rem;
+        color: var(--secondary);
+    }
+
+    .alert {
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        display: flex;
+        gap: 1rem;
+    }
+
+    .alert i {
+        font-size: 1.25rem;
+        flex-shrink: 0;
+        margin-top: 0.25rem;
+    }
+
+    .alert h4 {
+        margin: 0 0 0.5rem;
+        font-size: 1rem;
+    }
+
+    .alert ul {
+        margin: 0;
+        padding-left: 1.5rem;
+    }
+
+    .alert-danger {
+        background-color: rgba(245, 101, 101, 0.1);
+        color: var(--danger);
+        border-left: 4px solid var(--danger);
+    }
+
+    .alert-success {
+        background-color: rgba(72, 187, 120, 0.1);
+        color: var(--success);
+        border-left: 4px solid var(--success);
+    }
+
+    .card {
         background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--card-shadow);
         overflow: hidden;
-        border: 1px solid var(--medium-gray);
-        margin-top: 20px;
-        max-width: 700px;
     }
 
-    .form-card {
-        padding: 30px;
-    }
-
-    .form-card-header {
-        background: linear-gradient(135deg, var(--light-gray) 0%, #f1f5f9 100%);
-        padding: 24px;
+    .form-section {
+        padding: 2rem;
         border-bottom: 1px solid var(--medium-gray);
-        margin-bottom: 30px;
-        border-radius: 12px 12px 0 0;
     }
 
-    .form-card-header h3 {
-        margin: 0;
-        font-size: 18px;
+    .form-section:last-of-type {
+        border-bottom: none;
+    }
+
+    .section-title {
+        font-size: 1.125rem;
+        font-weight: 700;
         color: var(--primary);
+        margin-bottom: 1rem;
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 0.75rem;
     }
 
-    .form-card-header i {
+    .section-title i {
         color: var(--accent);
-        font-size: 20px;
+        font-size: 1.25rem;
+    }
+
+    .section-description {
+        font-size: 0.875rem;
+        color: var(--secondary);
+        margin-bottom: 1.5rem;
+        margin-top: -0.5rem;
+    }
+
+    .picture-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .current-avatar {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .avatar-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 4px solid var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-circle img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .avatar-text {
+        font-size: 0.875rem;
+        color: var(--secondary);
+        text-align: center;
+    }
+
+    .upload-zone {
+        border: 2px dashed var(--accent);
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+        background-color: rgba(212, 175, 55, 0.02);
+    }
+
+    .upload-zone:hover {
+        background-color: rgba(212, 175, 55, 0.05);
+        border-color: #c19a2f;
+    }
+
+    .upload-zone.active {
+        background-color: rgba(212, 175, 55, 0.1);
+        border-color: #c19a2f;
+    }
+
+    .upload-zone i {
+        font-size: 2.5rem;
+        color: var(--accent);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .upload-zone p {
+        margin: 0.5rem 0;
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    .or-text {
+        color: var(--secondary) !important;
+        font-size: 0.875rem;
+        font-weight: 400;
+    }
+
+    .upload-btn {
+        display: inline-block;
+        padding: 0.75rem 1.5rem;
+        background-color: var(--accent);
+        color: var(--primary);
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .upload-btn:hover {
+        background-color: #c19a2f;
+    }
+
+    .file-info {
+        font-size: 0.75rem;
+        color: var(--secondary);
+        margin-top: 0.75rem !important;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
     }
 
     .form-group {
-        margin-bottom: 28px;
+        display: flex;
+        flex-direction: column;
     }
 
     .form-group label {
-        display: block;
-        margin-bottom: 10px;
         font-weight: 600;
         color: var(--primary);
-        font-size: 14px;
+        margin-bottom: 0.5rem;
+        font-size: 0.9375rem;
     }
 
     .form-control {
-        width: 100%;
-        padding: 14px 16px;
-        border-radius: 8px;
+        padding: 0.75rem 1rem;
         border: 2px solid var(--medium-gray);
-        font-size: 15px;
-        transition: all 0.3s ease;
-        background: white;
+        border-radius: 6px;
+        font-size: 0.9375rem;
+        transition: var(--transition);
         color: var(--primary);
+        background-color: white;
         font-family: inherit;
     }
 
     .form-control:focus {
         outline: none;
         border-color: var(--accent);
-        box-shadow: 0 0 0 4px rgba(212, 175, 55, 0.1);
+        box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
     }
 
-    .form-control.is-invalid {
-        border-color: var(--danger);
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
     }
 
-    .form-text {
+    .error-text {
+        color: var(--danger);
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
         display: block;
-        margin-top: 6px;
-        font-size: 13px;
-        color: var(--dark-gray);
+    }
+
+    .password-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .password-input-wrapper .form-control {
+        width: 100%;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 0.75rem;
+        background: none;
+        border: none;
+        color: var(--secondary);
+        cursor: pointer;
+        padding: 0.5rem;
+        transition: var(--transition);
+        font-size: 1rem;
+    }
+
+    .toggle-password:hover {
+        color: var(--accent);
     }
 
     .form-actions {
-        padding: 30px;
-        border-top: 1px solid var(--medium-gray);
+        padding: 2rem;
+        background-color: var(--light-gray);
         display: flex;
         justify-content: flex-end;
-        gap: 20px;
-        background: linear-gradient(135deg, var(--light-gray) 0%, #f1f5f9 100%);
-        border-radius: 0 0 12px 12px;
+        gap: 1rem;
     }
 
-    .btn {
-        padding: 12px 28px;
-        border-radius: 8px;
+    .btn-cancel,
+    .btn-submit {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
         font-weight: 600;
         cursor: pointer;
-        border: none;
-        transition: all 0.3s ease;
+        transition: var(--transition);
         display: inline-flex;
         align-items: center;
-        gap: 10px;
+        gap: 0.5rem;
         text-decoration: none;
+        font-size: 0.9375rem;
     }
 
-    .btn-primary {
-        background: linear-gradient(135deg, var(--accent) 0%, #e6c158 100%);
+    .btn-submit {
+        background-color: var(--accent);
         color: var(--primary);
     }
 
-    .btn-primary:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+    .btn-submit:hover {
+        background-color: #c19a2f;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
-    .btn-secondary {
-        background: white;
+    .btn-cancel {
+        background-color: white;
         color: var(--primary);
         border: 2px solid var(--medium-gray);
     }
 
-    .btn-secondary:hover {
-        background: var(--light-gray);
+    .btn-cancel:hover {
+        background-color: var(--light-gray);
         border-color: var(--accent);
     }
 
-    .tabs {
-        display: flex;
-        gap: 20px;
-        margin-bottom: 30px;
-        border-bottom: 2px solid var(--medium-gray);
-    }
+    @media (max-width: 768px) {
+        .picture-section {
+            grid-template-columns: 1fr;
+        }
 
-    .tab {
-        padding: 15px 0;
-        cursor: pointer;
-        color: var(--secondary);
-        font-weight: 600;
-        border-bottom: 3px solid transparent;
-        transition: all 0.3s ease;
-    }
+        .form-row {
+            grid-template-columns: 1fr;
+        }
 
-    .tab.active {
-        color: var(--accent);
-        border-bottom-color: var(--accent);
-    }
+        .form-actions {
+            flex-direction: column-reverse;
+        }
 
-    .tab-content {
-        display: none;
-    }
-
-    .tab-content.active {
-        display: block;
+        .btn-submit,
+        .btn-cancel {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-    <h1 style="margin: 0; font-size: 28px;">Edit Profile</h1>
-    <a href="{{ route('staff.profile.show') }}" class="btn btn-secondary">
-        <i class="fas fa-arrow-left"></i> Back
-    </a>
-</div>
-
-<div style="max-width: 700px;">
-    <div class="tabs">
-        <div class="tab active" data-tab="personal">Personal Information</div>
-        <div class="tab" data-tab="password">Change Password</div>
-    </div>
-
-    <div class="tab-content active" id="personal">
-        <div class="form-container">
-            <div class="form-card-header">
-                <h3><i class="fas fa-user-circle"></i> Update Personal Information</h3>
-            </div>
-            <form action="{{ route('staff.profile.update') }}" method="POST">
-                @csrf
-                @method('PATCH')
-
-                <div class="form-card">
-                    <div class="form-group">
-                        <label for="name">Full Name *</label>
-                        <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name', auth()->user()->name) }}" required>
-                        @error('name')
-                            <div style="color: var(--danger); margin-top: 6px; font-size: 13px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', auth()->user()->email) }}" required>
-                        @error('email')
-                            <div style="color: var(--danger); margin-top: 6px; font-size: 13px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" class="form-control" value="{{ old('phone', auth()->user()->phone) }}" placeholder="e.g., +60123456789">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="position">Position</label>
-                        <input type="text" id="position" name="position" class="form-control" value="{{ old('position', auth()->user()->position) }}" placeholder="e.g., Senior Barber">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="address">Address</label>
-                        <textarea id="address" name="address" class="form-control" rows="3" placeholder="Your address">{{ old('address', auth()->user()->address) }}</textarea>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <a href="{{ route('staff.profile.show') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <div class="tab-content" id="password">
-        <div class="form-container">
-            <div class="form-card-header">
-                <h3><i class="fas fa-lock"></i> Change Password</h3>
-            </div>
-            <form action="{{ route('staff.profile.change-password') }}" method="POST">
-                @csrf
-                @method('PATCH')
-
-                <div class="form-card">
-                    <div class="form-group">
-                        <label for="current_password">Current Password *</label>
-                        <input type="password" id="current_password" name="current_password" class="form-control @error('current_password') is-invalid @enderror" required>
-                        @error('current_password')
-                            <div style="color: var(--danger); margin-top: 6px; font-size: 13px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="new_password">New Password *</label>
-                        <input type="password" id="new_password" name="new_password" class="form-control @error('new_password') is-invalid @enderror" required>
-                        <small class="form-text">Minimum 8 characters</small>
-                        @error('new_password')
-                            <div style="color: var(--danger); margin-top: 6px; font-size: 13px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label for="new_password_confirmation">Confirm New Password *</label>
-                        <input type="password" id="new_password_confirmation" name="new_password_confirmation" class="form-control" required>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <a href="{{ route('staff.profile.show') }}" class="btn btn-secondary">
-                        <i class="fas fa-times"></i> Cancel
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> Change Password
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
 <script>
-document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', function() {
-        const tabName = this.dataset.tab;
+    // Handle file upload
+    const uploadZone = document.getElementById('uploadZone');
+    const profileImage = document.getElementById('profileImage');
+    const previewImage = document.getElementById('previewImage');
 
-        document.querySelectorAll('.tab-content').forEach(content => {
-            content.classList.remove('active');
-        });
-
-        document.querySelectorAll('.tab').forEach(t => {
-            t.classList.remove('active');
-        });
-
-        document.getElementById(tabName).classList.add('active');
-        this.classList.add('active');
+    profileImage.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
     });
-});
+
+    // Drag and drop
+    uploadZone.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadZone.classList.add('active');
+    });
+
+    uploadZone.addEventListener('dragleave', function() {
+        uploadZone.classList.remove('active');
+    });
+
+    uploadZone.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadZone.classList.remove('active');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            profileImage.files = files;
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                previewImage.src = event.target.result;
+            };
+            reader.readAsDataURL(files[0]);
+        }
+    });
+
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const target = this.dataset.target;
+            const input = document.getElementById(target);
+            const icon = this.querySelector('i');
+
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        });
+    });
 </script>
 @endsection

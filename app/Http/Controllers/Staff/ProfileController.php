@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Staff;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
@@ -24,21 +25,50 @@ class ProfileController extends Controller
 
     public function update(Request $request)
     {
-        $request->validate([
+        $user = auth()->user();
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . auth()->id(),
+            'email' => 'required|email|max:255|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:255',
             'position' => 'nullable|string|max:100',
+            'profile_image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
+            'password' => 'nullable|string|min:6|confirmed'
         ]);
 
-        auth()->user()->update([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone' => $request->phone,
-            'address' => $request->address,
-            'position' => $request->position,
-        ]);
+        // Update profile image if uploaded
+        if ($request->hasFile('profile_image')) {
+            try {
+                // Create upload directory if it doesn't exist
+                $uploadDir = public_path('uploads/profile_images');
+                if (!file_exists($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                // Delete old image if exists
+                if ($user->profile_image && file_exists(public_path($user->profile_image))) {
+                    unlink(public_path($user->profile_image));
+                }
+
+                // Upload new image
+                $file = $request->file('profile_image');
+                $filename = 'profile_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+                $file->move($uploadDir, $filename);
+                $validated['profile_image'] = 'uploads/profile_images/' . $filename;
+            } catch (\Exception $e) {
+                return back()->withErrors(['profile_image' => 'Failed to upload image.']);
+            }
+        }
+
+        // Hash password if provided
+        if (!empty($validated['password'])) {
+            $validated['password'] = Hash::make($validated['password']);
+        } else {
+            unset($validated['password']);
+        }
+
+        $user->update($validated);
 
         return redirect()
             ->route('staff.profile.show')

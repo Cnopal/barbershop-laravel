@@ -74,7 +74,15 @@
                                             <i class="fas fa-star text-yellow-500 mt-1 mr-3"></i>
                                             <div>
                                                 <h4 class="font-semibold text-gray-900 mb-2">Key Characteristics</h4>
-                                                <p class="text-gray-700">{{ $data['characteristics'] }}</p>
+                                                @if(is_array($data['characteristics']))
+                                                    <ul class="text-gray-700 space-y-2">
+                                                        @foreach($data['characteristics'] as $char)
+                                                            <li class="flex items-center"><span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>{{ $char }}</li>
+                                                        @endforeach
+                                                    </ul>
+                                                @else
+                                                    <p class="text-gray-700">{{ $data['characteristics'] }}</p>
+                                                @endif
                                             </div>
                                         </div>
                                     </div>

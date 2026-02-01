@@ -4,60 +4,85 @@
 
 @section('content')
 <style>
+    :root {
+        --primary: #1a1f36;
+        --secondary: #4a5568;
+        --accent: #d4af37;
+        --light-gray: #f7fafc;
+        --medium-gray: #e2e8f0;
+        --dark-gray: #718096;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --transition: all 0.3s ease;
+    }
+
+    .page-header {
+        margin-bottom: 2rem;
+    }
+
+    .page-header h2 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin: 0;
+    }
+
     .feedback-header {
         background: white;
         border-radius: 12px;
-        padding: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
         display: flex;
         justify-content: space-between;
         align-items: center;
-    }
-
-    @media (max-width: 768px) {
-        .feedback-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 20px;
-        }
+        gap: 2rem;
     }
 
     .rating-summary {
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 1.5rem;
     }
 
     .rating-circle {
         width: 100px;
         height: 100px;
         border-radius: 50%;
-        background: linear-gradient(135deg, var(--accent) 0%, #e6c158 100%);
+        background: linear-gradient(135deg, var(--accent) 0%, #c19a2f 100%);
         color: var(--primary);
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
         font-weight: 700;
+        box-shadow: 0 4px 12px rgba(212, 175, 55, 0.2);
     }
 
     .rating-number {
-        font-size: 36px;
+        font-size: 2.25rem;
     }
 
     .rating-label {
-        font-size: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
     }
 
     .stars {
         color: #fbbf24;
-        font-size: 20px;
+        font-size: 1.25rem;
+        letter-spacing: 0.25rem;
+    }
+
+    .rating-text {
+        font-size: 0.875rem;
+        color: var(--secondary);
+        margin-top: 0.5rem;
     }
 
     .feedback-stats {
-        display: flex;
-        gap: 30px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1.5rem;
     }
 
     .stat-item {
@@ -65,102 +90,105 @@
     }
 
     .stat-value {
-        font-size: 28px;
+        font-size: 1.875rem;
         font-weight: 700;
         color: var(--primary);
     }
 
     .stat-label {
-        font-size: 13px;
+        font-size: 0.875rem;
         color: var(--secondary);
-        margin-top: 5px;
+        margin-top: 0.5rem;
+        font-weight: 500;
     }
 
     .feedback-card {
         background: white;
         border-radius: 12px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--card-shadow);
         border-left: 4px solid var(--accent);
+        transition: var(--transition);
+    }
+
+    .feedback-card:hover {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
     }
 
     .feedback-header-content {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        margin-bottom: 15px;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        gap: 1rem;
     }
 
     .feedback-customer {
         font-weight: 600;
         color: var(--primary);
-        margin-bottom: 5px;
+        margin-bottom: 0.25rem;
     }
 
     .feedback-date {
-        font-size: 13px;
+        font-size: 0.875rem;
         color: var(--secondary);
     }
 
     .feedback-rating {
-        font-size: 14px;
+        font-size: 1rem;
         color: #fbbf24;
+        letter-spacing: 0.2rem;
     }
 
     .feedback-comments {
-        font-size: 15px;
+        font-size: 0.9375rem;
         color: var(--primary);
         line-height: 1.6;
-        padding: 15px;
+        padding: 1rem;
         background: var(--light-gray);
         border-radius: 8px;
+        border-left: 3px solid var(--accent);
     }
 
     .empty-state {
         text-align: center;
-        padding: 60px 20px;
+        padding: 3rem 2rem;
         color: var(--secondary);
         background: white;
         border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--card-shadow);
     }
 
     .empty-state i {
-        font-size: 64px;
-        color: var(--medium-gray);
-        margin-bottom: 20px;
+        font-size: 3rem;
+        color: var(--accent);
+        margin-bottom: 1rem;
     }
 
-    .pagination {
-        display: flex;
-        justify-content: center;
-        gap: 10px;
-        margin-top: 30px;
-        flex-wrap: wrap;
-    }
-
-    .pagination a,
-    .pagination span {
-        padding: 10px 15px;
-        border: 1px solid var(--medium-gray);
-        border-radius: 6px;
-        text-decoration: none;
+    .empty-state h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
         color: var(--primary);
+        margin-bottom: 0.5rem;
     }
 
-    .pagination a:hover {
-        background: var(--light-gray);
-    }
+    @media (max-width: 768px) {
+        .feedback-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
 
-    .pagination .active span {
-        background: var(--accent);
-        color: var(--primary);
-        border-color: var(--accent);
+        .feedback-stats {
+            grid-template-columns: 1fr 1fr;
+        }
     }
 </style>
 
-<h1 style="margin: 0 0 30px 0; font-size: 28px;">Customer Feedbacks</h1>
+<div class="page-header">
+    <h2>Customer Feedbacks</h2>
+</div>
 
 @if($totalFeedbacks > 0)
     <div class="feedback-header">
@@ -181,7 +209,7 @@
                         @endif
                     @endfor
                 </div>
-                <div style="margin-top: 5px; color: var(--secondary);">Average Rating</div>
+                <div class="rating-text">Average Rating</div>
             </div>
         </div>
 
@@ -219,7 +247,7 @@
         </div>
     @endforeach
 
-    <div class="pagination">
+    <div style="margin-top: 2rem; display: flex; justify-content: center;">
         {{ $feedbacks->links() }}
     </div>
 @else

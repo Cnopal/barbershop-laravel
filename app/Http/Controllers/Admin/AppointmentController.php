@@ -121,7 +121,7 @@ class AppointmentController extends Controller
             'start_time' => $start->format('H:i:s'),
             'end_time' => $end->format('H:i:s'),
             'price' => $service->price,
-            'status' => 'pending_payment', // set pending by default for payment later
+            'status' => $request->status, // set pending by default for payment later
         ]);
 
         return redirect()

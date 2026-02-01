@@ -137,7 +137,7 @@
             height: 50px;
             font-size: 24px;
             cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             justify-content: center;
             align-items: center;
         }
@@ -441,10 +441,73 @@
             margin-top: 5px;
         }
 
+        /* Admin Profile Section */
+        .admin-profile-section {
+            padding: 15px 25px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: auto;
+            margin-bottom: 0;
+        }
+
+        .profile-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: white;
+            transition: var(--transition);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .profile-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .profile-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 2px solid rgba(212, 175, 55, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-name {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+
+        .profile-role {
+            font-size: 11px;
+            opacity: 0.8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         .sidebar-footer {
             padding: 20px 25px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            margin-top: auto;
+            margin-top: 0;
         }
 
         .logout-btn {
@@ -493,12 +556,12 @@
             .stats-container {
                 grid-template-columns: repeat(2, 1fr);
             }
-            
+
             .content-row {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-            
+
             .card {
                 padding: 20px;
             }
@@ -510,33 +573,33 @@
                 margin-left: 0;
                 padding: 20px;
             }
-            
+
             .sidebar {
                 transform: translateX(-100%);
                 width: 280px;
             }
-            
+
             .sidebar.active {
                 transform: translateX(0);
             }
-            
+
             .sidebar-overlay.active {
                 display: block;
                 opacity: 1;
             }
-            
+
             .menu-toggle {
                 display: flex;
             }
-            
+
             .header {
                 margin-top: 20px;
             }
-            
+
             .stats-container {
                 grid-template-columns: 1fr;
             }
-            
+
             .stat-value {
                 font-size: 28px;
             }
@@ -547,58 +610,59 @@
             .main-content {
                 padding: 15px;
             }
-            
+
             .header {
                 flex-direction: column;
                 align-items: flex-start;
                 margin-bottom: 30px;
             }
-            
+
             .header h2 {
                 font-size: 24px;
             }
-            
+
             .user-info {
                 width: 100;
                 justify-content: flex-start;
             }
-            
+
             .stats-container {
                 gap: 15px;
             }
-            
+
             .stat-card {
                 padding: 20px 15px;
             }
-            
+
             .stat-value {
                 font-size: 24px;
             }
-            
+
             .stat-icon {
                 width: 40px;
                 height: 40px;
                 font-size: 18px;
             }
-            
+
             .card-title {
                 font-size: 18px;
             }
-            
-            th, td {
+
+            th,
+            td {
                 padding: 10px 5px;
                 font-size: 13px;
             }
-            
+
             .status {
                 padding: 4px 8px;
                 font-size: 12px;
             }
-            
+
             .activity-item {
                 flex-direction: column;
             }
-            
+
             .activity-icon {
                 margin-bottom: 10px;
                 margin-right: 0;
@@ -610,31 +674,31 @@
             .header h2 {
                 font-size: 20px;
             }
-            
+
             .stat-card {
                 padding: 15px;
             }
-            
+
             .stat-value {
                 font-size: 22px;
             }
-            
+
             .card {
                 padding: 15px;
             }
-            
+
             .chart-container {
                 height: 250px;
             }
-            
+
             .logo h1 {
                 font-size: 20px;
             }
-            
+
             .nav-item {
                 padding: 12px 15px;
             }
-            
+
             .nav-item span {
                 font-size: 14px;
             }
@@ -645,23 +709,23 @@
             .main-content {
                 padding: 10px;
             }
-            
+
             .header {
                 gap: 15px;
             }
-            
+
             .stats-container {
                 gap: 10px;
             }
-            
+
             .stat-card {
                 padding: 12px;
             }
-            
+
             .stat-value {
                 font-size: 20px;
             }
-            
+
             .stat-title {
                 font-size: 13px;
             }
@@ -672,11 +736,11 @@
             .sidebar {
                 overflow-y: auto;
             }
-            
+
             .nav-item {
                 padding: 10px 25px;
             }
-            
+
             .logo {
                 padding: 0 25px 15px;
                 margin-bottom: 15px;
@@ -685,15 +749,17 @@
 
         /* Print styles */
         @media print {
-            .sidebar, .menu-toggle {
+
+            .sidebar,
+            .menu-toggle {
                 display: none;
             }
-            
+
             .main-content {
                 margin-left: 0;
                 padding: 0;
             }
-            
+
             .stat-card:hover {
                 transform: none;
             }
@@ -706,7 +772,7 @@
     <button class="menu-toggle" id="menuToggle">
         <i class="fas fa-bars"></i>
     </button>
-    
+
     <!-- Overlay for mobile sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -738,10 +804,27 @@
                 <i class="fas fa-user-tie"></i>
                 <span>Service</span>
             </a>
-            
-            <a href="#" class="nav-item">
+
+            <!-- <a href="#" class="nav-item">
                 <i class="fas fa-cash-register"></i>
                 <span>Gallery</span>
+            </a> -->
+        </div>
+        <!-- Admin Profile Section -->
+        <div class="admin-profile-section">
+            <a href="{{ route('admin.profile.show') }}" class="profile-link">
+                <div class="profile-avatar">
+                    @if(Auth::user()->profile_image)
+                        <img src="{{ asset(Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
+                    @else
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=d4af37&color=1a1f36&bold=true&size=200"
+                            alt="{{ Auth::user()->name }}">
+                    @endif
+                </div>
+                <div class="profile-info">
+                    <p class="profile-name">{{ Auth::user()->name }}</p>
+                    <p class="profile-role">Administrator</p>
+                </div>
             </a>
         </div>
         <div class="sidebar-footer">
@@ -758,7 +841,7 @@
     <!-- Main Content -->
     <div class="main-content">
         <!-- Header -->
-      
+
 
         <!-- yield content -->
         @yield('content')
@@ -770,12 +853,12 @@
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
         const menuIcon = menuToggle.querySelector('i');
-        
+
         function toggleSidebar() {
             sidebar.classList.toggle('active');
             sidebarOverlay.classList.toggle('active');
             document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : 'auto';
-            
+
             // Change menu icon
             if (sidebar.classList.contains('active')) {
                 menuIcon.className = 'fas fa-times';
@@ -783,61 +866,61 @@
                 menuIcon.className = 'fas fa-bars';
             }
         }
-        
+
         menuToggle.addEventListener('click', toggleSidebar);
         sidebarOverlay.addEventListener('click', toggleSidebar);
-        
+
         // Close sidebar when clicking on a nav item on mobile
         document.querySelectorAll('.nav-item').forEach(item => {
-            item.addEventListener('click', function() {
+            item.addEventListener('click', function () {
                 if (window.innerWidth <= 992) {
                     toggleSidebar();
                 }
-                
+
                 // Update active nav item
                 document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
                 this.classList.add('active');
             });
         });
-        
+
         // Close sidebar on escape key press
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && sidebar.classList.contains('active')) {
                 toggleSidebar();
             }
         });
-        
+
         // Update the current time in the dashboard
         function updateTime() {
             const now = new Date();
             const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
             const dateString = now.toLocaleDateString('en-US', options);
             const timeString = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            
+
             // Update time display if we have an element for it
             const timeElement = document.getElementById('current-time');
             if (timeElement) {
                 timeElement.textContent = `${dateString} at ${timeString}`;
             }
         }
-        
+
         // Update time on page load and every minute
         updateTime();
         setInterval(updateTime, 60000);
-        
+
         // Simple animation for stat cards on hover (only on non-touch devices)
         if (!('ontouchstart' in window || navigator.maxTouchPoints)) {
             document.querySelectorAll('.stat-card').forEach(card => {
-                card.addEventListener('mouseenter', function() {
+                card.addEventListener('mouseenter', function () {
                     this.style.transform = 'translateY(-5px)';
                 });
-                
-                card.addEventListener('mouseleave', function() {
+
+                card.addEventListener('mouseleave', function () {
                     this.style.transform = 'translateY(0)';
                 });
             });
         }
-        
+
         // Handle window resize
         function handleResize() {
             // Auto-close sidebar on resize to desktop if it was open
@@ -847,7 +930,7 @@
                 menuIcon.className = 'fas fa-bars';
                 document.body.style.overflow = 'auto';
             }
-            
+
             // Update menu toggle visibility
             if (window.innerWidth <= 992) {
                 menuToggle.style.display = 'flex';
@@ -855,11 +938,11 @@
                 menuToggle.style.display = 'none';
             }
         }
-        
+
         // Initial check on load
         window.addEventListener('load', handleResize);
         window.addEventListener('resize', handleResize);
-        
+
         // Add touch-friendly table scrolling on mobile
         document.querySelectorAll('table').forEach(table => {
             if ('ontouchstart' in window) {

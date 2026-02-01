@@ -126,6 +126,14 @@
             font-size: 1.25rem;
             color: var(--primary);
             flex-shrink: 0;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .user-info {
@@ -442,7 +450,11 @@
 
             <div class="user-profile">
                 <div class="user-avatar">
-                    {{ Auth::check() ? strtoupper(substr(Auth::user()->name, 0, 2)) : 'MC' }}
+                    @if(Auth::check() && Auth::user()->profile_image)
+                        <img src="{{ asset(Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}" class="avatar-img">
+                    @else
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name ?? 'User') }}&background=d4af37&color=fff&bold=true&size=400" alt="{{ Auth::user()->name ?? 'User' }}" class="avatar-img">
+                    @endif
                 </div>
                 <div class="user-info">
                     <h3>{{ Auth::check() ? Auth::user()->name : 'Guest User' }}</h3>
@@ -492,7 +504,7 @@
                     <span class="nav-text">View Services</span>
                 </a>
 
-                <a href="#" class="nav-item {{ request()->routeIs('customer.barbers.index') ? 'active' : '' }}">
+                <a href="{{ route('customer.barbers.index') }}" class="nav-item {{ request()->routeIs('customer.barbers.index') ? 'active' : '' }}">
                     <i class="fas fa-users"></i>
                     <span class="nav-text">Our Barbers</span>
                 </a>

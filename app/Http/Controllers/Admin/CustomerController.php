@@ -14,13 +14,22 @@ class CustomerController extends Controller
      */
     public function index()
     {
-        $customers = User::where('role', 'customer')->paginate(10);
-         // total customers
-        $totalCustomers = User::where('role', 'customer')->count();
-        return view('admin.customers.index', compact('customers', 'totalCustomers'));
-
-
+        $customers = User::where('role', 'customer')
+            ->with(['customerAppointments' => function($query) {
+                $query->with('service', 'barber')->orderBy('appointment_date', 'desc');
+            }])
+            ->paginate(10);
         
+        // total customers
+        $totalCustomers = User::where('role', 'customer')->count();
+        
+        // total appointments
+        $totalAppointments = \App\Models\Appointment::whereHas('customer')->count();
+        
+        // average appointments per customer
+        $avgAppointments = $totalCustomers > 0 ? round($totalAppointments / $totalCustomers, 2) : 0;
+        
+        return view('admin.customers.index', compact('customers', 'totalCustomers', 'totalAppointments', 'avgAppointments'));
     }
 
     /**
@@ -62,28 +71,25 @@ class CustomerController extends Controller
      */
     public function show(User $customer)
     {
-         if ($customer->role !== 'customer') {
-        abort(404);
-    }
+        if ($customer->role !== 'customer') {
+            abort(404);
+        }
 
-    // Load appointments count
-    // $customer->loadCount('appointments');
-    
-    // // Get recent appointments
-    // $recentAppointments = $customer->appointments()
-    //     ->with(['service', 'barber'])
-    //     ->latest()
-    //     ->take(5)
-    //     ->get();
-    
-    // Calculate statistics
-    // $completedAppointments = $customer->appointments()->where('status', 'completed')->count();
-    // $pendingAppointments = $customer->appointments()->whereIn('status', ['pending', 'confirmed'])->count();
-    // $totalSpent = $customer->appointments()->where('status', 'completed')->sum('price');
+        // Get appointments with relationships
+        $appointments = $customer->customerAppointments()
+            ->with(['service', 'barber'])
+            ->orderBy('appointment_date', 'desc')
+            ->get();
+        
+        // Calculate statistics
+        $totalAppointments = $appointments->count();
+        $completedAppointments = $appointments->where('status', 'completed')->count();
+        $upcomingAppointments = $appointments->whereIn('status', ['pending_payment', 'confirmed'])->count();
+        $totalSpent = $appointments->where('status', 'completed')->sum('price');
 
-    return view('admin.customers.show', compact(
-        'customer'
-    ));
+        return view('admin.customers.show', compact(
+            'customer', 'appointments', 'totalAppointments', 'completedAppointments', 'upcomingAppointments', 'totalSpent'
+        ));
     }
 
     /**

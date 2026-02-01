@@ -342,10 +342,11 @@
         
         // Form submission
         uploadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             const files = fileInput.files;
             
             if (files.length === 0) {
-                e.preventDefault();
                 showError('Please select an image file');
                 return;
             }
@@ -354,13 +355,11 @@
             
             // Validate file
             if (!file.type.match('image.*')) {
-                e.preventDefault();
                 showError('Please select an image file (JPG, PNG, GIF)');
                 return;
             }
             
             if (file.size > maxSize) {
-                e.preventDefault();
                 showError('File size exceeds 5MB limit');
                 return;
             }
@@ -392,9 +391,13 @@
                 
                 if (progress >= 100) {
                     clearInterval(interval);
-                    // Form will submit normally after this
                 }
             }, 100);
+            
+            // Submit form after a short delay to allow UI to update
+            setTimeout(() => {
+                uploadForm.submit();
+            }, 500);
         });
         
         function showError(message) {

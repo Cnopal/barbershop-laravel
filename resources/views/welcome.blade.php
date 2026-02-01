@@ -1205,7 +1205,7 @@
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2024 Men's Club. Crafting excellence since 2015. All rights reserved.</p>
+                <p>&copy; 2024 Men's Club, Develop by Naufal Hamdan. Crafting excellence since 2015. All rights reserved.</p>
             </div>
         </div>
     </footer>

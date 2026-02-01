@@ -56,6 +56,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::get('/appointments/available-slots', [AppointmentController::class, 'availableSlots'])
         ->name('appointments.available-slots');
     Route::resource('appointments', AppointmentController::class);
+
+    // Admin Profile
+    Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/edit', [\App\Http\Controllers\Admin\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('profile.update');
 });
 
 
@@ -114,6 +119,9 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->as('customer.'
     Route::get('/ai-hair', [AiHairController::class, 'index'])->name('ai-hair.index');
     Route::post('/ai-hair', [AiHairController::class, 'analyze'])->name('ai-hair.analyze');
     Route::get('/ai-hair/health', [AiHairController::class, 'checkApiHealth'])->name('customer.ai-hair.health');
+
+    // BARBERS
+    Route::resource('barbers', \App\Http\Controllers\Customer\CustomerBarberController::class)->only(['index', 'show']);
 });
 
 

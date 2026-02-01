@@ -1,30 +1,35 @@
 <?php
 
-namespace App\Http\Controllers\Customer;
+namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    // Show the customer profile
+    /**
+     * Show admin profile
+     */
     public function show()
     {
         $user = Auth::user();
-        return view('customer.profile.show', compact('user'));
+        return view('admin.profile.show', compact('user'));
     }
 
-    // Show the edit form
+    /**
+     * Show edit profile form
+     */
     public function edit()
     {
         $user = Auth::user();
-        return view('customer.profile.edit', compact('user'));
+        return view('admin.profile.edit', compact('user'));
     }
 
-    // Update profile
+    /**
+     * Update admin profile
+     */
     public function update(Request $request)
     {
         $user = Auth::user();
@@ -54,16 +59,11 @@ class ProfileController extends Controller
                     if (file_exists($oldPath)) {
                         @unlink($oldPath);
                     }
-                    // Try to delete from storage symlink
-                    if (Storage::disk('public')->exists($user->profile_image)) {
-                        Storage::disk('public')->delete($user->profile_image);
-                    }
                 }
                 
                 // Store in public folder for universal hosting compatibility
                 $file = $request->file('profile_image');
                 $filename = 'profile_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-                $destination = $uploadDir . DIRECTORY_SEPARATOR . $filename;
                 
                 // Move file to public folder
                 if ($file->move($uploadDir, $filename)) {
@@ -86,6 +86,6 @@ class ProfileController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('customer.profile.show')->with('success', 'Profile updated successfully!');
+        return redirect()->route('admin.profile.show')->with('success', 'Profile updated successfully!');
     }
 }

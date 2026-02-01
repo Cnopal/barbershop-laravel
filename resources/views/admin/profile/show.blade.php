@@ -1,12 +1,10 @@
-@extends('staff.sidebar')
-
-@section('page-title', 'My Profile')
+@extends('admin.sidebar')
 
 @section('content')
 <div class="profile-container">
     <!-- Header -->
     <div class="profile-header">
-        <h2>Staff Profile</h2>
+        <h2>Admin Profile</h2>
         <p>Your account information</p>
     </div>
 
@@ -16,18 +14,18 @@
         <div class="card-header">
             <div class="avatar-section">
                 <div class="avatar-large">
-                    @if($user->profile_image)
-                        <img src="{{ asset($user->profile_image) }}" alt="{{ $user->name }}">
+                    @if(Auth::user()->profile_image)
+                        <img src="{{ asset(Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
                     @else
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode($user->name) }}&background=d4af37&color=fff&bold=true&size=400" alt="{{ $user->name }}">
+                        <img src="https://ui-avatars.com/api/?name={{ urlencode(Auth::user()->name) }}&background=d4af37&color=fff&bold=true&size=400" alt="{{ Auth::user()->name }}">
                     @endif
                 </div>
                 <div class="user-details">
-                    <h3>{{ $user->name }}</h3>
-                    <p class="role">{{ $user->position ?? 'Staff Member' }}</p>
+                    <h3>{{ Auth::user()->name }}</h3>
+                    <p class="role">Administrator</p>
                 </div>
             </div>
-            <a href="{{ route('staff.profile.edit') }}" class="btn-edit">
+            <a href="{{ route('admin.profile.edit') }}" class="btn-edit">
                 <i class="fas fa-edit"></i> Edit Profile
             </a>
         </div>
@@ -41,7 +39,7 @@
                 </div>
                 <div class="info-content">
                     <label>Email Address</label>
-                    <p>{{ $user->email }}</p>
+                    <p>{{ Auth::user()->email }}</p>
                 </div>
             </div>
 
@@ -52,7 +50,7 @@
                 </div>
                 <div class="info-content">
                     <label>Phone Number</label>
-                    <p>{{ $user->phone ?? 'Not provided' }}</p>
+                    <p>{{ Auth::user()->phone ?? 'Not provided' }}</p>
                 </div>
             </div>
 
@@ -63,7 +61,7 @@
                 </div>
                 <div class="info-content">
                     <label>Address</label>
-                    <p>{{ $user->address ?? 'Not provided' }}</p>
+                    <p>{{ Auth::user()->address ?? 'Not provided' }}</p>
                 </div>
             </div>
 
@@ -74,7 +72,57 @@
                 </div>
                 <div class="info-content">
                     <label>Member Since</label>
-                    <p>{{ $user->created_at->format('F j, Y') }}</p>
+                    <p>{{ Auth::user()->created_at->format('F j, Y') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-section">
+        <h3 class="section-title">System Statistics</h3>
+        <div class="stats-grid">
+            <!-- Total Staff -->
+            <div class="stat-box">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>{{ \App\Models\User::where('role', 'staff')->where('status', 'active')->count() }}</h4>
+                    <p>Active Staff</p>
+                </div>
+            </div>
+
+            <!-- Total Customers -->
+            <div class="stat-box">
+                <div class="stat-icon">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>{{ \App\Models\User::where('role', 'customer')->where('status', 'active')->count() }}</h4>
+                    <p>Active Customers</p>
+                </div>
+            </div>
+
+            <!-- Total Appointments -->
+            <div class="stat-box">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>{{ \App\Models\Appointment::count() }}</h4>
+                    <p>Total Appointments</p>
+                </div>
+            </div>
+
+            <!-- Total Services -->
+            <div class="stat-box">
+                <div class="stat-icon">
+                    <i class="fas fa-cut"></i>
+                </div>
+                <div class="stat-info">
+                    <h4>{{ \App\Models\Service::count() }}</h4>
+                    <p>Services Available</p>
                 </div>
             </div>
         </div>
@@ -239,6 +287,64 @@
         font-weight: 500;
     }
 
+    .stats-section {
+        margin-top: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 1.5rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .stat-box {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: var(--card-shadow);
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+        transition: var(--transition);
+    }
+
+    .stat-box:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--accent) 0%, #c19a2f 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.75rem;
+        color: var(--primary);
+        flex-shrink: 0;
+    }
+
+    .stat-info h4 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-info p {
+        font-size: 0.875rem;
+        color: var(--secondary);
+    }
+
     @media (max-width: 768px) {
         .card-header {
             flex-direction: column;
@@ -250,6 +356,21 @@
         }
 
         .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .stat-box {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .stats-grid {
             grid-template-columns: 1fr;
         }
     }

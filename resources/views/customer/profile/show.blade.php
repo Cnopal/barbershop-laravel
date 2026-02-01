@@ -23,7 +23,7 @@
                 <div class="overview-header">
                     <div class="avatar-wrapper">
                         <div class="avatar-circle">
-                            <img src="{{ $user->profile_image ? asset('storage/' . $user->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=d4af37&color=fff&bold=true&size=400' }}"
+                            <img src="{{ $user->profile_image ? asset($user->profile_image) : 'https://ui-avatars.com/api/?name=' . urlencode($user->name) . '&background=d4af37&color=fff&bold=true&size=400' }}"
                                 alt="{{ $user->name }}" class="avatar-image">
                             <div class="avatar-badge">
                                 <i class="fas fa-check"></i>
