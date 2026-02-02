@@ -90,8 +90,8 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->as('staff.')->group(
     Route::patch('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
 
     // Customer creation endpoints
-    Route::post('/appointments/check-customer', [AppointmentController::class, 'checkCustomer'])->name('appointments.check-customer');
-    Route::post('/appointments/create-customer', [AppointmentController::class, 'createCustomer'])->name('appointments.create-customer');
+    Route::post('/appointments/check-customer', [StaffAppointmentController::class, 'checkCustomer'])->name('appointments.check-customer');
+    Route::post('/appointments/create-customer', [StaffAppointmentController::class, 'createCustomer'])->name('appointments.create-customer');
 
 
 });
