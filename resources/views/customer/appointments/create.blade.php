@@ -289,6 +289,8 @@
                                 <ul>
                                     <li>Cannot update appointment details after booking</li>
                                     <li>No-shows may result in a cancellation fee</li>
+                                    <li>Once booked, appointments cannot be canceled or rescheduled</li>
+                                    <li>No refunds will be issued for missed or appointments cancellation</li>
                                     <!-- <li></li> -->
                                 </ul>
                             </label>
