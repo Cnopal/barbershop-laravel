@@ -198,7 +198,7 @@
 </div>
 
 <style>
-    :root {
+    .profile-wrapper {
         --primary: #1a1a1a;
         --secondary: #666666;
         --accent: #d4af37;
@@ -213,9 +213,6 @@
         --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         --danger: #ef4444;
         --success: #22c55e;
-    }
-
-    .profile-wrapper {
         max-width: 900px;
         margin: 0 auto;
         padding: 2rem 1.5rem;

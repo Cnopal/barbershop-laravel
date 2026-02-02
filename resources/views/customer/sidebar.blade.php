@@ -515,7 +515,7 @@
         <div class="nav-section">
             <div class="section-title">Account</div>
             <div class="nav-links">
-                <a href="{{ route('customer.profile.show')  }}" class="nav-item {{ request()->routeIs('customer.profile.*') ? 'active' : '' }}">
+                <a href="{{ route('customer.profile.show')  }}" class="nav-item {{ request()->routeIs('customer.profile.show') ? 'active' : '' }}">
                     <i class="fas fa-user-edit"></i>
                     <span class="nav-text">Edit Profile</span>
                 </a>
