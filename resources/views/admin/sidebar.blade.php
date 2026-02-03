@@ -804,11 +804,6 @@
                 <i class="fas fa-user-tie"></i>
                 <span>Service</span>
             </a>
-
-            <!-- <a href="#" class="nav-item">
-                <i class="fas fa-cash-register"></i>
-                <span>Gallery</span>
-            </a> -->
         </div>
         <!-- Admin Profile Section -->
         <div class="admin-profile-section">

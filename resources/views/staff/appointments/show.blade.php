@@ -192,11 +192,7 @@
                         @endif
 
                         <!-- Edit Button -->
-                        @if(!in_array($appointment->status, ['completed', 'cancelled']))
-                            <a href="{{ route('staff.appointments.edit', $appointment->id) }}" class="btn btn-primary btn-block">
-                                <i class="fas fa-edit"></i> Edit Appointment
-                            </a>
-                        @endif
+                        
 
                         <!-- Delete Button -->
                         <form action="{{ route('staff.appointments.destroy', $appointment->id) }}" method="POST" class="action-form" onsubmit="return confirm('Are you sure you want to delete this appointment? This action cannot be undone.')">

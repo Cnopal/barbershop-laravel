@@ -3,13 +3,20 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
+    protected $cloudinaryService;
+
+    public function __construct(CloudinaryService $cloudinaryService)
+    {
+        $this->cloudinaryService = $cloudinaryService;
+    }
+
     // Show the customer profile
     public function show()
     {
@@ -41,39 +48,25 @@ class ProfileController extends Controller
         // Update profile image if uploaded
         if ($request->hasFile('profile_image')) {
             try {
-                // Create upload directory if it doesn't exist
-                $uploadDir = public_path('uploads/profile_images');
-                if (!is_dir($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
+                // Delete old image from Cloudinary if exists
+                if ($user->profile_image) {
+                    $publicId = $this->cloudinaryService->getPublicIdFromUrl($user->profile_image);
+                    if ($publicId) {
+                        $this->cloudinaryService->deleteImage($publicId);
+                    }
                 }
 
-                // Delete old profile image if exists
-                if ($user->profile_image) {
-                    // Try to delete from public folder
-                    $oldPath = public_path($user->profile_image);
-                    if (file_exists($oldPath)) {
-                        @unlink($oldPath);
-                    }
-                    // Try to delete from storage symlink
-                    if (Storage::disk('public')->exists($user->profile_image)) {
-                        Storage::disk('public')->delete($user->profile_image);
-                    }
-                }
-                
-                // Store in public folder for universal hosting compatibility
+                // Upload new image to Cloudinary
                 $file = $request->file('profile_image');
-                $filename = 'profile_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-                $destination = $uploadDir . DIRECTORY_SEPARATOR . $filename;
-                
-                // Move file to public folder
-                if ($file->move($uploadDir, $filename)) {
-                    $validated['profile_image'] = 'uploads/profile_images/' . $filename;
+                $imageUrl = $this->cloudinaryService->uploadProfileImage($file, $user->id);
+
+                if ($imageUrl) {
+                    $validated['profile_image'] = $imageUrl;
                 } else {
-                    return redirect()->back()->with('error', 'Failed to move uploaded file.');
+                    return back()->withErrors(['profile_image' => 'Failed to upload image to Cloudinary.']);
                 }
-                
             } catch (\Exception $e) {
-                return redirect()->back()->with('error', 'Upload failed: ' . $e->getMessage());
+                return back()->withErrors(['profile_image' => 'Failed to upload image: ' . $e->getMessage()]);
             }
         }
 

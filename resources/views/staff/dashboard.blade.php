@@ -255,6 +255,7 @@
     }
 </style>
 
+<div class="container">
 <div class="dashboard-header">
     <h2>Dashboard</h2>
     <a href="{{ route('staff.profile.show') }}" class="profile-link-header">
@@ -399,4 +400,5 @@
         </div>
     @endif
 </div>
+
 @endsection

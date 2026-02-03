@@ -22,16 +22,6 @@ use App\Http\Controllers\Customer\AiHairController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 // use App\Http\Controllers\StripeController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "web" middleware group. Make something great!
-|
-*/
 
 
 
@@ -93,7 +83,6 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->as('staff.')->group(
     Route::post('/appointments/check-customer', [StaffAppointmentController::class, 'checkCustomer'])->name('appointments.check-customer');
     Route::post('/appointments/create-customer', [StaffAppointmentController::class, 'createCustomer'])->name('appointments.create-customer');
 
-
 });
 
 
@@ -108,7 +97,6 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->as('customer.'
     Route::get('/profile', [CustomerProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [CustomerProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
-
 
     // STRIPE PAYMENT
     Route::get('/appointments/{appointment}/pay', [CustomerAppointmentController::class, 'pay'])->name('appointments.pay');

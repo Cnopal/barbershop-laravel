@@ -3,12 +3,19 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Services\CloudinaryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class ProfileController extends Controller
 {
+    protected $cloudinaryService;
+
+    public function __construct(CloudinaryService $cloudinaryService)
+    {
+        $this->cloudinaryService = $cloudinaryService;
+    }
     public function show()
     {
         $user = auth()->user();
@@ -40,24 +47,25 @@ class ProfileController extends Controller
         // Update profile image if uploaded
         if ($request->hasFile('profile_image')) {
             try {
-                // Create upload directory if it doesn't exist
-                $uploadDir = public_path('uploads/profile_images');
-                if (!file_exists($uploadDir)) {
-                    mkdir($uploadDir, 0755, true);
+                // Delete old image from Cloudinary if exists
+                if ($user->profile_image) {
+                    $publicId = $this->cloudinaryService->getPublicIdFromUrl($user->profile_image);
+                    if ($publicId) {
+                        $this->cloudinaryService->deleteImage($publicId);
+                    }
                 }
 
-                // Delete old image if exists
-                if ($user->profile_image && file_exists(public_path($user->profile_image))) {
-                    unlink(public_path($user->profile_image));
-                }
-
-                // Upload new image
+                // Upload new image to Cloudinary
                 $file = $request->file('profile_image');
-                $filename = 'profile_' . $user->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-                $file->move($uploadDir, $filename);
-                $validated['profile_image'] = 'uploads/profile_images/' . $filename;
+                $imageUrl = $this->cloudinaryService->uploadProfileImage($file, $user->id);
+
+                if ($imageUrl) {
+                    $validated['profile_image'] = $imageUrl;
+                } else {
+                    return back()->withErrors(['profile_image' => 'Failed to upload image to Cloudinary.']);
+                }
             } catch (\Exception $e) {
-                return back()->withErrors(['profile_image' => 'Failed to upload image.']);
+                return back()->withErrors(['profile_image' => 'Failed to upload image: ' . $e->getMessage()]);
             }
         }
 
