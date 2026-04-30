@@ -1,7 +1,7 @@
 @extends('customer.sidebar')
 
 @section('content')
-<div class="barbers-page">
+<div class="customer-page barbers-page">
     <!-- Page Header -->
     <div class="page-header">
         <h1>Our Expert Barbers</h1>

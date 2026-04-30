@@ -3,7 +3,7 @@
 @section('title', 'Book Appointment')
 
 @section('content')
-<div class="booking-page">
+<div class="customer-page booking-page">
     <!-- Page Header -->
     <div class="page-header">
         <h1>Book New Appointment</h1>
@@ -141,7 +141,7 @@
                             <div class="barber-card">
                                 <div class="barber-avatar">
                                     @if($barber->profile_image)
-                                        <img src="{{ asset('storage/' . $barber->profile_image) }}" alt="{{ $barber->name }}">
+                                        <img src="{{ $barber->profile_image }}" alt="{{ $barber->name }}">
                                     @else
                                         {{ strtoupper(substr($barber->name, 0, 2)) }}
                                     @endif
@@ -234,6 +234,46 @@
                         <div class="step-number">4</div>
                         <h2>Review & Book</h2>
                     </div>
+
+                    <div class="recipient-card">
+                        <h3><i class="fas fa-user-friends"></i> Who is this appointment for?</h3>
+                        <div class="recipient-options">
+                            <label class="recipient-option">
+                                <input type="radio" name="booking_for" value="self" {{ old('booking_for', 'self') !== 'other' ? 'checked' : '' }}>
+                                <span>Myself</span>
+                            </label>
+                            <label class="recipient-option">
+                                <input type="radio" name="booking_for" value="other" {{ old('booking_for') === 'other' ? 'checked' : '' }}>
+                                <span>Someone else</span>
+                            </label>
+                        </div>
+
+                        <div class="recipient-fields" id="recipientFields">
+                            <div class="recipient-field-grid">
+                                <div class="form-group">
+                                    <label for="recipient_name">Name</label>
+                                    <input type="text"
+                                           name="recipient_name"
+                                           id="recipient_name"
+                                           class="form-control"
+                                           value="{{ old('recipient_name') }}"
+                                           placeholder="Example: Adam">
+                                </div>
+                                <div class="form-group">
+                                    <label for="recipient_age">Age</label>
+                                    <input type="number"
+                                           name="recipient_age"
+                                           id="recipient_age"
+                                           class="form-control"
+                                           value="{{ old('recipient_age') }}"
+                                           min="0"
+                                           max="120"
+                                           placeholder="Example: 10">
+                                </div>
+                            </div>
+                            <small class="text-muted">Children below 12 years old are charged RM15.</small>
+                        </div>
+                    </div>
                     
                     <div class="review-summary">
                         <div class="summary-card">
@@ -257,6 +297,11 @@
                             <div class="summary-item">
                                 <span class="label">Time:</span>
                                 <span class="value" id="summaryTime">-</span>
+                            </div>
+                            
+                            <div class="summary-item">
+                                <span class="label">For:</span>
+                                <span class="value" id="summaryRecipient">Myself</span>
                             </div>
                             
                             <div class="summary-item">
@@ -325,27 +370,27 @@
         --warning: #ed8936;
         --danger: #f56565;
         --info: #4299e1;
-        --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        --radius: 12px;
+        --shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
+        --shadow-lg: 0 12px 28px rgba(26, 31, 54, 0.10);
+        --radius: 8px;
         --transition: all 0.3s ease;
     }
 
     /* Base Styles */
     .booking-page {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
-        padding: 1rem;
+        padding: 30px;
     }
 
     .page-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 26px;
     }
 
     .page-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         color: var(--primary);
         margin-bottom: 0.5rem;
     }
@@ -361,7 +406,7 @@
     .alert {
         padding: 1rem 1.5rem;
         border-radius: var(--radius);
-        margin-bottom: 2rem;
+        margin-bottom: 22px;
         display: flex;
         align-items: flex-start;
         gap: 0.75rem;
@@ -415,9 +460,9 @@
     .progress-indicator {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 3rem;
+        margin-bottom: 26px;
         position: relative;
-        padding: 0 1rem;
+        padding: 0;
     }
 
     .progress-indicator::before {
@@ -485,7 +530,7 @@
 
     .form-step {
         display: none;
-        padding: 2rem;
+        padding: 24px;
     }
 
     .form-step.active {
@@ -501,9 +546,9 @@
     .step-header {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        padding-bottom: 1.5rem;
+        gap: 12px;
+        margin-bottom: 22px;
+        padding-bottom: 16px;
         border-bottom: 1px solid var(--medium-gray);
     }
 
@@ -531,9 +576,9 @@
     /* Services Grid */
     .services-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+        gap: 20px;
+        margin-bottom: 22px;
     }
 
     .service-option {
@@ -549,7 +594,7 @@
         background: var(--light-gray);
         border: 2px solid var(--medium-gray);
         border-radius: var(--radius);
-        padding: 1.5rem;
+        padding: 24px;
         transition: var(--transition);
         height: 100%;
     }
@@ -569,7 +614,7 @@
     .service-icon {
         width: 60px;
         height: 60px;
-        border-radius: 12px;
+        border-radius: var(--radius);
         background: linear-gradient(135deg, var(--accent) 0%, #c19a2f 100%);
         display: flex;
         align-items: center;
@@ -621,9 +666,9 @@
     /* Barbers Grid */
     .barbers-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 1rem;
-        margin-bottom: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+        gap: 20px;
+        margin-bottom: 22px;
     }
 
     .barber-option {
@@ -639,7 +684,7 @@
         background: var(--light-gray);
         border: 2px solid var(--medium-gray);
         border-radius: var(--radius);
-        padding: 1.5rem;
+        padding: 20px;
         transition: var(--transition);
         display: flex;
         align-items: center;
@@ -720,7 +765,7 @@
 
     .status-badge {
         padding: 0.25rem 0.75rem;
-        border-radius: 12px;
+        border-radius: 8px;
         font-size: 0.75rem;
         font-weight: 600;
     }
@@ -735,8 +780,8 @@
     .datetime-selection {
         display: grid;
         grid-template-columns: 1fr 2fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
+        gap: 22px;
+        margin-bottom: 22px;
     }
 
     @media (max-width: 768px) {
@@ -782,7 +827,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 3rem;
+        padding: 40px 20px;
         text-align: center;
     }
 
@@ -831,7 +876,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 3rem;
+        padding: 40px 20px;
         text-align: center;
         color: var(--secondary);
     }
@@ -921,16 +966,81 @@
         font-size: 0.875rem;
     }
 
+    .recipient-card {
+        background: white;
+        border: 1px solid var(--medium-gray);
+        border-radius: var(--radius);
+        padding: 24px;
+        margin-bottom: 22px;
+        box-shadow: var(--shadow);
+    }
+
+    .recipient-card h3 {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-size: 1.125rem;
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+
+    .recipient-card h3 i {
+        color: var(--accent);
+    }
+
+    .recipient-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 1rem;
+    }
+
+    .recipient-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-height: 44px;
+        padding: 0.75rem 1rem;
+        border: 1px solid var(--medium-gray);
+        border-radius: var(--radius);
+        font-weight: 600;
+        cursor: pointer;
+        background: var(--light-gray);
+    }
+
+    .recipient-option:has(input:checked) {
+        border-color: var(--accent);
+        background: rgba(212, 175, 55, 0.14);
+    }
+
+    .recipient-fields {
+        display: none;
+    }
+
+    .recipient-fields.active {
+        display: block;
+    }
+
+    .recipient-field-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+    }
+
     /* Review Summary */
     .review-summary {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
+        gap: 22px;
+        margin-bottom: 22px;
     }
 
     @media (max-width: 768px) {
         .review-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .recipient-field-grid {
             grid-template-columns: 1fr;
         }
     }
@@ -938,7 +1048,7 @@
     .summary-card {
         background: var(--light-gray);
         border-radius: var(--radius);
-        padding: 1.5rem;
+        padding: 24px;
         border: 1px solid var(--medium-gray);
     }
 
@@ -1005,8 +1115,8 @@
 
     /* Booking Terms */
     .booking-terms {
-        margin-bottom: 2rem;
-        padding: 1.5rem;
+        margin-bottom: 22px;
+        padding: 24px;
         background: var(--light-gray);
         border-radius: var(--radius);
         border: 1px solid var(--medium-gray);
@@ -1043,7 +1153,7 @@
     .step-actions {
         display: flex;
         justify-content: space-between;
-        padding-top: 1.5rem;
+        padding-top: 24px;
         border-top: 1px solid var(--medium-gray);
     }
 
@@ -1053,8 +1163,8 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
+        padding: 11px 16px;
+        font-weight: 800;
         text-decoration: none;
         border-radius: var(--radius);
         transition: var(--transition);
@@ -1100,7 +1210,7 @@
         
         .step-actions {
             flex-direction: column;
-            gap: 1rem;
+            gap: 12px;
         }
         
         .step-actions .btn {
@@ -1119,11 +1229,11 @@
 
     @media (max-width: 480px) {
         .booking-page {
-            padding: 0.5rem;
+            padding: 20px;
         }
         
         .form-step {
-            padding: 1.5rem;
+            padding: 24px;
         }
         
         .page-header h1 {
@@ -1144,6 +1254,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedDate = null;
     let selectedTime = null;
     let selectedTimeDisplay = null;
+    const slotsUrl = @json(route('customer.appointments.slots'));
+    const childPrice = 15;
+    const selfName = @json(Auth::user()->name ?? 'Myself');
     
     // Get DOM elements
     const dateInput = document.getElementById('appointment_date');
@@ -1155,6 +1268,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const timeMessage = document.getElementById('timeMessage');
     const timeSlotLoading = document.getElementById('timeSlotLoading');
     const nextStep3 = document.getElementById('nextStep3');
+    const bookingForInputs = document.querySelectorAll('input[name="booking_for"]');
+    const recipientFields = document.getElementById('recipientFields');
+    const recipientNameInput = document.getElementById('recipient_name');
+    const recipientAgeInput = document.getElementById('recipient_age');
     
     // Step navigation
     const steps = document.querySelectorAll('.form-step');
@@ -1171,12 +1288,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Restore selections from old input if validation failed
     @if(old('service_id'))
     selectedService = "{{ old('service_id') }}";
-    document.querySelector(`input[name="service_id"][value="{{ old('service_id') }}"]`).checked = true;
+    const oldServiceInput = document.querySelector(`input[name="service_id"][value="{{ old('service_id') }}"]`);
+    if (oldServiceInput) {
+        oldServiceInput.checked = true;
+    }
     @endif
     
     @if(old('barber_id'))
     selectedBarber = "{{ old('barber_id') }}";
-    document.querySelector(`input[name="barber_id"][value="{{ old('barber_id') }}"]`).checked = true;
+    const oldBarberInput = document.querySelector(`input[name="barber_id"][value="{{ old('barber_id') }}"]`);
+    if (oldBarberInput) {
+        oldBarberInput.checked = true;
+    }
     @endif
     
     @if(old('appointment_date'))
@@ -1192,12 +1315,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (selectedService && selectedBarber && selectedDate) {
         setTimeout(() => loadAvailableSlots(), 500);
     }
+
+    updateRecipientFields();
+
+    bookingForInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            updateRecipientFields();
+            updateSummary();
+        });
+    });
+
+    recipientNameInput?.addEventListener('input', updateSummary);
+    recipientAgeInput?.addEventListener('input', updateSummary);
     
     // Service selection
     document.querySelectorAll('input[name="service_id"]').forEach(input => {
         input.addEventListener('change', function() {
             selectedService = this.value;
-            console.log('Service selected:', selectedService);
+            updateSummary();
             
             // If barber and date are already selected, load slots
             if (selectedBarber && selectedDate) {
@@ -1210,7 +1345,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[name="barber_id"]').forEach(input => {
         input.addEventListener('change', function() {
             selectedBarber = this.value;
-            console.log('Barber selected:', selectedBarber);
+            updateSummary();
             
             // If service and date are already selected, load slots
             if (selectedService && selectedDate) {
@@ -1222,7 +1357,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Date selection
     dateInput.addEventListener('change', function() {
         selectedDate = this.value;
-        console.log('Date selected:', selectedDate);
         
         // Clear time selection
         selectedTime = null;
@@ -1236,7 +1370,7 @@ document.addEventListener('DOMContentLoaded', function() {
         today.setHours(0, 0, 0, 0);
         
         if (selected < today) {
-            dateMessage.textContent = '⚠️ Selected date has already passed';
+            dateMessage.textContent = 'Selected date has already passed';
             dateMessage.style.color = 'var(--danger)';
             showNoSlots('Cannot select a past date');
             return;
@@ -1254,8 +1388,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Load available time slots
     function loadAvailableSlots() {
-        console.log('Loading slots for:', { selectedService, selectedBarber, selectedDate });
-        
         if (!selectedService || !selectedBarber || !selectedDate) {
             showNoSlots('Please select service, barber and date');
             return;
@@ -1266,7 +1398,17 @@ document.addEventListener('DOMContentLoaded', function() {
         timeSlotsContainer.classList.remove('active');
         
         // Make AJAX request
-        fetch(`/customer/appointments/slots/available?date=${selectedDate}&barber_id=${selectedBarber}&service_id=${selectedService}`)
+        const params = new URLSearchParams({
+            date: selectedDate,
+            barber_id: selectedBarber,
+            service_id: selectedService,
+        });
+
+        fetch(`${slotsUrl}?${params.toString()}`, {
+            headers: {
+                'Accept': 'application/json',
+            },
+        })
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -1274,8 +1416,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 return response.json();
             })
             .then(data => {
-                console.log('API Response:', data);
-                
                 // Hide loading
                 timeSlotLoading.classList.remove('active');
                 timeSlotsContainer.classList.add('active');
@@ -1392,10 +1532,9 @@ document.addEventListener('DOMContentLoaded', function() {
         selectedTimeDisplay = timeSlot.dataset.display;
         document.getElementById('hiddenStartTime').value = selectedTime;
         
-        console.log('Time selected:', selectedTime);
-        
         // Update next button
         updateStepButtons();
+        updateSummary();
     });
     
     // Update step buttons state
@@ -1458,7 +1597,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const selectedDateTime = new Date(`${selectedDate}T${selectedTime}`);
             
             if (selectedDateTime < now) {
-                alert('⚠️ The selected time has already passed.\n\nPlease choose a future time slot.');
+                alert('The selected time has already passed.\n\nPlease choose a future time slot.');
                 
                 // Clear the invalid selection
                 selectedTime = null;
@@ -1526,6 +1665,74 @@ document.addEventListener('DOMContentLoaded', function() {
         
         return true;
     }
+
+    function isBookingForOther() {
+        return document.querySelector('input[name="booking_for"]:checked')?.value === 'other';
+    }
+
+    function updateRecipientFields() {
+        const other = isBookingForOther();
+        recipientFields?.classList.toggle('active', other);
+
+        if (recipientNameInput) {
+            recipientNameInput.required = other;
+        }
+
+        if (recipientAgeInput) {
+            recipientAgeInput.required = other;
+        }
+    }
+
+    function getRecipientSummary() {
+        if (!isBookingForOther()) {
+            return selfName;
+        }
+
+        const name = recipientNameInput?.value.trim() || 'Someone else';
+        const age = recipientAgeInput?.value;
+
+        return age !== '' ? `${name} (${age} years old)` : name;
+    }
+
+    function calculateDisplayPrice(serviceInput) {
+        if (!serviceInput) {
+            return null;
+        }
+
+        const servicePrice = parseFloat(serviceInput.dataset.price || '0');
+        const age = parseInt(recipientAgeInput?.value || '', 10);
+
+        if (isBookingForOther() && !Number.isNaN(age) && age < 12) {
+            return childPrice;
+        }
+
+        return servicePrice;
+    }
+
+    function formatCurrency(amount) {
+        return `RM${Number(amount || 0).toFixed(2)}`;
+    }
+
+    function validateRecipient() {
+        if (!isBookingForOther()) {
+            return true;
+        }
+
+        if (!recipientNameInput?.value.trim()) {
+            alert('Please enter the name of the person receiving the service');
+            recipientNameInput?.focus();
+            return false;
+        }
+
+        const age = parseInt(recipientAgeInput?.value || '', 10);
+        if (Number.isNaN(age) || age < 0 || age > 120) {
+            alert('Please enter a valid age for the person receiving the service');
+            recipientAgeInput?.focus();
+            return false;
+        }
+
+        return true;
+    }
     
     // Update summary
     function updateSummary() {
@@ -1533,13 +1740,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const serviceInput = document.querySelector('input[name="service_id"]:checked');
         if (serviceInput) {
             const serviceCard = serviceInput.closest('.service-option').querySelector('.service-card');
+            const displayPrice = calculateDisplayPrice(serviceInput);
             document.getElementById('summaryService').textContent = 
                 serviceCard.querySelector('h4').textContent;
             document.getElementById('summaryPrice').textContent = 
-                serviceCard.querySelector('.price').textContent;
+                displayPrice !== null ? formatCurrency(displayPrice) : '-';
             document.getElementById('summaryDuration').textContent = 
                 serviceCard.querySelector('.duration').textContent;
         }
+
+        document.getElementById('summaryRecipient').textContent = getRecipientSummary();
         
         // Get selected barber
         const barberInput = document.querySelector('input[name="barber_id"]:checked');
@@ -1592,6 +1802,11 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please complete all required fields');
             return;
         }
+
+        if (!validateRecipient()) {
+            e.preventDefault();
+            return;
+        }
         
         // Validate terms agreement
         const agreeTerms = document.getElementById('agreeTerms');
@@ -1618,7 +1833,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (selectedDateTime < now) {
                 e.preventDefault();
-                alert('⚠️ The selected time has already passed. Please choose a different time slot.');
+                alert('The selected time has already passed. Please choose a different time slot.');
                 
                 // Clear selection and reload
                 selectedTime = null;
@@ -1633,14 +1848,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show loading state
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        
-        // Allow form submission
-        console.log('Form submitted with:', {
-            service: selectedService,
-            barber: selectedBarber,
-            date: selectedDate,
-            time: selectedTime
-        });
     });
     
     // Update progress steps initially

@@ -3,47 +3,80 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Appointment;
+use App\Models\ProductOrder;
+use App\Models\User;
 
 class AdminDashboardController extends Controller
 {
-    //
     public function index()
     {
-        // Today's appointments
-        $todayAppointments = \App\Models\Appointment::whereDate('appointment_date', today())->count();
+        $today = today();
+        $now = now();
+        $weekStart = $now->copy()->subDays(6)->startOfDay();
+        $weekEnd = $now->copy()->endOfDay();
+        $monthStart = $now->copy()->startOfMonth()->startOfDay();
+        $monthEnd = $now->copy()->endOfMonth()->endOfDay();
 
-        // Revenue today (RM)
-        $revenueToday = \App\Models\Appointment::whereDate('appointment_date', today())
+        // Today's appointments
+        $todayAppointments = Appointment::whereDate('appointment_date', $today)->count();
+
+        // Revenue includes completed appointments and paid product orders (online + POS).
+        $appointmentRevenueToday = Appointment::whereDate('appointment_date', $today)
             ->where('status', 'completed')
             ->sum('price');
 
+        $productRevenueToday = ProductOrder::paid()
+            ->whereDate('paid_at', $today)
+            ->sum('total');
+
+        $revenueToday = $appointmentRevenueToday + $productRevenueToday;
+
         // Active clients
-        $activeClients = \App\Models\User::where('role', 'customer')->count();
+        $activeClients = User::where('role', 'customer')->count();
 
         // Available barbers
-        $availableBarbers = \App\Models\User::where('role', 'staff')->where('status', 'active')->count();
+        $availableBarbers = User::where('role', 'staff')->where('status', 'active')->count();
 
         // Recent appointments
-        $recentAppointments = \App\Models\Appointment::with(['customer', 'barber'])
+        $recentAppointments = Appointment::with(['customer', 'barber'])
             ->orderBy('appointment_date', 'desc')
             ->orderBy('start_time', 'desc')
             ->limit(5)
             ->get();
 
         // Weekly revenue (last 7 days)
-        $weeklyRevenue = \App\Models\Appointment::where('status', 'completed')
-            ->whereBetween('appointment_date', [now()->subDays(6)->toDateString(), now()->toDateString()])
+        $appointmentWeeklyRevenue = Appointment::where('status', 'completed')
+            ->whereBetween('appointment_date', [$weekStart->toDateString(), $weekEnd->toDateString()])
             ->selectRaw('DATE(appointment_date) as date, SUM(price) as total')
             ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+            ->pluck('total', 'date');
+
+        $productWeeklyRevenue = ProductOrder::paid()
+            ->whereBetween('paid_at', [$weekStart, $weekEnd])
+            ->selectRaw('DATE(paid_at) as date, SUM(total) as total')
+            ->groupBy('date')
+            ->pluck('total', 'date');
+
+        $weeklyRevenue = collect(range(0, 6))->map(function ($dayOffset) use ($weekStart, $appointmentWeeklyRevenue, $productWeeklyRevenue) {
+            $date = $weekStart->copy()->addDays($dayOffset)->toDateString();
+
+            return (object) [
+                'date' => $date,
+                'total' => (float) ($appointmentWeeklyRevenue[$date] ?? 0) + (float) ($productWeeklyRevenue[$date] ?? 0),
+            ];
+        });
 
         // Monthly revenue (current month)
-        $monthlyRevenue = \App\Models\Appointment::where('status', 'completed')
-            ->whereMonth('appointment_date', now()->month)
-            ->whereYear('appointment_date', now()->year)
+        $appointmentMonthlyRevenue = Appointment::where('status', 'completed')
+            ->whereBetween('appointment_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
             ->sum('price');
+
+        $productMonthlyRevenue = ProductOrder::paid()
+            ->whereBetween('paid_at', [$monthStart, $monthEnd])
+            ->sum('total');
+
+        $monthlyRevenue = $appointmentMonthlyRevenue + $productMonthlyRevenue;
 
         return view('admin.dashboard', compact(
             'todayAppointments',

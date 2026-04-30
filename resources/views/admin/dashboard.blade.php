@@ -10,14 +10,14 @@
                 <a href="{{ route('admin.profile.show') }}" class="profile-link-header">
                     <div class="user-avatar">
                         @if(Auth::user()->profile_image)
-                            <img src="{{ asset(Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                            <img src="{{ asset(Auth::user()->profile_image) }}" alt="{{ Auth::user()->name }}">
                         @else
                             {{ substr(Auth::user()->name, 0, 1) }}{{ substr(Auth::user()->name, strrpos(Auth::user()->name, ' ') + 1, 1) }}
                         @endif
                     </div>
                     <div>
                         <div class="user-name">{{ Auth::user()->name }}</div>
-                        <div style="font-size: 14px; color: var(--dark-gray);">Barbershop Manager</div>
+                        <div class="user-role-label">Barbershop Manager</div>
                     </div>
                 </a>
             </div>
@@ -182,10 +182,22 @@
             border: 2px solid var(--medium-gray);
             overflow: hidden;
         }
+
+        .profile-link-header .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .user-role-label {
+            font-size: 14px;
+            color: var(--dark-gray);
+        }
     </style>
     <style>
         .container {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
             padding: 30px;
         }

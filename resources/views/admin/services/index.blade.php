@@ -56,6 +56,9 @@
 
                 <div class="service-header">
                     <div class="service-icon">
+                        @if($service->image_url)
+                            <img src="{{ $service->image_url }}" alt="{{ $service->name }}">
+                        @else
                         @php
                             // Determine icon based on service name
                             $icon = 'fas fa-cut';
@@ -73,6 +76,7 @@
                             }
                         @endphp
                         <i class="{{ $icon }}"></i>
+                        @endif
                     </div>
                     
                     <div class="service-info">
@@ -187,7 +191,7 @@
 
     /* Container */
     .container {
-        max-width: 1400px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 30px;
     }
@@ -197,9 +201,9 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 26px;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 16px;
     }
     
     .page-title {
@@ -210,9 +214,9 @@
     
     /* Button Styles */
     .btn {
-        padding: 12px 24px;
+        padding: 11px 16px;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         border: none;
         transition: var(--transition);
@@ -263,9 +267,9 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
+        margin-bottom: 22px;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 16px;
     }
     
     .search-container {
@@ -316,16 +320,16 @@
     /* Services Grid */
     .services-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 25px;
-        margin-bottom: 40px;
+        grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+        gap: 20px;
+        margin-bottom: 26px;
     }
     
     .service-card {
         background-color: white;
-        border-radius: 10px;
-        padding: 25px;
-        box-shadow: var(--card-shadow);
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
         transition: var(--transition);
         display: flex;
         flex-direction: column;
@@ -345,7 +349,7 @@
     .service-icon {
         width: 60px;
         height: 60px;
-        border-radius: 12px;
+        border-radius: 8px;
         margin-right: 20px;
         background-color: rgba(212, 175, 55, 0.1);
         display: flex;
@@ -354,6 +358,13 @@
         color: var(--accent-color);
         font-size: 24px;
         flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .service-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     
     .service-info h3 {
@@ -469,7 +480,7 @@
     
     /* Pagination */
     .pagination-container {
-        margin-top: 30px;
+        margin-top: 26px;
         display: flex;
         justify-content: center;
     }
@@ -538,7 +549,7 @@
     
     .modal-content {
         background-color: white;
-        border-radius: 10px;
+        border-radius: 8px;
         width: 90%;
         max-width: 500px;
         max-height: 90vh;

@@ -2,7 +2,7 @@
 
 
 @section('content')
-    <div class="appointment-details-page">
+    <div class="customer-page appointment-details-page">
         <!-- Back Navigation -->
         <div class="back-nav">
             <a href="{{ route('customer.appointments.index') }}" class="back-link">
@@ -19,10 +19,10 @@
 
             <div class="header-actions">
                 <span class="status-badge status-{{ $appointment->status }}">
-                    {{ ucfirst($appointment->status) }}
+                    {{ ucwords(str_replace('_', ' ', $appointment->status)) }}
                 </span>
 
-                @if(in_array($appointment->status, ['pending', 'confirmed']))
+                @if(in_array($appointment->status, ['pending', 'pending_payment', 'confirmed']))
                     <div class="action-buttons">
                         <button class="btn btn-danger btn-small" id="cancelBtn">
                             <i class="fas fa-times"></i> Cancel
@@ -161,6 +161,15 @@
                         <span class="detail-value">{{ Auth::user()->name }}</span>
                     </div>
                     <div class="detail-item">
+                        <span class="detail-label">Appointment For</span>
+                        <span class="detail-value">
+                            {{ $appointment->recipient_display_name }}
+                            @if($appointment->recipient_age !== null)
+                                ({{ $appointment->recipient_age }} years old)
+                            @endif
+                        </span>
+                    </div>
+                    <div class="detail-item">
                         <span class="detail-label">Email</span>
                         <span class="detail-value">{{ Auth::user()->email }}</span>
                     </div>
@@ -274,7 +283,7 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" id="cancelCancel">No, Keep It</button>
                 <form method="POST" action="{{ route('customer.appointments.cancel', $appointment->id) }}"
-                    style="display: inline;">
+                    class="inline-action-form">
                     @csrf
                     @method('PATCH')
                     <button type="submit" class="btn btn-danger">Yes, Cancel</button>
@@ -297,9 +306,9 @@
             --warning: #ed8936;
             --danger: #f56565;
             --info: #4299e1;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --radius: 12px;
+            --shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
+            --shadow-lg: 0 12px 28px rgba(26, 31, 54, 0.10);
+            --radius: 8px;
             --transition: all 0.3s ease;
         }
 
@@ -318,14 +327,14 @@
         }
 
         .appointment-details-page {
-            max-width: 1200px;
+            max-width: 1500px;
             margin: 0 auto;
-            padding: 2rem 1rem;
+            padding: 30px;
         }
 
         /* Back Navigation */
         .back-nav {
-            margin-bottom: 2rem;
+            margin-bottom: 22px;
         }
 
         .back-link {
@@ -350,10 +359,10 @@
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 2rem;
+            margin-bottom: 26px;
             flex-wrap: wrap;
-            gap: 1rem;
-            padding: 1.5rem;
+            gap: 16px;
+            padding: 24px;
             background: white;
             border-radius: var(--radius);
             box-shadow: var(--shadow);
@@ -361,8 +370,8 @@
         }
 
         .header-content h1 {
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: 800;
             color: var(--primary);
             margin-bottom: 0.5rem;
         }
@@ -372,7 +381,7 @@
             color: var(--secondary);
             background: var(--light-gray);
             padding: 0.25rem 0.75rem;
-            border-radius: 12px;
+            border-radius: 8px;
             display: inline-block;
         }
 
@@ -393,7 +402,8 @@
             letter-spacing: 0.5px;
         }
 
-        .status-pending {
+        .status-pending,
+        .status-pending_payment {
             background: rgba(237, 137, 54, 0.1);
             color: var(--warning);
             border: 1px solid rgba(237, 137, 54, 0.2);
@@ -420,7 +430,7 @@
         /* Action Buttons */
         .action-buttons {
             display: flex;
-            gap: 0.75rem;
+            gap: 12px;
         }
 
         /* Button Styles */
@@ -429,8 +439,8 @@
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-            padding: 0.75rem 1.5rem;
-            font-weight: 600;
+            padding: 11px 16px;
+            font-weight: 800;
             text-decoration: none;
             border-radius: var(--radius);
             transition: var(--transition);
@@ -493,8 +503,8 @@
         .details-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 20px;
+            margin-bottom: 26px;
         }
 
         /* Detail Cards */
@@ -517,8 +527,8 @@
         .card-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 1.5rem;
+            gap: 12px;
+            padding: 24px;
             background: var(--light-gray);
             border-bottom: 1px solid var(--medium-gray);
         }
@@ -526,7 +536,7 @@
         .card-icon {
             width: 40px;
             height: 40px;
-            border-radius: 10px;
+            border-radius: 8px;
             background: var(--accent);
             color: var(--primary);
             display: flex;
@@ -544,7 +554,7 @@
         }
 
         .card-body {
-            padding: 1.5rem;
+            padding: 24px;
         }
 
         /* Detail Items */
@@ -581,8 +591,8 @@
         .barber-profile {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 12px;
+            margin-bottom: 22px;
         }
 
         .barber-avatar {
@@ -623,8 +633,8 @@
 
         .barber-stats {
             display: flex;
-            gap: 1.5rem;
-            padding-top: 1.5rem;
+            gap: 16px;
+            padding-top: 22px;
             border-top: 1px solid var(--medium-gray);
         }
 
@@ -652,8 +662,8 @@
         .schedule-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            gap: 12px;
+            margin-bottom: 22px;
         }
 
         .schedule-item:last-child {
@@ -663,7 +673,7 @@
         .schedule-icon {
             width: 40px;
             height: 40px;
-            border-radius: 10px;
+            border-radius: 8px;
             background: var(--light-gray);
             color: var(--accent);
             display: flex;
@@ -694,12 +704,12 @@
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow);
-            margin-bottom: 2rem;
+            margin-bottom: 22px;
             border: 1px solid var(--medium-gray);
         }
 
         .section-header {
-            padding: 1.5rem;
+            padding: 24px;
             background: var(--light-gray);
             border-bottom: 1px solid var(--medium-gray);
         }
@@ -715,7 +725,7 @@
         }
 
         .notes-content {
-            padding: 1.5rem;
+            padding: 24px;
             color: var(--secondary);
             line-height: 1.6;
             white-space: pre-line;
@@ -723,7 +733,7 @@
 
         /* Timeline */
         .timeline {
-            padding: 1.5rem;
+            padding: 24px;
         }
 
         .timeline-item {
@@ -791,10 +801,10 @@
         /* Quick Actions */
         .quick-actions {
             display: flex;
-            gap: 1rem;
+            gap: 12px;
             justify-content: center;
-            margin-top: 3rem;
-            padding-top: 2rem;
+            margin-top: 26px;
+            padding-top: 22px;
             border-top: 1px solid var(--medium-gray);
         }
 
@@ -926,6 +936,11 @@
             margin: 0;
         }
 
+        .inline-action-form {
+            display: inline;
+            margin: 0;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
             .appointment-header {
@@ -948,6 +963,10 @@
 
             .quick-actions {
                 flex-direction: column;
+            }
+
+            .appointment-details-page {
+                padding: 20px;
             }
 
             .modal-footer {

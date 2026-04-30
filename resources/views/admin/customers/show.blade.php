@@ -250,7 +250,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 26px;
         flex-wrap: wrap;
         gap: 20px;
     }
@@ -274,7 +274,7 @@
     
     /* Button Styles */
     .btn {
-        padding: 12px 24px;
+        padding: 11px 16px;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
@@ -325,7 +325,7 @@
     /* Customer Profile Container */
     .customer-profile-container {
         background-color: white;
-        border-radius: 10px;
+        border-radius: 8px;
         box-shadow: var(--card-shadow);
         overflow: hidden;
     }
@@ -389,7 +389,7 @@
     .details-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 25px;
+        gap: 22px;
         padding: 40px;
     }
     
@@ -434,7 +434,7 @@
     }
     
     .detail-card-body {
-        padding: 25px;
+        padding: 24px;
     }
     
     /* Contact Details */
@@ -511,7 +511,7 @@
     .stat-icon {
         width: 50px;
         height: 50px;
-        border-radius: 10px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -696,7 +696,7 @@
     
     .modal-content {
         background-color: white;
-        border-radius: 10px;
+        border-radius: 8px;
         width: 90%;
         max-width: 500px;
         max-height: 90vh;
@@ -705,7 +705,7 @@
     }
     
     .modal-body {
-        padding: 25px;
+        padding: 24px;
     }
     
     .modal-footer {

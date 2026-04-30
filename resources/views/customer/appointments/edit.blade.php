@@ -3,7 +3,7 @@
 @section('title', 'Edit Appointment')
 
 @section('content')
-<div class="edit-appointment-page">
+<div class="customer-page edit-appointment-page">
     <!-- Page Header -->
     <div class="page-header">
         <h1>Edit Appointment</h1>
@@ -43,7 +43,7 @@
                         <div class="detail-item">
                             <span class="label">Status:</span>
                             <span class="value status-badge status-{{ $appointment->status }}">
-                                {{ ucfirst($appointment->status) }}
+                                {{ ucwords(str_replace('_', ' ', $appointment->status)) }}
                             </span>
                         </div>
                     </div>
@@ -147,18 +147,19 @@
 
 <style>
     .edit-appointment-page {
-        max-width: 1000px;
+        max-width: 1500px;
         margin: 0 auto;
+        padding: 30px;
     }
 
     .page-header {
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 26px;
     }
 
     .page-header h1 {
-        font-size: 2rem;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         color: var(--primary);
         margin-bottom: 0.5rem;
     }
@@ -170,21 +171,22 @@
     .edit-form-container {
         background: white;
         border-radius: var(--radius);
-        box-shadow: var(--shadow);
-        padding: 2rem;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
+        padding: 24px;
         border: 1px solid var(--medium-gray);
     }
 
     .form-grid {
         display: grid;
         grid-template-columns: 1fr 2fr;
-        gap: 2rem;
-        margin-bottom: 2rem;
+        gap: 22px;
+        margin-bottom: 22px;
     }
 
     @media (max-width: 768px) {
         .form-grid {
             grid-template-columns: 1fr;
+            gap: 20px;
         }
     }
 
@@ -201,7 +203,7 @@
     .current-details {
         background: var(--light-gray);
         border-radius: var(--radius);
-        padding: 1.5rem;
+        padding: 24px;
     }
 
     .detail-item {
@@ -230,13 +232,14 @@
 
     .status-badge {
         padding: 0.25rem 0.75rem;
-        border-radius: 12px;
+        border-radius: 8px;
         font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
     }
 
-    .status-pending {
+    .status-pending,
+    .status-pending_payment {
         background: rgba(237, 137, 54, 0.1);
         color: var(--warning);
         border: 1px solid rgba(237, 137, 54, 0.2);
@@ -249,7 +252,7 @@
     }
 
     .option-section {
-        margin-bottom: 2rem;
+        margin-bottom: 22px;
     }
 
     .option-section:last-child {
@@ -271,7 +274,7 @@
     }
 
     .form-group {
-        margin-bottom: 1.5rem;
+        margin-bottom: 22px;
     }
 
     .form-group:last-child {
@@ -389,8 +392,8 @@
     .form-actions {
         display: flex;
         justify-content: flex-end;
-        gap: 1rem;
-        padding-top: 2rem;
+        gap: 12px;
+        padding-top: 24px;
         border-top: 1px solid var(--medium-gray);
     }
 
@@ -400,8 +403,8 @@
         align-items: center;
         justify-content: center;
         gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
+        padding: 11px 16px;
+        font-weight: 800;
         text-decoration: none;
         border-radius: var(--radius);
         transition: var(--transition);
@@ -433,9 +436,15 @@
         color: white;
     }
 
+    @media (max-width: 768px) {
+        .edit-appointment-page {
+            padding: 20px;
+        }
+    }
+
     @media (max-width: 480px) {
         .edit-form-container {
-            padding: 1.5rem;
+            padding: 24px;
         }
 
         .form-actions {
@@ -486,13 +495,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Time slot availability check (simulated)
-        timeSelect.addEventListener('change', function() {
-            if (this.value) {
-                // In a real app, this would be an AJAX call to check availability
-                console.log('Checking availability for:', dateInput.value, this.value);
-            }
-        });
     }
     
     // Form submission validation

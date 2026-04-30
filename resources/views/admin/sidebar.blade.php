@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BarberPro | Admin Dashboard</title>
+    <title>MensClub | Admin Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -25,6 +25,11 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html {
+            overflow-y: scroll;
+            scrollbar-gutter: stable;
         }
 
         body {
@@ -49,6 +54,7 @@
             left: 0;
             top: 0;
             z-index: 1000;
+            line-height: 1.2;
             transition: transform 0.3s ease;
         }
 
@@ -100,6 +106,7 @@
             text-decoration: none;
             transition: var(--transition);
             border-left: 4px solid transparent;
+            width: 100%;
         }
 
         .nav-item:hover,
@@ -146,6 +153,8 @@
         .main-content {
             margin-left: 250px;
             flex: 1;
+            width: calc(100% - 250px);
+            min-width: 0;
             padding: 30px;
             min-height: 100vh;
             overflow-y: auto;
@@ -156,14 +165,14 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 26px;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 16px;
         }
 
         .header h2 {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: 800;
         }
 
         .user-info {
@@ -193,14 +202,14 @@
         .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
+            gap: 20px;
+            margin-bottom: 26px;
         }
 
         .stat-card {
             background-color: white;
-            border-radius: 10px;
-            padding: 25px;
+            border-radius: 8px;
+            padding: 24px;
             box-shadow: var(--card-shadow);
             transition: var(--transition);
         }
@@ -225,7 +234,7 @@
         .stat-icon {
             width: 48px;
             height: 48px;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -276,14 +285,14 @@
         .content-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 40px;
+            gap: 22px;
+            margin-bottom: 26px;
         }
 
         .card {
             background-color: white;
-            border-radius: 10px;
-            padding: 25px;
+            border-radius: 8px;
+            padding: 24px;
             box-shadow: var(--card-shadow);
             overflow-x: auto;
         }
@@ -571,6 +580,7 @@
         @media (max-width: 992px) {
             .main-content {
                 margin-left: 0;
+                width: 100%;
                 padding: 20px;
             }
 
@@ -784,25 +794,37 @@
         </div>
 
         <div class="nav-links">
-            <a href="{{ route('admin.dashboard') }}" class="nav-item active">
+            <a href="{{ route('admin.dashboard') }}" class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                 <i class="fas fa-chart-bar"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="{{ route('admin.staffs.index') }}" class="nav-item">
+            <a href="{{ route('admin.staffs.index') }}" class="nav-item {{ request()->routeIs('admin.staffs.*') ? 'active' : '' }}">
                 <i class="fas fa-users"></i>
                 <span>Staff</span>
             </a>
-            <a href="{{ route('admin.customers.index') }}" class="nav-item">
+            <a href="{{ route('admin.customers.index') }}" class="nav-item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
                 <i class="fas fa-users"></i>
                 <span>Customer</span>
             </a>
-            <a href="{{ route('admin.appointments.index') }}" class="nav-item">
-                <i class="fas fa-cash-register"></i>
+            <a href="{{ route('admin.appointments.index') }}" class="nav-item {{ request()->routeIs('admin.appointments.*') ? 'active' : '' }}">
+                <i class="fas fa-calendar-check"></i>
                 <span>Appointment</span>
             </a>
-            <a href="{{ route('admin.services.index') }}" class="nav-item">
+            <a href="{{ route('admin.services.index') }}" class="nav-item {{ request()->routeIs('admin.services.*') ? 'active' : '' }}">
                 <i class="fas fa-user-tie"></i>
                 <span>Service</span>
+            </a>
+            <a href="{{ route('admin.products.index') }}" class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+                <i class="fas fa-box-open"></i>
+                <span>Product</span>
+            </a>
+            <a href="{{ route('admin.product-orders.index') }}" class="nav-item {{ request()->routeIs('admin.product-orders.*') ? 'active' : '' }}">
+                <i class="fas fa-truck"></i>
+                <span>Product Orders</span>
+            </a>
+            <a href="{{ route('admin.pos.index') }}" class="nav-item {{ request()->routeIs('admin.pos.*') ? 'active' : '' }}">
+                <i class="fas fa-cash-register"></i>
+                <span>P.O.S</span>
             </a>
         </div>
         <!-- Admin Profile Section -->
@@ -840,6 +862,182 @@
 
         <!-- yield content -->
         @yield('content')
+
+        <style>
+            .main-content > .container,
+            .main-content > .product-admin-page,
+            .main-content > .profile-container,
+            .main-content > .profile-page,
+            .main-content > .admin-profile-page,
+            .main-content > .edit-profile-page {
+                max-width: 1500px !important;
+                width: 100% !important;
+                margin: 0 auto !important;
+                padding: 30px !important;
+                color: #1a1f36;
+            }
+
+            .main-content .page-header,
+            .main-content .product-page-header,
+            .main-content > .container > .header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 16px !important;
+                margin-bottom: 26px !important;
+                flex-wrap: wrap;
+            }
+
+            .main-content .page-title,
+            .main-content .product-page-header h1,
+            .main-content > .container > .header h2 {
+                font-size: 32px !important;
+                font-weight: 800 !important;
+                line-height: 1.2;
+                margin: 0 !important;
+                color: #1a1f36;
+            }
+
+            .main-content .btn:not(.btn-action),
+            .main-content .product-btn {
+                border-radius: 8px !important;
+                padding: 11px 16px !important;
+                font-weight: 800 !important;
+            }
+
+            .main-content .btn-small {
+                padding: 8px 12px !important;
+                font-size: 14px;
+            }
+
+            .main-content .control-bar,
+            .main-content .product-toolbar {
+                gap: 16px !important;
+                margin-bottom: 22px !important;
+                padding: 20px !important;
+                border: 1px solid #e2e8f0 !important;
+                border-radius: 8px !important;
+                background: #fff;
+                box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06) !important;
+            }
+
+            .main-content .stats-container,
+            .main-content .product-stats,
+            .main-content .content-row,
+            .main-content .barbers-grid,
+            .main-content .services-grid,
+            .main-content .product-grid,
+            .main-content .details-grid,
+            .main-content .info-grid,
+            .main-content .form-row {
+                gap: 20px !important;
+                margin-bottom: 26px !important;
+            }
+
+            .main-content .stat-card,
+            .main-content .product-stat,
+            .main-content .card,
+            .main-content .table-container,
+            .main-content .appointments-table,
+            .main-content .calendar-container,
+            .main-content .barber-card,
+            .main-content .barber-show-container,
+            .main-content .customer-profile-card,
+            .main-content .service-card,
+            .main-content .product-card,
+            .main-content .form-container,
+            .main-content .service-show-container,
+            .main-content .details-card,
+            .main-content .actions-card,
+            .main-content .timeline-card,
+            .main-content .info-card,
+            .main-content .profile-card,
+            .main-content .profile-section,
+            .main-content .detail-card,
+            .main-content .summary-card,
+            .main-content .empty-state {
+                border-radius: 8px !important;
+                border: 1px solid #e2e8f0;
+                box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06) !important;
+            }
+
+            .main-content .stat-card,
+            .main-content .card,
+            .main-content .barber-card,
+            .main-content .customer-profile-card,
+            .main-content .service-card,
+            .main-content .profile-section,
+            .main-content .detail-card,
+            .main-content .summary-card {
+                padding: 24px !important;
+            }
+
+            .main-content .form-card-body,
+            .main-content .card-body,
+            .main-content .modal-body,
+            .main-content .detail-card-body,
+            .main-content .profile-card-body,
+            .main-content .profile-info-grid {
+                padding: 24px !important;
+            }
+
+            .main-content .modal-content {
+                border-radius: 8px !important;
+            }
+
+            .main-content .modal-footer,
+            .main-content .form-actions,
+            .main-content .action-buttons {
+                gap: 12px !important;
+            }
+
+            .main-content .pagination-container {
+                margin-top: 26px !important;
+            }
+
+            .main-content .is-hidden {
+                display: none;
+            }
+
+            @media (max-width: 768px) {
+                .main-content > .container,
+                .main-content > .product-admin-page,
+                .main-content > .profile-container,
+                .main-content > .profile-page,
+                .main-content > .admin-profile-page,
+                .main-content > .edit-profile-page {
+                    padding: 20px !important;
+                }
+
+                .main-content .page-header,
+                .main-content .product-page-header,
+                .main-content > .container > .header {
+                    gap: 16px !important;
+                    margin-bottom: 26px !important;
+                }
+
+                .main-content .control-bar,
+                .main-content .product-toolbar {
+                    padding: 16px !important;
+                }
+
+                .main-content .stat-card,
+                .main-content .card,
+                .main-content .barber-card,
+                .main-content .service-card,
+                .main-content .profile-section,
+                .main-content .detail-card,
+                .main-content .summary-card,
+                .main-content .form-card-body,
+                .main-content .card-body,
+                .main-content .modal-body,
+                .main-content .detail-card-body,
+                .main-content .profile-card-body,
+                .main-content .profile-info-grid {
+                    padding: 20px !important;
+                }
+            }
+        </style>
     </div>
 
     <script>

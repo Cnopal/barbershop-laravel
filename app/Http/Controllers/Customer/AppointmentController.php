@@ -57,12 +57,17 @@ class AppointmentController extends Controller
         $request->validate([
             'service_id' => 'required|exists:services,id',
             'barber_id' => 'required|exists:users,id',
+            'booking_for' => 'required|in:self,other',
+            'recipient_name' => 'nullable|required_if:booking_for,other|string|max:255',
+            'recipient_age' => 'nullable|required_if:booking_for,other|integer|min:0|max:120',
             'appointment_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required|date_format:H:i:s', // ✅ FIX
             'notes' => 'nullable|string|max:500',
         ]);
 
         $service = Service::findOrFail($request->service_id);
+        $recipient = Appointment::recipientPayload(Auth::user(), $request->all());
+        $price = Appointment::priceForRecipient($service, $recipient['recipient_age']);
 
         $start_time = $request->start_time;
         $end_time = Carbon::createFromFormat('H:i:s', $start_time)
@@ -79,7 +84,7 @@ class AppointmentController extends Controller
         // Customer conflict
         $hasCustomerConflict = Appointment::where('customer_id', Auth::id())
             ->where('appointment_date', $request->appointment_date)
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['pending', 'pending_payment', 'confirmed'])
             ->where(function ($q) use ($start_time, $end_time) {
                 $q->where('start_time', '<', $end_time)
                     ->where('end_time', '>', $start_time);
@@ -93,7 +98,7 @@ class AppointmentController extends Controller
         // Barber conflict
         $hasBarberConflict = Appointment::where('barber_id', $request->barber_id)
             ->where('appointment_date', $request->appointment_date)
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['pending', 'pending_payment', 'confirmed'])
             ->where(function ($q) use ($start_time, $end_time) {
                 $q->where('start_time', '<', $end_time)
                     ->where('end_time', '>', $start_time);
@@ -122,12 +127,15 @@ class AppointmentController extends Controller
         // CREATE APPOINTMENT (PENDING PAYMENT)
         $appointment = Appointment::create([
             'customer_id' => Auth::id(),
+            'booking_for' => $recipient['booking_for'],
+            'recipient_name' => $recipient['recipient_name'],
+            'recipient_age' => $recipient['recipient_age'],
             'service_id' => $request->service_id,
             'barber_id' => $request->barber_id,
             'appointment_date' => $request->appointment_date,
             'start_time' => $start_time,
             'end_time' => $end_time,
-            'price' => $service->price,
+            'price' => $price,
             'status' => 'pending_payment',
             'notes' => $request->notes,
         ]);
@@ -154,9 +162,9 @@ class AppointmentController extends Controller
                     'price_data' => [
                         'currency' => 'myr',
                         'product_data' => [
-                            'name' => $appointment->service->name,
+                            'name' => $appointment->service->name . ' for ' . $appointment->recipient_display_name,
                         ],
-                        'unit_amount' => $appointment->price * 100, // in sen
+                        'unit_amount' => (int) round($appointment->price * 100), // in sen
                     ],
                     'quantity' => 1,
                 ]
@@ -212,7 +220,7 @@ class AppointmentController extends Controller
             abort(403);
         }
 
-        if (!in_array($appointment->status, ['pending', 'confirmed'])) {
+        if (!in_array($appointment->status, ['pending', 'pending_payment', 'confirmed'])) {
             return back()->with('error', 'This appointment cannot be cancelled.');
         }
 
@@ -288,7 +296,7 @@ class AppointmentController extends Controller
         // Get barber's existing appointments for that day
         $existing = Appointment::where('barber_id', $request->barber_id)
             ->where('appointment_date', $request->date)
-            ->whereIn('status', ['pending', 'confirmed'])
+            ->whereIn('status', ['pending', 'pending_payment', 'confirmed'])
             ->get(['start_time', 'end_time']);
 
         $available = array_filter($slots, function ($slot) use ($existing) {

@@ -4,6 +4,7 @@
 
 @section('content')
 
+<div class="customer-page dashboard-page">
     <h1 style="margin-bottom: 1.5rem;">Welcome back, {{ Auth::user()->name }} </h1>
 
     {{-- Quick Stats --}}
@@ -125,6 +126,7 @@
             <i class="fas fa-magic"></i> AI Hair Recommendation
         </a>
     </div>
+</div>
 
     {{-- Inline CSS --}}
     <style>

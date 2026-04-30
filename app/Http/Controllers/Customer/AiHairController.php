@@ -11,7 +11,6 @@ class AiHairController extends Controller
 {
     public function index()
     {
-        // Tampilkan form upload
         return view('customer.hairstyles.ai-hair');
     }
 

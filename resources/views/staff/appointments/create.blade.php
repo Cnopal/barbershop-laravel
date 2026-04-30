@@ -5,16 +5,22 @@
 
 @section('content')
 <style>
+    .staff-ui-page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 30px;
+        color: #1a1f36;
+    }
+
     .form-container {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
         border: 1px solid var(--medium-gray);
-        margin-top: 20px;
     }
 
     .form-card {
-        margin-bottom: 30px;
+        margin-bottom: 22px;
         border: 1px solid var(--medium-gray);
         border-radius: 8px;
         overflow: hidden;
@@ -45,11 +51,11 @@
     }
 
     .form-card-body {
-        padding: 30px;
+        padding: 24px;
     }
 
     .form-group {
-        margin-bottom: 28px;
+        margin-bottom: 22px;
     }
 
     .form-group label {
@@ -118,17 +124,17 @@
     .btn-group {
         display: flex;
         gap: 12px;
-        margin-top: 40px;
+        margin-top: 26px;
         justify-content: flex-end;
-        padding: 0 30px 30px 30px;
+        padding: 0 24px 24px;
     }
 
     .btn {
-        padding: 12px 28px;
+        padding: 11px 16px;
         border-radius: 8px;
         border: none;
         font-size: 15px;
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         transition: all 0.3s ease;
         display: flex;
@@ -185,7 +191,7 @@
     .modal-content {
         background: white;
         padding: 40px;
-        border-radius: 12px;
+        border-radius: 8px;
         width: 90%;
         max-width: 500px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
@@ -266,9 +272,100 @@
         margin-bottom: 20px;
         border: 1px solid #f5c6cb;
     }
+
+    .appointment-fields-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 22px;
+    }
+
+    .customer-search-input {
+        margin-bottom: 10px;
+    }
+
+    .recipient-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .recipient-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 14px;
+        border: 2px solid var(--medium-gray);
+        border-radius: 8px;
+        background: var(--light-gray);
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .recipient-option:has(input:checked) {
+        border-color: var(--accent);
+        background: rgba(212, 175, 55, 0.14);
+    }
+
+    .recipient-fields {
+        display: none;
+    }
+
+    .recipient-fields.active {
+        display: block;
+    }
+
+    .recipient-field-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
+    }
+
+    .price-preview {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        min-height: 52px;
+        padding: 14px 16px;
+        background: var(--light-gray);
+        border: 1px solid var(--medium-gray);
+        border-radius: 8px;
+    }
+
+    .price-preview span {
+        color: var(--dark-gray);
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .price-preview strong {
+        color: var(--accent);
+        font-size: 18px;
+    }
+
+    .slot-help-text {
+        display: block;
+        margin-bottom: 20px;
+        color: var(--accent);
+        font-weight: 500;
+    }
+
+    @media (max-width: 768px) {
+        .staff-ui-page {
+            padding: 20px;
+        }
+
+        .appointment-fields-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .recipient-field-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 
-<div class="container" style="max-width: 1200px;">
+<div class="staff-ui-page">
     <div class="form-container">
         <form action="{{ route('staff.appointments.store') }}" method="POST">
             @csrf
@@ -284,17 +381,72 @@
                 <div class="form-card-body">
                     <div class="form-group">
                         <label for="customer_id" class="required">Select Customer</label>
+                        <input type="search"
+                               id="customerSearch"
+                               class="form-control customer-search-input"
+                               placeholder="Search by name, email, or phone">
                         <select name="customer_id" id="customer_id" class="form-control @error('customer_id') is-invalid @enderror" required>
                             <option value="">-- Choose Customer --</option>
                             @foreach($customers as $customer)
-                                <option value="{{ $customer->id }}" {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
-                                    {{ $customer->name }} ({{ $customer->email }})
+                                <option value="{{ $customer->id }}"
+                                        data-search="{{ strtolower($customer->name . ' ' . $customer->email . ' ' . ($customer->phone ?? '')) }}"
+                                        {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
+                                    {{ $customer->name }} ({{ $customer->email }}){{ $customer->phone ? ' - ' . $customer->phone : '' }}
                                 </option>
                             @endforeach
                         </select>
                         @error('customer_id')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label class="required">Appointment For</label>
+                        <div class="recipient-options">
+                            <label class="recipient-option">
+                                <input type="radio" name="booking_for" value="self" {{ old('booking_for', 'self') !== 'other' ? 'checked' : '' }}>
+                                <span>Selected customer</span>
+                            </label>
+                            <label class="recipient-option">
+                                <input type="radio" name="booking_for" value="other" {{ old('booking_for') === 'other' ? 'checked' : '' }}>
+                                <span>Someone else</span>
+                            </label>
+                        </div>
+                        @error('booking_for')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="recipient-fields" id="recipientFields">
+                        <div class="recipient-field-grid">
+                            <div class="form-group">
+                                <label for="recipient_name" class="required">Recipient Name</label>
+                                <input type="text"
+                                       name="recipient_name"
+                                       id="recipient_name"
+                                       class="form-control @error('recipient_name') is-invalid @enderror"
+                                       value="{{ old('recipient_name') }}"
+                                       placeholder="Example: Adam">
+                                @error('recipient_name')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                            <div class="form-group">
+                                <label for="recipient_age" class="required">Age</label>
+                                <input type="number"
+                                       name="recipient_age"
+                                       id="recipient_age"
+                                       class="form-control @error('recipient_age') is-invalid @enderror"
+                                       value="{{ old('recipient_age') }}"
+                                       min="0"
+                                       max="120"
+                                       placeholder="10">
+                                @error('recipient_age')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+                        <small class="form-text">Children below 12 years old are charged RM15.</small>
                     </div>
                 </div>
             </div>
@@ -310,7 +462,7 @@
                         <select name="service_id" id="service_id" class="form-control @error('service_id') is-invalid @enderror" required onchange="updateServiceInfo()">
                             <option value="">-- Choose Service --</option>
                             @foreach($services as $service)
-                                <option value="{{ $service->id }}" data-duration="{{ $service->duration }}" data-price="{{ $service->price }}">
+                                <option value="{{ $service->id }}" data-duration="{{ $service->duration }}" data-price="{{ $service->price }}" {{ old('service_id') == $service->id ? 'selected' : '' }}>
                                     {{ $service->name }} - RM{{ $service->price }} ({{ $service->duration }}min)
                                 </option>
                             @endforeach
@@ -318,6 +470,11 @@
                         @error('service_id')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
+                    </div>
+
+                    <div class="price-preview" id="pricePreview">
+                        <span>Estimated price</span>
+                        <strong>RM0.00</strong>
                     </div>
                 </div>
             </div>
@@ -328,10 +485,10 @@
                     <h3><i class="fas fa-calendar-alt"></i> Appointment Schedule</h3>
                 </div>
                 <div class="form-card-body">
-                    <small class="form-text" style="display: block; margin-bottom: 20px; color: var(--accent); font-weight: 500;">
+                    <small class="form-text slot-help-text">
                         <i class="fas fa-info-circle"></i> Available time slots will be automatically loaded based on your schedule
                     </small>
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                    <div class="appointment-fields-grid">
                         <div class="form-group">
                             <label for="appointment_date" class="required">Date</label>
                             <input type="date" name="appointment_date" id="appointment_date" class="form-control @error('appointment_date') is-invalid @enderror" value="{{ old('appointment_date') }}" required onchange="updateAvailableSlots()">
@@ -414,6 +571,74 @@
 </div>
 
 <script>
+    const childPrice = 15;
+    const bookingForInputs = document.querySelectorAll('input[name="booking_for"]');
+    const recipientFields = document.getElementById('recipientFields');
+    const recipientNameInput = document.getElementById('recipient_name');
+    const recipientAgeInput = document.getElementById('recipient_age');
+    const pricePreview = document.getElementById('pricePreview');
+    const customerSearch = document.getElementById('customerSearch');
+    const customerSelect = document.getElementById('customer_id');
+
+    function isBookingForOther() {
+        return document.querySelector('input[name="booking_for"]:checked')?.value === 'other';
+    }
+
+    function updateRecipientFields() {
+        const other = isBookingForOther();
+        recipientFields?.classList.toggle('active', other);
+
+        if (recipientNameInput) {
+            recipientNameInput.required = other;
+        }
+
+        if (recipientAgeInput) {
+            recipientAgeInput.required = other;
+        }
+
+        updatePricePreview();
+    }
+
+    function updatePricePreview() {
+        const serviceSelect = document.getElementById('service_id');
+        const selectedOption = serviceSelect?.options[serviceSelect.selectedIndex];
+        const servicePrice = selectedOption?.dataset.price ? parseFloat(selectedOption.dataset.price) : 0;
+        const age = parseInt(recipientAgeInput?.value || '', 10);
+        const finalPrice = isBookingForOther() && !Number.isNaN(age) && age < 12 ? childPrice : servicePrice;
+
+        if (pricePreview) {
+            pricePreview.querySelector('strong').textContent = `RM${Number(finalPrice || 0).toFixed(2)}`;
+        }
+    }
+
+    function filterCustomerOptions() {
+        if (!customerSearch || !customerSelect) {
+            return;
+        }
+
+        const query = customerSearch.value.trim().toLowerCase();
+        const selectedOption = customerSelect.options[customerSelect.selectedIndex];
+        let selectedStillVisible = !selectedOption?.value;
+
+        Array.from(customerSelect.options).forEach(option => {
+            if (!option.value) {
+                option.hidden = false;
+                return;
+            }
+
+            const matches = !query || (option.dataset.search || '').includes(query);
+            option.hidden = !matches;
+
+            if (option.selected && matches) {
+                selectedStillVisible = true;
+            }
+        });
+
+        if (!selectedStillVisible) {
+            customerSelect.value = '';
+        }
+    }
+
     function openCustomerModal() {
         document.getElementById('customerModal').classList.add('show');
     }
@@ -447,9 +672,15 @@
                 const select = document.getElementById('customer_id');
                 const option = document.createElement('option');
                 option.value = data.customer.id;
-                option.textContent = `${data.customer.name} (${data.customer.email})`;
+                option.textContent = `${data.customer.name} (${data.customer.email})${data.customer.phone ? ' - ' + data.customer.phone : ''}`;
+                option.dataset.search = `${data.customer.name} ${data.customer.email} ${data.customer.phone || ''}`.toLowerCase();
                 option.selected = true;
                 select.appendChild(option);
+
+                if (customerSearch) {
+                    customerSearch.value = data.customer.name;
+                    filterCustomerOptions();
+                }
 
                 // Close modal after 2 seconds
                 setTimeout(() => {
@@ -470,12 +701,7 @@
     }
 
     function updateServiceInfo() {
-        const selected = document.getElementById('service_id').selectedOptions[0];
-        if (selected.value) {
-            const duration = selected.getAttribute('data-duration');
-            const price = selected.getAttribute('data-price');
-            console.log(`Service: ${selected.text}, Duration: ${duration}min, Price: ₱${price}`);
-        }
+        updatePricePreview();
         updateAvailableSlots();
     }
 
@@ -527,6 +753,38 @@
             timeSelect.disabled = true;
         });
     }
+
+    bookingForInputs.forEach(input => {
+        input.addEventListener('change', updateRecipientFields);
+    });
+
+    customerSearch?.addEventListener('input', filterCustomerOptions);
+    recipientNameInput?.addEventListener('input', updatePricePreview);
+    recipientAgeInput?.addEventListener('input', updatePricePreview);
+    document.getElementById('service_id')?.addEventListener('change', updatePricePreview);
+
+    document.querySelector('.staff-ui-page form')?.addEventListener('submit', function(e) {
+        if (!isBookingForOther()) {
+            return;
+        }
+
+        if (!recipientNameInput?.value.trim()) {
+            e.preventDefault();
+            recipientNameInput?.focus();
+            alert('Please enter the recipient name');
+            return;
+        }
+
+        const age = parseInt(recipientAgeInput?.value || '', 10);
+        if (Number.isNaN(age) || age < 0 || age > 120) {
+            e.preventDefault();
+            recipientAgeInput?.focus();
+            alert('Please enter a valid recipient age');
+        }
+    });
+
+    updateRecipientFields();
+    filterCustomerOptions();
 
     // Close modal when clicking outside
     document.getElementById('customerModal').addEventListener('click', function(e) {

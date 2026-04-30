@@ -38,7 +38,7 @@
                             <div class="profile-image-upload">
                                 <div class="current-image">
                                     @if($staff->profile_image)
-                                        <img src="{{ Storage::url($staff->profile_image) }}" alt="{{ $staff->name }}" id="currentProfileImage">
+                                        <img src="{{ $staff->profile_image }}" alt="{{ $staff->name }}" id="currentProfileImage">
                                         <button type="button" class="remove-image" id="removeImage">
                                             <i class="fas fa-times"></i>
                                         </button>
@@ -114,7 +114,7 @@
                         </div>
 
                         <!-- Custom Position Input (shown when "Other" is selected) -->
-                        <div class="form-group" id="customPositionGroup" style="display: {{ old('position', $staff->position) == 'Other' ? 'block' : 'none' }};">
+                        <div class="form-group {{ old('position', $staff->position) == 'Other' ? '' : 'is-hidden' }}" id="customPositionGroup">
                             <label for="custom_position">Custom Position</label>
                             <input type="text" id="custom_position" name="custom_position" 
                                    class="form-control @error('custom_position') is-invalid @enderror"
@@ -228,7 +228,7 @@
                             @error('password')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <div class="password-strength" id="passwordStrength" style="display: none;">
+                            <div class="password-strength is-hidden" id="passwordStrength">
                                 <div class="strength-bar"></div>
                                 <span class="strength-text">Password strength: None</span>
                             </div>
@@ -284,7 +284,7 @@
 
     /* Container */
     .container {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 30px;
     }
@@ -294,7 +294,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 26px;
         flex-wrap: wrap;
         gap: 20px;
     }
@@ -318,7 +318,7 @@
     
     /* Button Styles */
     .btn {
-        padding: 12px 24px;
+        padding: 11px 16px;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
@@ -360,7 +360,7 @@
     /* Form Container */
     .form-container {
         background-color: white;
-        border-radius: 10px;
+        border-radius: 8px;
         box-shadow: var(--card-shadow);
         overflow: hidden;
     }
@@ -393,14 +393,14 @@
     }
     
     .form-card-body {
-        padding: 25px;
+        padding: 24px;
     }
     
     /* Form Grid */
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 25px;
+        gap: 22px;
     }
     
     @media (max-width: 992px) {
@@ -472,7 +472,7 @@
     .profile-image-upload {
         display: flex;
         align-items: flex-start;
-        gap: 25px;
+        gap: 22px;
     }
     
     @media (max-width: 768px) {
@@ -628,7 +628,7 @@
     
     /* Form Actions */
     .form-actions {
-        padding: 25px;
+        padding: 24px;
         border-top: 1px solid var(--medium-gray);
         display: flex;
         justify-content: flex-end;

@@ -39,6 +39,15 @@
                                 <span class="info-value">{{ $appointment->customer->name }}</span>
                             </div>
                             <div class="info-item">
+                                <span class="info-label">Appointment For:</span>
+                                <span class="info-value">
+                                    {{ $appointment->recipient_display_name }}
+                                    @if($appointment->recipient_age !== null)
+                                        ({{ $appointment->recipient_age }} years old)
+                                    @endif
+                                </span>
+                            </div>
+                            <div class="info-item">
                                 <span class="info-label">Email:</span>
                                 <span class="info-value">{{ $appointment->customer->email }}</span>
                             </div>
@@ -67,7 +76,7 @@
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Price:</span>
-                                <span class="info-value price">RM{{ number_format($appointment->service->price, 2) }}</span>
+                                <span class="info-value price">RM{{ number_format($appointment->price, 2) }}</span>
                             </div>
                             @if($appointment->service->description)
                                 <div class="info-item">
@@ -339,7 +348,7 @@
                                 </div>
                                 <div class="info-content">
                                     <div class="info-label">Total Cost</div>
-                                    <div class="info-value">RM{{ number_format($appointment->service->price, 2) }}</div>
+                                    <div class="info-value">RM{{ number_format($appointment->price, 2) }}</div>
                                 </div>
                             </div>
                         </div>
@@ -368,16 +377,16 @@
             --info-color: #4299e1;
             --completed-color: #805ad5;
             --cancelled-color: #a0aec0;
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            --card-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
+            --hover-shadow: 0 12px 28px rgba(26, 31, 54, 0.10);
             --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            --border-radius: 12px;
+            --border-radius: 8px;
             --border-radius-sm: 8px;
         }
 
         /* Container */
         .container {
-            max-width: auto;
+            max-width: 1500px;
             margin: 0 auto;
             padding: 30px;
             animation: fadeIn 0.5s ease-out;
@@ -400,10 +409,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 26px;
             flex-wrap: wrap;
-            gap: 20px;
-            padding: 20px 0;
+            gap: 16px;
+            padding: 0;
             border-bottom: 2px solid var(--accent-light);
         }
 
@@ -457,9 +466,9 @@
 
         /* Button Styles */
         .btn {
-            padding: 12px 24px;
+            padding: 11px 16px;
             border-radius: var(--border-radius-sm);
-            font-weight: 600;
+            font-weight: 800;
             cursor: pointer;
             border: none;
             transition: var(--transition);
@@ -560,7 +569,7 @@
         .content-grid {
             display: grid;
             grid-template-columns: 1fr 400px;
-            gap: 30px;
+            gap: 22px;
         }
 
         @media (max-width: 1200px) {
@@ -579,7 +588,7 @@
             box-shadow: var(--card-shadow);
             overflow: hidden;
             border: 1px solid var(--medium-gray);
-            margin-bottom: 30px;
+            margin-bottom: 22px;
             transition: var(--transition);
         }
 
@@ -634,7 +643,7 @@
         }
 
         .card-body {
-            padding: 30px;
+            padding: 24px;
         }
 
         /* Status Badges */
@@ -672,8 +681,8 @@
         .info-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 22px;
+            margin-bottom: 22px;
         }
 
         .info-section {
@@ -737,7 +746,7 @@
 
         .status-indicator {
             padding: 4px 12px;
-            border-radius: 12px;
+            border-radius: 8px;
             font-size: 12px;
             font-weight: 600;
             display: inline-block;
@@ -901,7 +910,7 @@
             width: 40px;
             height: 40px;
             background: linear-gradient(135deg, var(--accent-light) 0%, #f8f3e6 100%);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -934,12 +943,12 @@
         .toast {
             background: linear-gradient(135deg, var(--primary-color) 0%, #2d3748 100%);
             color: white;
-            padding: 20px 28px;
-            border-radius: 12px;
+            padding: 16px 24px;
+            border-radius: 8px;
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
             animation: toastSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             max-width: 450px;
             border-left: 4px solid var(--accent-color);
@@ -980,8 +989,8 @@
             .page-header {
                 flex-direction: column;
                 align-items: stretch;
-                gap: 15px;
-                padding-bottom: 15px;
+                gap: 16px;
+                padding-bottom: 0;
             }
 
             .page-title {
@@ -1000,7 +1009,7 @@
 
             .info-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 22px;
             }
 
             .info-section {
@@ -1008,7 +1017,7 @@
             }
 
             .btn {
-                padding: 10px 20px;
+                padding: 11px 16px;
                 font-size: 13px;
             }
 

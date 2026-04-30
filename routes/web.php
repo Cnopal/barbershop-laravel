@@ -8,15 +8,20 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\AppointmentController;
+use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\PosController;
+use App\Http\Controllers\ProductOrderManagementController;
 
 use App\Http\Controllers\Customer\AppointmentController as CustomerAppointmentController;
 use App\Http\Controllers\Customer\CustomerServiceController;
+use App\Http\Controllers\Customer\ProductController as CustomerProductController;
 
 
 use App\Http\Controllers\Staff\AppointmentController as StaffAppointmentController;
 use App\Http\Controllers\Staff\ScheduleController;
 use App\Http\Controllers\Staff\FeedbackController;
 use App\Http\Controllers\Staff\ServiceController as StaffServiceController;
+use App\Http\Controllers\Staff\ProductController as StaffProductController;
 use App\Http\Controllers\Staff\ProfileController;
 use App\Http\Controllers\Customer\AiHairController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
@@ -40,7 +45,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('staffs', StaffController::class);
     Route::resource('services', ServiceController::class);
+    Route::resource('products', AdminProductController::class);
+    Route::get('/product-orders', [ProductOrderManagementController::class, 'index'])->name('product-orders.index');
+    Route::get('/product-orders/{order}', [ProductOrderManagementController::class, 'show'])->name('product-orders.show');
+    Route::patch('/product-orders/{order}/status', [ProductOrderManagementController::class, 'updateStatus'])->name('product-orders.status');
     Route::resource('customers', CustomerController::class);
+
+    Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
+    Route::post('/pos/orders', [PosController::class, 'store'])->name('pos.orders.store');
+    Route::get('/pos/orders', [PosController::class, 'orders'])->name('pos.orders.index');
+    Route::get('/pos/orders/{order}', [PosController::class, 'show'])->name('pos.orders.show');
 
     // ✅ Available slots route MUST be before resource route to avoid conflicts
     Route::get('/appointments/available-slots', [AppointmentController::class, 'availableSlots'])
@@ -73,6 +87,17 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->as('staff.')->group(
     Route::get('/services', [StaffServiceController::class, 'index'])->name('services.index');
     Route::get('/services/{service}', [StaffServiceController::class, 'show'])->name('services.show');
 
+    // Products and POS
+    Route::get('/products', [StaffProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{product}', [StaffProductController::class, 'show'])->name('products.show');
+    Route::get('/product-orders', [ProductOrderManagementController::class, 'index'])->name('product-orders.index');
+    Route::get('/product-orders/{order}', [ProductOrderManagementController::class, 'show'])->name('product-orders.show');
+    Route::patch('/product-orders/{order}/status', [ProductOrderManagementController::class, 'updateStatus'])->name('product-orders.status');
+    Route::get('/pos', [PosController::class, 'index'])->name('pos.index');
+    Route::post('/pos/orders', [PosController::class, 'store'])->name('pos.orders.store');
+    Route::get('/pos/orders', [PosController::class, 'orders'])->name('pos.orders.index');
+    Route::get('/pos/orders/{order}', [PosController::class, 'show'])->name('pos.orders.show');
+
     // Profile
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -89,11 +114,18 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->as('staff.')->group(
 // ================= CUSTOMER =================
 Route::middleware(['auth', 'role:customer'])->prefix('customer')->as('customer.')->group(function () {
     Route::get('/dashboard', [CustomerDashboardController::class, 'index'])->name('dashboard');
-    Route::resource('appointments', CustomerAppointmentController::class);
-    Route::resource('services', CustomerServiceController::class);
-    Route::patch('/appointments/{appointment}/cancel', [CustomerAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::get('/appointments/slots/available', [CustomerAppointmentController::class, 'getAvailableSlots'])
         ->name('appointments.slots');
+    Route::resource('appointments', CustomerAppointmentController::class);
+    Route::resource('services', CustomerServiceController::class);
+    Route::get('/products', [CustomerProductController::class, 'index'])->name('products.index');
+    Route::get('/products/{product}', [CustomerProductController::class, 'show'])->name('products.show');
+    Route::post('/products/{product}/checkout', [CustomerProductController::class, 'checkout'])->name('products.checkout');
+    Route::get('/product-orders', [CustomerProductController::class, 'orders'])->name('product-orders.index');
+    Route::get('/product-orders/{order}', [CustomerProductController::class, 'orderShow'])->name('product-orders.show');
+    Route::get('/product-orders/{order}/payment/success', [CustomerProductController::class, 'paymentSuccess'])->name('product-orders.payment.success');
+    Route::get('/product-orders/{order}/payment/cancel', [CustomerProductController::class, 'paymentCancel'])->name('product-orders.payment.cancel');
+    Route::patch('/appointments/{appointment}/cancel', [CustomerAppointmentController::class, 'cancel'])->name('appointments.cancel');
     Route::get('/profile', [CustomerProfileController::class, 'show'])->name('profile.show');
     Route::get('/profile/edit', [CustomerProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [CustomerProfileController::class, 'update'])->name('profile.update');
@@ -106,10 +138,8 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->as('customer.'
     // AI HAIR
     Route::get('/ai-hair', [AiHairController::class, 'index'])->name('ai-hair.index');
     Route::post('/ai-hair', [AiHairController::class, 'analyze'])->name('ai-hair.analyze');
-    Route::get('/ai-hair/health', [AiHairController::class, 'checkApiHealth'])->name('customer.ai-hair.health');
+    Route::get('/ai-hair/health', [AiHairController::class, 'checkApiHealth'])->name('ai-hair.health');
 
     // BARBERS
     Route::resource('barbers', \App\Http\Controllers\Customer\CustomerBarberController::class)->only(['index', 'show']);
 });
-
-

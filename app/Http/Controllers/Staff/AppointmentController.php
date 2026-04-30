@@ -76,12 +76,18 @@ class AppointmentController extends Controller
         $request->validate([
             'customer_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
+            'booking_for' => 'required|in:self,other',
+            'recipient_name' => 'nullable|required_if:booking_for,other|string|max:255',
+            'recipient_age' => 'nullable|required_if:booking_for,other|integer|min:0|max:120',
             'appointment_date' => 'required|date|after_or_equal:today',
             'start_time' => 'required|date_format:H:i',
             'notes' => 'nullable|string|max:500',
         ]);
 
         $service = Service::findOrFail($request->service_id);
+        $customer = User::findOrFail($request->customer_id);
+        $recipient = Appointment::recipientPayload($customer, $request->all());
+        $price = Appointment::priceForRecipient($service, $recipient['recipient_age']);
         $staffId = auth()->id();
 
         $start = Carbon::parse($request->appointment_date . ' ' . $request->start_time);
@@ -104,12 +110,15 @@ class AppointmentController extends Controller
 
         Appointment::create([
             'customer_id' => $request->customer_id,
+            'booking_for' => $recipient['booking_for'],
+            'recipient_name' => $recipient['recipient_name'],
+            'recipient_age' => $recipient['recipient_age'],
             'barber_id' => $staffId,
             'service_id' => $request->service_id,
             'appointment_date' => $request->appointment_date,
             'start_time' => $start->format('H:i:s'),
             'end_time' => $end->format('H:i:s'),
-            'price' => $service->price,
+            'price' => $price,
             'status' => 'pending_payment',
             'notes' => $request->notes,
         ]);

@@ -186,21 +186,23 @@
         --success: #48bb78;
         --danger: #f56565;
         --warning: #ed8936;
-        --radius: 12px;
+        --radius: 8px;
         --transition: all 0.3s ease;
     }
 
     .profile-container {
-        max-width: 900px;
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 30px;
     }
 
     .profile-header {
-        margin-bottom: 2rem;
+        margin-bottom: 26px;
     }
 
     .profile-header h2 {
-        font-size: 1.75rem;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         color: var(--primary);
         margin-bottom: 0.5rem;
     }
@@ -259,13 +261,13 @@
     .card {
         background: white;
         border-radius: var(--radius);
-        padding: 2rem;
+        padding: 24px;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     }
 
     .form-section {
-        margin-bottom: 2.5rem;
-        padding-bottom: 2rem;
+        margin-bottom: 26px;
+        padding-bottom: 24px;
         border-bottom: 1px solid var(--medium-gray);
     }
 
@@ -297,7 +299,7 @@
     .picture-section {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 2rem;
+        gap: 22px;
         margin-bottom: 1rem;
     }
 
@@ -329,7 +331,7 @@
     .upload-area {
         border: 2px dashed var(--medium-gray);
         border-radius: var(--radius);
-        padding: 2rem;
+        padding: 24px;
         text-align: center;
         cursor: pointer;
         transition: var(--transition);
@@ -372,7 +374,7 @@
     .form-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
+        gap: 20px;
     }
 
     .form-group {
@@ -447,19 +449,19 @@
 
     .form-actions {
         display: flex;
-        gap: 1rem;
+        gap: 12px;
         justify-content: flex-end;
-        margin-top: 2rem;
+        margin-top: 26px;
     }
 
     .btn {
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
+        padding: 11px 16px;
         border: none;
         border-radius: var(--radius);
-        font-weight: 600;
+        font-weight: 800;
         font-size: 0.9375rem;
         cursor: pointer;
         text-decoration: none;
@@ -490,7 +492,7 @@
 
     @media (max-width: 768px) {
         .card {
-            padding: 1.5rem;
+            padding: 20px;
         }
 
         .picture-section {

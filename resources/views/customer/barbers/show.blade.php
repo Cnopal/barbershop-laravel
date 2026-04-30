@@ -1,7 +1,7 @@
 @extends('customer.sidebar')
 
 @section('content')
-<div class="barber-detail-page">
+<div class="customer-page barber-detail-page">
     <!-- Back Button -->
     <div class="back-link">
         <a href="{{ route('customer.barbers.index') }}" class="btn-back">
@@ -205,10 +205,15 @@
     /* Profile Section */
     .profile-section {
         background: linear-gradient(135deg, var(--primary) 0%, #2d3748 100%);
+        display: flex;
+        min-height: 100%;
     }
 
     .profile-image-container {
-        height: 400px;
+        flex: 1;
+        width: 100%;
+        height: 100%;
+        min-height: 520px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -483,6 +488,7 @@
 
         .profile-image-container {
             height: 300px;
+            min-height: 300px;
         }
 
         .details-section {

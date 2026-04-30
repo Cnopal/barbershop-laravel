@@ -29,20 +29,74 @@
                         <!-- Customer Selection -->
                         <div class="form-group">
                             <label for="customer_id">Customer *</label>
+                            <input type="search"
+                                   id="customerSearch"
+                                   class="form-control customer-search-input"
+                                   placeholder="Search by name, email, or phone">
                             <select id="customer_id" name="customer_id" 
                                     class="form-control @error('customer_id') is-invalid @enderror"
                                     required>
                                 <option value="">Select Customer</option>
                                 @foreach($customers as $customer)
                                     <option value="{{ $customer->id }}" 
+                                            data-search="{{ strtolower($customer->name . ' ' . $customer->email . ' ' . ($customer->phone ?? '')) }}"
                                             {{ old('customer_id') == $customer->id ? 'selected' : '' }}>
-                                        {{ $customer->name }} ({{ $customer->email }})
+                                        {{ $customer->name }} ({{ $customer->email }}){{ $customer->phone ? ' - ' . $customer->phone : '' }}
                                     </option>
                                 @endforeach
                             </select>
                             @error('customer_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label>Appointment For *</label>
+                            <div class="recipient-options">
+                                <label class="recipient-option">
+                                    <input type="radio" name="booking_for" value="self" {{ old('booking_for', 'self') !== 'other' ? 'checked' : '' }}>
+                                    <span>Selected customer</span>
+                                </label>
+                                <label class="recipient-option">
+                                    <input type="radio" name="booking_for" value="other" {{ old('booking_for') === 'other' ? 'checked' : '' }}>
+                                    <span>Someone else</span>
+                                </label>
+                            </div>
+                            @error('booking_for')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="recipient-fields" id="recipientFields">
+                            <div class="recipient-field-grid">
+                                <div class="form-group">
+                                    <label for="recipient_name">Recipient Name</label>
+                                    <input type="text"
+                                           id="recipient_name"
+                                           name="recipient_name"
+                                           class="form-control @error('recipient_name') is-invalid @enderror"
+                                           value="{{ old('recipient_name') }}"
+                                           placeholder="Example: Adam">
+                                    @error('recipient_name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-group">
+                                    <label for="recipient_age">Age</label>
+                                    <input type="number"
+                                           id="recipient_age"
+                                           name="recipient_age"
+                                           class="form-control @error('recipient_age') is-invalid @enderror"
+                                           value="{{ old('recipient_age') }}"
+                                           min="0"
+                                           max="120"
+                                           placeholder="10">
+                                    @error('recipient_age')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">Children below 12 years old are charged RM15.</small>
                         </div>
 
                         <!-- Service Selection -->
@@ -153,7 +207,7 @@
                             @error('price')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                            <small class="form-text text-muted">Auto-calculated from service price</small>
+                            <small class="form-text text-muted">Auto-calculated from service price and recipient age</small>
                         </div>
 
                         <!-- Status -->
@@ -194,6 +248,10 @@
                             <div class="summary-item">
                                 <span class="summary-label">Customer:</span>
                                 <span class="summary-value" id="summaryCustomer">-</span>
+                            </div>
+                            <div class="summary-item">
+                                <span class="summary-label">For:</span>
+                                <span class="summary-value" id="summaryRecipient">-</span>
                             </div>
                             <div class="summary-item">
                                 <span class="summary-label">Service:</span>
@@ -254,10 +312,10 @@
         --warning-color: #ed8936;
         --danger-color: #f56565;
         --info-color: #4299e1;
-        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        --card-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
+        --hover-shadow: 0 12px 28px rgba(26, 31, 54, 0.10);
         --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        --border-radius: 12px;
+        --border-radius: 8px;
         --border-radius-sm: 8px;
     }
 
@@ -300,19 +358,13 @@
         scrollbar-color: var(--medium-gray) var(--light-gray);
     }
 
-    body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-        line-height: 1.6;
-        color: var(--primary-color);
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-        min-height: 100vh;
-    }
-
     /* Container */
     .container {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 30px;
+        color: var(--primary-color);
+        line-height: 1.6;
         animation: fadeIn 0.5s ease-out;
     }
 
@@ -332,10 +384,10 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 26px;
         flex-wrap: wrap;
-        gap: 20px;
-        padding: 20px 0;
+        gap: 16px;
+        padding: 0;
         border-bottom: 2px solid var(--accent-light);
     }
 
@@ -375,9 +427,9 @@
 
     /* Button Styles - Enhanced */
     .btn {
-        padding: 12px 28px;
+        padding: 11px 16px;
         border-radius: var(--border-radius-sm);
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         border: none;
         transition: var(--transition);
@@ -448,7 +500,7 @@
         box-shadow: var(--card-shadow);
         overflow: hidden;
         border: 1px solid var(--medium-gray);
-        margin-top: 20px;
+        margin-top: 0;
         position: relative;
         animation: slideUp 0.4s ease-out;
     }
@@ -476,7 +528,7 @@
 
     /* Form Cards - Enhanced */
     .form-card {
-        margin-bottom: 30px;
+        margin-bottom: 22px;
         border: 1px solid var(--medium-gray);
         border-radius: var(--border-radius-sm);
         overflow: hidden;
@@ -529,7 +581,50 @@
     }
 
     .form-card-body {
-        padding: 30px;
+        padding: 24px;
+    }
+
+    .recipient-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .customer-search-input {
+        margin-bottom: 10px;
+    }
+
+    .recipient-option {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 44px;
+        padding: 10px 14px;
+        border: 2px solid var(--medium-gray);
+        border-radius: var(--border-radius-sm);
+        background: var(--light-gray);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .recipient-option:has(input:checked) {
+        border-color: var(--accent-color);
+        background: var(--accent-light);
+    }
+
+    .recipient-fields {
+        display: none;
+    }
+
+    .recipient-fields.active {
+        display: block;
+    }
+
+    .recipient-field-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 16px;
     }
 
     /* Appointment Summary Styles */
@@ -582,7 +677,7 @@
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 30px;
+        gap: 22px;
     }
 
     @media (max-width: 992px) {
@@ -593,7 +688,7 @@
 
     /* Form Groups - Enhanced */
     .form-group {
-        margin-bottom: 28px;
+        margin-bottom: 22px;
         position: relative;
     }
 
@@ -668,11 +763,11 @@
 
     /* Form Actions - Enhanced */
     .form-actions {
-        padding: 30px;
+        padding: 24px;
         border-top: 1px solid var(--medium-gray);
         display: flex;
         justify-content: flex-end;
-        gap: 20px;
+        gap: 12px;
         background: linear-gradient(135deg, var(--light-gray) 0%, #f1f5f9 100%);
         position: relative;
     }
@@ -719,7 +814,7 @@
         background: linear-gradient(135deg, var(--primary-color) 0%, #2d3748 100%);
         color: white;
         padding: 20px 28px;
-        border-radius: 12px;
+        border-radius: 8px;
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
         display: flex;
         align-items: center;
@@ -854,8 +949,8 @@
         .page-header {
             flex-direction: column;
             align-items: stretch;
-            gap: 15px;
-            padding-bottom: 15px;
+            gap: 16px;
+            padding-bottom: 0;
         }
 
         .page-title {
@@ -875,7 +970,7 @@
         .form-actions {
             flex-direction: column;
             padding: 24px;
-            gap: 15px;
+            gap: 12px;
         }
 
         .form-actions .btn {
@@ -887,7 +982,7 @@
         }
 
         .btn {
-            padding: 12px 20px;
+            padding: 11px 16px;
         }
 
         .toast {
@@ -928,6 +1023,10 @@
         .summary-item.total .summary-value {
             font-size: 16px;
         }
+
+        .recipient-field-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     @media (max-width: 480px) {
@@ -953,6 +1052,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Form elements
     const customerSelect = document.getElementById('customer_id');
+    const customerSearch = document.getElementById('customerSearch');
     const serviceSelect = document.getElementById('service_id');
     const barberSelect = document.getElementById('barber_id');
     const dateInput = document.getElementById('appointment_date');
@@ -961,9 +1061,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const priceInput = document.getElementById('price');
     const statusSelect = document.getElementById('status');
     const notesInput = document.getElementById('notes');
+    const bookingForInputs = document.querySelectorAll('input[name="booking_for"]');
+    const recipientFields = document.getElementById('recipientFields');
+    const recipientNameInput = document.getElementById('recipient_name');
+    const recipientAgeInput = document.getElementById('recipient_age');
+    const childPrice = 15;
     
     // Summary elements
     const summaryCustomer = document.getElementById('summaryCustomer');
+    const summaryRecipient = document.getElementById('summaryRecipient');
     const summaryService = document.getElementById('summaryService');
     const summaryDuration = document.getElementById('summaryDuration');
     const summaryBarber = document.getElementById('summaryBarber');
@@ -1005,6 +1111,97 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    function isBookingForOther() {
+        return document.querySelector('input[name="booking_for"]:checked')?.value === 'other';
+    }
+
+    function updateRecipientFields() {
+        const other = isBookingForOther();
+        recipientFields?.classList.toggle('active', other);
+
+        if (recipientNameInput) {
+            recipientNameInput.required = other;
+        }
+
+        if (recipientAgeInput) {
+            recipientAgeInput.required = other;
+        }
+    }
+
+    function getRecipientSummary() {
+        if (isBookingForOther()) {
+            const name = recipientNameInput?.value.trim() || 'Someone else';
+            const age = recipientAgeInput?.value;
+            return age !== '' ? `${name} (${age} years old)` : name;
+        }
+
+        return selectedCustomer ? selectedCustomer.name : '-';
+    }
+
+    function calculateDisplayPrice() {
+        if (!selectedService) {
+            return null;
+        }
+
+        const age = parseInt(recipientAgeInput?.value || '', 10);
+
+        if (isBookingForOther() && !Number.isNaN(age) && age < 12) {
+            return childPrice;
+        }
+
+        return parseFloat(selectedService.price || '0');
+    }
+
+    function validateRecipient() {
+        if (!isBookingForOther()) {
+            return true;
+        }
+
+        if (!recipientNameInput?.value.trim()) {
+            recipientNameInput?.focus();
+            showToast('Please enter the recipient name', 'error');
+            return false;
+        }
+
+        const age = parseInt(recipientAgeInput?.value || '', 10);
+        if (Number.isNaN(age) || age < 0 || age > 120) {
+            recipientAgeInput?.focus();
+            showToast('Please enter a valid recipient age', 'error');
+            return false;
+        }
+
+        return true;
+    }
+
+    function filterCustomerOptions() {
+        if (!customerSearch || !customerSelect) {
+            return;
+        }
+
+        const query = customerSearch.value.trim().toLowerCase();
+        const selectedOption = customerSelect.options[customerSelect.selectedIndex];
+        let selectedStillVisible = !selectedOption?.value;
+
+        Array.from(customerSelect.options).forEach(option => {
+            if (!option.value) {
+                option.hidden = false;
+                return;
+            }
+
+            const matches = !query || (option.dataset.search || '').includes(query);
+            option.hidden = !matches;
+
+            if (option.selected && matches) {
+                selectedStillVisible = true;
+            }
+        });
+
+        if (!selectedStillVisible) {
+            customerSelect.value = '';
+            updateSummary();
+        }
+    }
+
     // Update summary when form changes
     function updateSummary() {
         // Customer
@@ -1016,6 +1213,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } : null;
         
         summaryCustomer.textContent = selectedCustomer ? selectedCustomer.name : '-';
+        summaryRecipient.textContent = getRecipientSummary();
         
         // Service
         const serviceOption = serviceSelect.options[serviceSelect.selectedIndex];
@@ -1063,7 +1261,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Price
         if (selectedService) {
-            const price = parseFloat(selectedService.price).toFixed(2);
+            const price = calculateDisplayPrice().toFixed(2);
             summaryPrice.textContent = 'RM' + price;
             priceInput.value = price;
         } else {
@@ -1107,6 +1305,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Customer selection change
     customerSelect.addEventListener('change', updateSummary);
+    customerSearch?.addEventListener('input', filterCustomerOptions);
+
+    bookingForInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            updateRecipientFields();
+            updateSummary();
+        });
+    });
+
+    recipientNameInput?.addEventListener('input', updateSummary);
+    recipientAgeInput?.addEventListener('input', updateSummary);
     
     // Status selection change
     statusSelect.addEventListener('change', updateSummary);
@@ -1207,8 +1416,6 @@ async function updateTimeSlots() {
         // (without the extra /admin prefix since we're already in the admin group)
         const url = `{{ route('admin.appointments.available-slots') }}?barber_id=${encodeURIComponent(barberId)}&date=${encodeURIComponent(date)}&service_id=${encodeURIComponent(serviceId)}`;
         
-        console.log('Fetching URL:', url); // Debug log
-        
         // Fetch available slots from the server with proper headers
         const response = await fetch(url, {
             headers: {
@@ -1218,14 +1425,11 @@ async function updateTimeSlots() {
             }
         });
         
-        console.log('Response status:', response.status); // Debug log
-        
         if (!response.ok) {
             throw new Error(`Server error: ${response.status} ${response.statusText}`);
         }
 
         const data = await response.json();
-        console.log('Received data:', data); // Debug log
 
         // Check for error response
         if (data.error) {
@@ -1338,6 +1542,11 @@ async function updateTimeSlots() {
                     if (errorDiv) errorDiv.remove();
                 }
             });
+
+            if (!validateRecipient()) {
+                isValid = false;
+                firstInvalidField = firstInvalidField || (isBookingForOther() ? recipientNameInput : null);
+            }
             
             if (!isValid) {
                 if (firstInvalidField) {
@@ -1435,6 +1644,18 @@ dateInput.addEventListener('change', function() {
     }
     
     // Initialize form state
+    if (serviceSelect.value) {
+        const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+        selectedService = {
+            id: selectedOption.value,
+            price: selectedOption.getAttribute('data-price'),
+            duration: parseInt(selectedOption.getAttribute('data-duration')),
+            name: selectedOption.text.split('-')[0].trim()
+        };
+    }
+
+    updateRecipientFields();
+    filterCustomerOptions();
     updateSummary();
     updateTimeSlots();
     

@@ -371,6 +371,18 @@
                 class="nav-item {{ request()->routeIs('staff.services.*') ? 'active' : '' }}">
                 <i class="fas fa-list"></i> Services
             </a>
+            <a href="{{ route('staff.products.index') }}"
+                class="nav-item {{ request()->routeIs('staff.products.*') ? 'active' : '' }}">
+                <i class="fas fa-box-open"></i> Products
+            </a>
+            <a href="{{ route('staff.product-orders.index') }}"
+                class="nav-item {{ request()->routeIs('staff.product-orders.*') ? 'active' : '' }}">
+                <i class="fas fa-truck"></i> Product Orders
+            </a>
+            <a href="{{ route('staff.pos.index') }}"
+                class="nav-item {{ request()->routeIs('staff.pos.*') ? 'active' : '' }}">
+                <i class="fas fa-cash-register"></i> P.O.S
+            </a>
         </nav>
 
         <div class="staff-profile-section">

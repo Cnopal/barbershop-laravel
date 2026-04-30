@@ -6,6 +6,7 @@ use Cloudinary\Cloudinary;
 use Cloudinary\Asset\Asset;
 use Cloudinary\Transformation\Resize;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Str;
 
 class CloudinaryService
 {
@@ -76,6 +77,61 @@ class CloudinaryService
         }
     }
 
+    public function uploadProductImage(UploadedFile $file, string $productName): ?string
+    {
+        return $this->uploadCatalogImage(
+            $file,
+            'barberpro/products',
+            'product_' . $this->safePublicId($productName),
+            [
+                'width' => 900,
+                'height' => 900,
+                'crop' => 'fill',
+                'gravity' => 'auto',
+            ],
+            'Product'
+        );
+    }
+
+    public function uploadServiceImage(UploadedFile $file, string $serviceName): ?string
+    {
+        return $this->uploadCatalogImage(
+            $file,
+            'barberpro/services',
+            'service_' . $this->safePublicId($serviceName),
+            [
+                'width' => 1000,
+                'height' => 700,
+                'crop' => 'fill',
+                'gravity' => 'auto',
+            ],
+            'Service'
+        );
+    }
+
+    private function uploadCatalogImage(UploadedFile $file, string $folder, string $publicId, array $options, string $label): ?string
+    {
+        try {
+            $response = $this->cloudinary->uploadApi()->upload($file->getRealPath(), array_merge([
+                'folder' => $folder,
+                'public_id' => $publicId . '_' . time(),
+                'resource_type' => 'auto',
+                'quality' => 'auto',
+                'fetch_format' => 'auto',
+            ], $options));
+
+            return $response['secure_url'] ?? null;
+        } catch (\Exception $e) {
+            \Log::error("Cloudinary {$label} Upload Error: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    private function safePublicId(string $name): string
+    {
+        return Str::slug($name) ?: 'image';
+    }
+
     /**
      * Delete image from Cloudinary by public_id
      *
@@ -101,14 +157,17 @@ class CloudinaryService
      */
     public function getPublicIdFromUrl(string $url): ?string
     {
-        // URL format: https://res.cloudinary.com/cloud_name/image/upload/v123456/folder/public_id.jpg
-        preg_match('/\/([^\/]+)\/([^\/]+)$/', parse_url($url, PHP_URL_PATH), $matches);
+        $path = parse_url($url, PHP_URL_PATH);
 
-        if (isset($matches[2])) {
-            return $matches[1] . '/' . pathinfo($matches[2], PATHINFO_FILENAME);
+        if (!$path || !str_contains($path, '/image/upload/')) {
+            return null;
         }
 
-        return null;
+        $publicPath = substr($path, strpos($path, '/image/upload/') + strlen('/image/upload/'));
+        $publicPath = preg_replace('#^v\d+/#', '', $publicPath);
+        $publicPath = preg_replace('/\.[^.\/]+$/', '', $publicPath);
+
+        return $publicPath ? ltrim($publicPath, '/') : null;
     }
 
     /**

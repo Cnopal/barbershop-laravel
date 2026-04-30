@@ -4,13 +4,35 @@
 
 @section('content')
 <style>
+    .staff-ui-page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 30px;
+        color: #1a1f36;
+    }
+
+    .staff-page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 26px;
+        flex-wrap: wrap;
+    }
+
+    .staff-page-header h1 {
+        margin: 0;
+        font-size: 32px;
+        font-weight: 800;
+        color: var(--primary);
+    }
+
     .form-container {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
         overflow: hidden;
         border: 1px solid var(--medium-gray);
-        margin-top: 20px;
         max-width: 600px;
     }
 
@@ -43,11 +65,11 @@
     }
 
     .form-card-body {
-        padding: 30px;
+        padding: 24px;
     }
 
     .form-group {
-        margin-bottom: 28px;
+        margin-bottom: 22px;
     }
 
     .form-group label {
@@ -126,18 +148,18 @@
     }
 
     .form-actions {
-        padding: 30px;
+        padding: 24px;
         border-top: 1px solid var(--medium-gray);
         display: flex;
         justify-content: flex-end;
-        gap: 20px;
+        gap: 12px;
         background: linear-gradient(135deg, var(--light-gray) 0%, #f1f5f9 100%);
     }
 
     .btn {
-        padding: 12px 28px;
+        padding: 11px 16px;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         border: none;
         transition: all 0.3s ease;
@@ -206,10 +228,23 @@
         opacity: 0.6;
         pointer-events: none;
     }
+
+    .field-error {
+        color: var(--danger);
+        margin-top: 6px;
+        font-size: 13px;
+    }
+
+    @media (max-width: 768px) {
+        .staff-ui-page {
+            padding: 20px;
+        }
+    }
 </style>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-    <h1 style="margin: 0; font-size: 28px;">Update Appointment Status</h1>
+<div class="staff-ui-page">
+<div class="staff-page-header">
+    <h1>Update Appointment Status</h1>
     <a href="{{ route('staff.appointments.show', $appointment->id) }}" class="btn btn-secondary">
         <i class="fas fa-arrow-left"></i> Back
     </a>
@@ -280,7 +315,7 @@
                         </option>
                     </select>
                     @error('status')
-                        <div style="color: var(--danger); margin-top: 6px; font-size: 13px;">{{ $message }}</div>
+                        <div class="field-error">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -297,7 +332,7 @@
                     <textarea id="notes" name="notes" class="form-control @error('notes') is-invalid @enderror" rows="4" placeholder="Add any special instructions or notes...">{{ old('notes', $appointment->notes) }}</textarea>
                     <small class="form-text">Maximum 500 characters</small>
                     @error('notes')
-                        <div style="color: var(--danger); margin-top: 6px; font-size: 13px;">{{ $message }}</div>
+                        <div class="field-error">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
@@ -312,5 +347,6 @@
             </button>
         </div>
     </form>
+</div>
 </div>
 @endsection

@@ -41,6 +41,15 @@
                             <span class="info-value">{{ $appointment->customer->name }}</span>
                         </div>
                         <div class="info-item">
+                            <span class="info-label">Appointment For:</span>
+                            <span class="info-value">
+                                {{ $appointment->recipient_display_name }}
+                                @if($appointment->recipient_age !== null)
+                                    ({{ $appointment->recipient_age }} years old)
+                                @endif
+                            </span>
+                        </div>
+                        <div class="info-item">
                             <span class="info-label">Email:</span>
                             <span class="info-value">{{ $appointment->customer->email }}</span>
                         </div>
@@ -69,7 +78,7 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">Price:</span>
-                            <span class="info-value price">RM{{ number_format($appointment->service->price, 2) }}</span>
+                            <span class="info-value price">RM{{ number_format($appointment->price, 2) }}</span>
                         </div>
                         @if($appointment->service->description)
                             <div class="info-item">
@@ -262,7 +271,7 @@
                             </div>
                             <div class="info-content">
                                 <div class="info-label">Total Cost</div>
-                                <div class="info-value">RM{{ number_format($appointment->service->price, 2) }}</div>
+                                <div class="info-value">RM{{ number_format($appointment->price, 2) }}</div>
                             </div>
                         </div>
                     </div>
@@ -288,16 +297,16 @@
         --info-color: #4299e1;
         --completed-color: #805ad5;
         --cancelled-color: #a0aec0;
-        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        --hover-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        --card-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
+        --hover-shadow: 0 12px 28px rgba(26, 31, 54, 0.10);
         --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-        --border-radius: 12px;
+        --border-radius: 8px;
         --border-radius-sm: 8px;
     }
 
     /* Container */
     .container {
-        max-width: auto;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 30px;
         animation: fadeIn 0.5s ease-out;
@@ -319,8 +328,8 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
-        padding: 20px 0;
+        margin-bottom: 26px;
+        padding: 0;
         border-bottom: 2px solid var(--accent-light);
     }
 
@@ -357,9 +366,9 @@
 
     /* Buttons */
     .btn {
-        padding: 12px 28px;
+        padding: 11px 16px;
         border-radius: var(--border-radius-sm);
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         border: none;
         transition: var(--transition);
@@ -391,7 +400,7 @@
     .content-grid {
         display: grid;
         grid-template-columns: 2fr 1fr;
-        gap: 30px;
+        gap: 22px;
     }
 
     @media (max-width: 1024px) {
@@ -403,11 +412,11 @@
     /* Cards */
     .details-card, .actions-card, .info-card {
         background: white;
-        border-radius: var(--border-radius);
+        border-radius: 8px;
         box-shadow: var(--card-shadow);
         overflow: hidden;
         border: 1px solid var(--medium-gray);
-        margin-bottom: 30px;
+        margin-bottom: 22px;
     }
 
     .card-header {
@@ -445,17 +454,21 @@
     }
 
     .card-body {
-        padding: 30px;
+        padding: 24px;
     }
 
     /* Info Grid */
     .info-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 30px;
+        gap: 22px;
     }
 
     @media (max-width: 768px) {
+        .container {
+            padding: 20px;
+        }
+
         .info-grid {
             grid-template-columns: 1fr;
         }
@@ -550,8 +563,8 @@
 
     /* Notes Section */
     .notes-section {
-        margin-top: 30px;
-        padding-top: 30px;
+        margin-top: 22px;
+        padding-top: 22px;
         border-top: 2px solid var(--light-gray);
     }
 

@@ -5,9 +5,14 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Service;
+use App\Services\CloudinaryService;
 
 class ServiceController extends Controller
 {
+    public function __construct(private CloudinaryService $cloudinaryService)
+    {
+    }
+
     public function index()
     {
         $services = Service::paginate(10);
@@ -21,15 +26,21 @@ class ServiceController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
-            'status' => 'required|in:active,inactive',
-        ]);
+        $validated = $this->validatedService($request);
 
-        Service::create($request->all());
+        if ($request->hasFile('image')) {
+            $imageUrl = $this->cloudinaryService->uploadServiceImage($request->file('image'), $validated['name']);
+
+            if (!$imageUrl) {
+                return back()
+                    ->withErrors(['image' => 'Failed to upload service image to Cloudinary.'])
+                    ->withInput();
+            }
+
+            $validated['image_url'] = $imageUrl;
+        }
+
+        Service::create($validated);
 
         return redirect()->route('admin.services.index')->with('success', 'Service created successfully.');
     }
@@ -55,22 +66,59 @@ class ServiceController extends Controller
 
     public function update(Request $request, Service $service)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'duration' => 'required|integer|min:1',
-            'status' => 'required|in:active,inactive',
-        ]);
+        $validated = $this->validatedService($request);
 
-        $service->update($request->all());
+        if ($request->hasFile('image')) {
+            $imageUrl = $this->cloudinaryService->uploadServiceImage($request->file('image'), $validated['name']);
+
+            if (!$imageUrl) {
+                return back()
+                    ->withErrors(['image' => 'Failed to upload service image to Cloudinary.'])
+                    ->withInput();
+            }
+
+            $this->deleteCloudinaryImage($service->image_url);
+            $validated['image_url'] = $imageUrl;
+        }
+
+        $service->update($validated);
 
         return redirect()->route('admin.services.index')->with('success', 'Service updated successfully.');
     }
 
     public function destroy(Service $service)
     {
+        $this->deleteCloudinaryImage($service->image_url);
         $service->delete();
         return redirect()->route('admin.services.index')->with('success', 'Service deleted successfully.');
+    }
+
+    private function validatedService(Request $request): array
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:5120',
+            'price' => 'required|numeric|min:0',
+            'duration' => 'required|integer|min:1',
+            'status' => 'required|in:active,inactive',
+        ]);
+
+        unset($validated['image']);
+
+        return $validated;
+    }
+
+    private function deleteCloudinaryImage(?string $imageUrl): void
+    {
+        if (!$imageUrl) {
+            return;
+        }
+
+        $publicId = $this->cloudinaryService->getPublicIdFromUrl($imageUrl);
+
+        if ($publicId) {
+            $this->cloudinaryService->deleteImage($publicId);
+        }
     }
 }

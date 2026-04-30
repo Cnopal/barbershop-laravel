@@ -26,7 +26,7 @@
                 <div class="profile-header">
                     <div class="profile-avatar-large">
                         @if($staff->profile_image)
-                            <img src="{{ Storage::url($staff->profile_image) }}" alt="{{ $staff->name }}">
+                            <img src="{{ $staff->profile_image }}" alt="{{ $staff->name }}">
                         @else
                             <div class="avatar-initials">{{ strtoupper(substr($staff->name, 0, 2)) }}</div>
                         @endif
@@ -315,7 +315,7 @@
 
         /* Container */
         .container {
-            max-width: 1200px;
+            max-width: 1500px;
             margin: 0 auto;
             padding: 30px;
         }
@@ -325,7 +325,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 26px;
             flex-wrap: wrap;
             gap: 20px;
         }
@@ -351,7 +351,7 @@
 
         /* Button Styles */
         .btn {
-            padding: 12px 24px;
+            padding: 11px 16px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
@@ -402,7 +402,7 @@
         /* Main Container */
         .barber-show-container {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 8px;
             box-shadow: var(--card-shadow);
             overflow: hidden;
         }
@@ -572,7 +572,7 @@
         .info-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 25px;
+            gap: 22px;
             padding: 40px;
         }
 
@@ -617,7 +617,7 @@
         }
 
         .info-card-body {
-            padding: 25px;
+            padding: 24px;
         }
 
         /* Info Rows */
@@ -668,7 +668,7 @@
         .stat-icon {
             width: 50px;
             height: 50px;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -837,7 +837,7 @@
 
         .modal-content {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 8px;
             width: 90%;
             max-width: 500px;
             max-height: 90vh;
@@ -846,7 +846,7 @@
         }
 
         .modal-body {
-            padding: 25px;
+            padding: 24px;
         }
 
         .modal-footer {
@@ -953,7 +953,7 @@
             }
 
             .profile-card {
-                padding: 25px;
+                padding: 20px;
             }
 
             .info-card-body {

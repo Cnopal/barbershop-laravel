@@ -45,12 +45,13 @@ class AppointmentController extends Controller
 
             return [
                 'id' => $appointment->id,
-                'title' => $appointment->customer->name . ' - ' . $appointment->service->name,
+                'title' => $appointment->recipient_display_name . ' - ' . $appointment->service->name,
                 'start' => $start,
                 'end' => $end,
                 'color' => $color,
                 'extendedProps' => [
                     'customer' => $appointment->customer->name,
+                    'recipient' => $appointment->recipient_display_name,
                     'barber' => $appointment->barber->name,
                     'service' => $appointment->service->name,
                     'status' => $appointment->status,
@@ -87,11 +88,19 @@ class AppointmentController extends Controller
             'customer_id' => 'required|exists:users,id',
             'barber_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
+            'booking_for' => 'required|in:self,other',
+            'recipient_name' => 'nullable|required_if:booking_for,other|string|max:255',
+            'recipient_age' => 'nullable|required_if:booking_for,other|integer|min:0|max:120',
             'appointment_date' => 'required|date',
             'start_time' => 'required|date_format:H:i',
+            'status' => 'required|in:pending_payment,confirmed',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         $service = Service::findOrFail($request->service_id);
+        $customer = User::findOrFail($request->customer_id);
+        $recipient = Appointment::recipientPayload($customer, $request->all());
+        $price = Appointment::priceForRecipient($service, $recipient['recipient_age']);
 
         $start = Carbon::parse($request->appointment_date . ' ' . $request->start_time);
         $end = $start->copy()->addMinutes($service->duration);
@@ -115,13 +124,17 @@ class AppointmentController extends Controller
 
         Appointment::create([
             'customer_id' => $request->customer_id,
+            'booking_for' => $recipient['booking_for'],
+            'recipient_name' => $recipient['recipient_name'],
+            'recipient_age' => $recipient['recipient_age'],
             'barber_id' => $request->barber_id,
             'service_id' => $request->service_id,
             'appointment_date' => $request->appointment_date,
             'start_time' => $start->format('H:i:s'),
             'end_time' => $end->format('H:i:s'),
-            'price' => $service->price,
+            'price' => $price,
             'status' => $request->status, // set pending by default for payment later
+            'notes' => $request->notes,
         ]);
 
         return redirect()
@@ -162,12 +175,19 @@ class AppointmentController extends Controller
             'customer_id' => 'required|exists:users,id',
             'barber_id' => 'required|exists:users,id',
             'service_id' => 'required|exists:services,id',
+            'booking_for' => 'nullable|in:self,other',
+            'recipient_name' => 'nullable|required_if:booking_for,other|string|max:255',
+            'recipient_age' => 'nullable|required_if:booking_for,other|integer|min:0|max:120',
             'appointment_date' => 'required',
             'start_time' => 'required|date_format:H:i',
             'status' => 'required|in:pending_payment,confirmed,completed,cancelled',
+            'notes' => 'nullable|string|max:500',
         ]);
 
         $service = Service::findOrFail($request->service_id);
+        $customer = User::findOrFail($request->customer_id);
+        $recipient = Appointment::recipientPayload($customer, $request->all(), $appointment);
+        $price = Appointment::priceForRecipient($service, $recipient['recipient_age']);
 
         // 🔥 FIX: normalize appointment_date (remove time if exists)
         $dateOnly = Carbon::parse($request->appointment_date)->format('Y-m-d');
@@ -199,12 +219,15 @@ class AppointmentController extends Controller
 
         $appointment->update([
             'customer_id' => $request->customer_id,
+            'booking_for' => $recipient['booking_for'],
+            'recipient_name' => $recipient['recipient_name'],
+            'recipient_age' => $recipient['recipient_age'],
             'barber_id' => $request->barber_id,
             'service_id' => $request->service_id,
             'appointment_date' => $dateOnly,
             'start_time' => $start->format('H:i:s'),
             'end_time' => $end->format('H:i:s'),
-            'price' => $service->price,
+            'price' => $price,
             'status' => $request->status,
             'notes' => $request->notes,
         ]);

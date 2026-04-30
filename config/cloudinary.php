@@ -9,6 +9,8 @@ return [
     'folders' => [
         'profile_images' => 'barberpro/profile_images',
         'gallery' => 'barberpro/gallery',
+        'products' => 'barberpro/products',
+        'services' => 'barberpro/services',
         'appointments' => 'barberpro/appointments',
         'temporary' => 'barberpro/temp',
     ],

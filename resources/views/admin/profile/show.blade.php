@@ -142,16 +142,18 @@
     }
 
     .profile-container {
-        max-width: 1000px;
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 30px;
     }
 
     .profile-header {
-        margin-bottom: 2rem;
+        margin-bottom: 26px;
     }
 
     .profile-header h2 {
-        font-size: 1.75rem;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         color: var(--primary);
         margin-bottom: 0.5rem;
     }
@@ -163,27 +165,27 @@
 
     .profile-card {
         background: white;
-        border-radius: 12px;
+        border-radius: 8px;
         box-shadow: var(--card-shadow);
         overflow: hidden;
-        margin-bottom: 2rem;
+        margin-bottom: 26px;
     }
 
     .card-header {
         background: linear-gradient(135deg, var(--primary) 0%, #2d3748 100%);
         color: white;
-        padding: 2rem;
+        padding: 24px;
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        gap: 2rem;
+        gap: 22px;
     }
 
     .avatar-section {
         display: flex;
         align-items: center;
-        gap: 1.5rem;
+        gap: 16px;
     }
 
     .avatar-large {
@@ -216,12 +218,12 @@
         display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
+        padding: 11px 16px;
         background-color: var(--accent);
         color: var(--primary);
         border: none;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 800;
         text-decoration: none;
         cursor: pointer;
         transition: var(--transition);
@@ -237,14 +239,14 @@
     .info-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-        gap: 1.5rem;
-        padding: 2rem;
+        gap: 20px;
+        padding: 24px;
     }
 
     .info-card {
         display: flex;
-        gap: 1rem;
-        padding: 1.5rem;
+        gap: 12px;
+        padding: 20px;
         background-color: var(--light-gray);
         border-radius: 8px;
         transition: var(--transition);
@@ -301,16 +303,16 @@
     .stats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
+        gap: 20px;
     }
 
     .stat-box {
         background: white;
-        border-radius: 12px;
-        padding: 1.5rem;
+        border-radius: 8px;
+        padding: 20px;
         box-shadow: var(--card-shadow);
         display: flex;
-        gap: 1.5rem;
+        gap: 16px;
         align-items: center;
         transition: var(--transition);
     }
@@ -323,7 +325,7 @@
     .stat-icon {
         width: 60px;
         height: 60px;
-        border-radius: 12px;
+        border-radius: 8px;
         background: linear-gradient(135deg, var(--accent) 0%, #c19a2f 100%);
         display: flex;
         align-items: center;

@@ -224,7 +224,7 @@
 
     /* Container */
     .container {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 30px;
     }
@@ -234,7 +234,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 26px;
         flex-wrap: wrap;
         gap: 20px;
     }
@@ -247,7 +247,7 @@
     
     /* Button Styles */
     .btn {
-        padding: 12px 24px;
+        padding: 11px 16px;
         border-radius: 8px;
         font-weight: 600;
         cursor: pointer;
@@ -284,7 +284,7 @@
     /* Form Container */
     .form-container {
         background-color: white;
-        border-radius: 10px;
+        border-radius: 8px;
         box-shadow: var(--card-shadow);
         overflow: hidden;
     }
@@ -317,14 +317,14 @@
     }
     
     .form-card-body {
-        padding: 25px;
+        padding: 24px;
     }
     
     /* Form Grid */
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 25px;
+        gap: 22px;
     }
     
     @media (max-width: 992px) {
@@ -517,7 +517,7 @@
     
     /* Form Actions */
     .form-actions {
-        padding: 25px;
+        padding: 24px;
         border-top: 1px solid var(--medium-gray);
         display: flex;
         justify-content: flex-end;

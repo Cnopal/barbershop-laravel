@@ -19,25 +19,32 @@
         --transition: all 0.3s ease;
     }
 
+    .staff-ui-page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 30px;
+        color: #1a1f36;
+    }
+
     .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
-        gap: 1rem;
+        margin-bottom: 26px;
+        gap: 16px;
     }
 
     .page-header h2 {
-        font-size: 1.75rem;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         color: var(--primary);
         margin: 0;
     }
 
     .btn {
-        padding: 0.75rem 1.5rem;
+        padding: 11px 16px;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         border: none;
         transition: var(--transition);
@@ -60,8 +67,9 @@
 
     .appointments-container {
         background: white;
-        border-radius: 12px;
-        box-shadow: var(--card-shadow);
+        border: 1px solid var(--medium-gray);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
         overflow: hidden;
     }
 
@@ -181,10 +189,11 @@
 
     .empty-state {
         background: white;
-        border-radius: 12px;
-        padding: 3rem 2rem;
+        border: 1px solid var(--medium-gray);
+        border-radius: 8px;
+        padding: 40px 20px;
         text-align: center;
-        box-shadow: var(--card-shadow);
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
     }
 
     .empty-state i {
@@ -205,7 +214,22 @@
         margin-bottom: 1.5rem;
     }
 
+    .pagination-wrap {
+        margin-top: 26px;
+        display: flex;
+        justify-content: center;
+    }
+
+    .inline-delete-form {
+        display: inline;
+        margin: 0;
+    }
+
     @media (max-width: 768px) {
+        .staff-ui-page {
+            padding: 20px;
+        }
+
         .page-header {
             flex-direction: column;
             align-items: flex-start;
@@ -230,6 +254,7 @@
     }
 </style>
 
+<div class="staff-ui-page">
 <div class="page-header">
     <h2>My Appointments</h2>
     <a href="{{ route('staff.appointments.create') }}" class="btn btn-primary">
@@ -256,6 +281,12 @@
                         <td>
                             <div class="appointment-customer">{{ $appointment->customer->name }}</div>
                             <div class="appointment-meta">{{ $appointment->customer->email }}</div>
+                            <div class="appointment-meta">
+                                For: {{ $appointment->recipient_display_name }}
+                                @if($appointment->recipient_age !== null)
+                                    ({{ $appointment->recipient_age }})
+                                @endif
+                            </div>
                         </td>
                         <td>{{ $appointment->service->name }}</td>
                         <td>
@@ -269,7 +300,7 @@
                                 <a href="{{ route('staff.appointments.show', $appointment->id) }}" class="btn btn-sm btn-info" title="View">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <form action="{{ route('staff.appointments.destroy', $appointment->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Are you sure?')">
+                                <form action="{{ route('staff.appointments.destroy', $appointment->id) }}" method="POST" class="inline-delete-form" onsubmit="return confirm('Are you sure?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger" title="Delete">
@@ -284,7 +315,7 @@
         </table>
     </div>
 
-    <div style="margin-top: 2rem; display: flex; justify-content: center;">
+    <div class="pagination-wrap">
         {{ $appointments->links() }}
     </div>
 @else
@@ -297,4 +328,5 @@
         </a>
     </div>
 @endif
+</div>
 @endsection

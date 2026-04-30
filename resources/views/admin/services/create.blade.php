@@ -16,7 +16,7 @@
 
     <!-- Form Container -->
     <div class="form-container">
-        <form action="{{ route('admin.services.store') }}" method="POST" id="createServiceForm">
+        <form action="{{ route('admin.services.store') }}" method="POST" enctype="multipart/form-data" id="createServiceForm">
             @csrf
             
             <div class="form-row">
@@ -114,6 +114,17 @@
                             @enderror
                             <small class="form-text text-muted">Optional: Detailed description helps customers understand the service better</small>
                         </div>
+
+                        <div class="form-group">
+                            <label for="image" class="optional">Service Photo</label>
+                            <input type="file" id="image" name="image"
+                                   class="form-control @error('image') is-invalid @enderror"
+                                   accept="image/*">
+                            @error('image')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                            <small class="form-text text-muted">Optional: JPG, PNG, WEBP, or GIF. Images are saved to Cloudinary.</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -146,7 +157,7 @@
                                 <span>Duration:</span>
                                 <span id="previewDuration">30 min</span>
                             </div>
-                            <div class="preview-row full-width" id="descriptionPreviewRow" style="display: none;">
+                            <div class="preview-row full-width is-hidden" id="descriptionPreviewRow">
                                 <span>Description:</span>
                                 <p id="previewDescription"></p>
                             </div>
@@ -191,7 +202,7 @@
 
     /* Container */
     .container {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 30px;
     }
@@ -201,9 +212,9 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 26px;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 16px;
     }
     
     .header-left, .header-center {
@@ -218,16 +229,16 @@
     
     .page-title {
         font-size: 32px;
-        font-weight: 700;
+        font-weight: 800;
         color: var(--primary-color);
         margin: 0;
     }
     
     /* Button Styles */
     .btn {
-        padding: 12px 24px;
+        padding: 11px 16px;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         border: none;
         transition: var(--transition);
@@ -267,14 +278,15 @@
     /* Form Container */
     .form-container {
         background-color: white;
-        border-radius: 10px;
-        box-shadow: var(--card-shadow);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
         overflow: hidden;
+        border: 1px solid var(--medium-gray);
     }
     
     /* Form Cards */
     .form-card {
-        margin-bottom: 25px;
+        margin-bottom: 22px;
         border: 1px solid var(--medium-gray);
         border-radius: 8px;
         overflow: hidden;
@@ -300,14 +312,14 @@
     }
     
     .form-card-body {
-        padding: 25px;
+        padding: 24px;
     }
     
     /* Form Grid */
     .form-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 25px;
+        gap: 22px;
     }
     
     @media (max-width: 992px) {
@@ -318,7 +330,7 @@
     
     /* Form Groups */
     .form-group {
-        margin-bottom: 25px;
+        margin-bottom: 22px;
     }
     
     .form-group label {
@@ -415,7 +427,7 @@
     .service-preview {
         background-color: var(--light-gray);
         border-radius: 8px;
-        padding: 25px;
+        padding: 24px;
         border: 2px dashed var(--medium-gray);
     }
     
@@ -429,7 +441,7 @@
     .preview-icon {
         width: 60px;
         height: 60px;
-        border-radius: 12px;
+        border-radius: 8px;
         background-color: rgba(212, 175, 55, 0.1);
         display: flex;
         align-items: center;
@@ -437,6 +449,13 @@
         color: var(--accent-color);
         font-size: 24px;
         flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .preview-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     
     .preview-info h4 {
@@ -519,11 +538,11 @@
     
     /* Form Actions */
     .form-actions {
-        padding: 25px;
+        padding: 24px;
         border-top: 1px solid var(--medium-gray);
         display: flex;
         justify-content: flex-end;
-        gap: 15px;
+        gap: 12px;
         background-color: var(--light-gray);
     }
     
@@ -626,6 +645,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const durationInput = document.getElementById('duration');
     const statusSelect = document.getElementById('status');
     const descriptionInput = document.getElementById('description');
+    const imageInput = document.getElementById('image');
+    let selectedImageData = null;
     
     // Preview elements
     const previewIcon = document.getElementById('previewIcon');
@@ -708,6 +729,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Update service icon based on name
     function updateServiceIcon() {
+        if (selectedImageData) {
+            previewIcon.innerHTML = `<img src="${selectedImageData}" alt="Service image preview">`;
+            return;
+        }
+
         const serviceName = nameInput.value.toLowerCase();
         let selectedIcon = 'fas fa-cut'; // Default icon
         
@@ -728,6 +754,24 @@ document.addEventListener('DOMContentLoaded', function() {
     if (durationInput) durationInput.addEventListener('input', updatePreview);
     if (statusSelect) statusSelect.addEventListener('change', updatePreview);
     if (descriptionInput) descriptionInput.addEventListener('input', updatePreview);
+    if (imageInput) {
+        imageInput.addEventListener('change', function() {
+            const file = this.files?.[0];
+
+            if (!file) {
+                selectedImageData = null;
+                updatePreview();
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                selectedImageData = event.target.result;
+                updatePreview();
+            };
+            reader.readAsDataURL(file);
+        });
+    }
     
     // Initialize preview
     updatePreview();

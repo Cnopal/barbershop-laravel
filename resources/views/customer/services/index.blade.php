@@ -2,7 +2,7 @@
 
 
 @section('content')
-<div class="services-page">
+<div class="customer-page services-page">
     <!-- Page Header -->
     <div class="page-header">
         <h1>Our Services</h1>
@@ -15,6 +15,9 @@
         <div class="service-card" data-status="{{ $service->status }}">
             <div class="service-header">
                 <div class="service-icon">
+                    @if($service->image_url)
+                        <img src="{{ $service->image_url }}" alt="{{ $service->name }}">
+                    @else
                     @php
                         $icon = 'fas fa-cut';
                         $nameLower = strtolower($service->name);
@@ -35,6 +38,7 @@
                         }
                     @endphp
                     <i class="{{ $icon }}"></i>
+                    @endif
                 </div>
                 
                 <div class="service-info">
@@ -139,20 +143,28 @@
         --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-        --radius: 12px;
+        --shadow-xl: 0 24px 60px rgba(26, 31, 54, 0.18);
+        --radius: 8px;
         --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .services-page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 30px;
+        color: #1a1f36;
     }
 
     /* Page Header */
     .page-header {
         text-align: center;
-        margin-bottom: 3rem;
-        padding: 0 1rem;
+        margin-bottom: 26px;
+        padding: 0;
     }
 
     .page-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         color: var(--primary);
         margin-bottom: 1rem;
         line-height: 1.2;
@@ -169,15 +181,15 @@
     /* Services Container */
     .services-container {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 2rem;
-        margin-bottom: 4rem;
+        grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+        gap: 20px;
+        margin-bottom: 26px;
     }
 
     /* Service Card */
     .service-card {
         background: white;
-        border-radius: var(--radius);
+        border-radius: 8px;
         overflow: hidden;
         box-shadow: var(--shadow);
         transition: var(--transition);
@@ -194,7 +206,7 @@
     }
 
     .service-header {
-        padding: 1.5rem;
+        padding: 24px;
         background: linear-gradient(135deg, var(--primary) 0%, #2d3748 100%);
         color: white;
         position: relative;
@@ -212,6 +224,13 @@
         margin-bottom: 1rem;
         color: var(--accent);
         font-size: 1.75rem;
+        overflow: hidden;
+    }
+
+    .service-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .service-info {
@@ -475,15 +494,28 @@
     }
 
     .modal-body {
-        padding: 2rem;
+        padding: 24px;
     }
 
     /* Service Details in Modal */
+    #serviceDetails .service-modal-heading {
+        text-align: center;
+        margin-bottom: 22px;
+    }
+
     #serviceDetails .service-icon {
         width: 80px;
         height: 80px;
         font-size: 2rem;
-        margin: 0 auto 1.5rem;
+        margin: 0 auto 22px;
+        background: linear-gradient(135deg, var(--accent) 0%, #c19a2f 100%);
+        color: var(--primary);
+    }
+
+    #serviceDetails .service-icon img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     #serviceDetails h3 {
@@ -495,27 +527,32 @@
 
     #serviceDetails .status-badge {
         display: inline-block;
-        margin: 0 auto 1.5rem;
+        margin: 0 auto 22px;
+    }
+
+    #serviceDetails .service-badge {
+        display: inline-block;
+        margin-bottom: 22px;
     }
 
     #serviceDetails .service-description {
         font-size: 1rem;
         line-height: 1.7;
         color: var(--secondary);
-        margin-bottom: 2rem;
+        margin-bottom: 22px;
     }
 
     #serviceDetails .details-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
-        margin-bottom: 2rem;
+        gap: 16px;
+        margin-bottom: 22px;
     }
 
     #serviceDetails .detail-card {
         background: var(--light-gray);
         border-radius: var(--radius);
-        padding: 1.25rem;
+        padding: 20px;
         text-align: center;
     }
 
@@ -537,11 +574,19 @@
 
     #serviceDetails .modal-footer {
         display: flex;
-        gap: 1rem;
+        gap: 12px;
+    }
+
+    #serviceDetails .modal-primary-action {
+        flex: 2;
     }
 
     /* Responsive Design */
     @media (max-width: 768px) {
+        .services-page {
+            padding: 20px;
+        }
+
         .page-header h1 {
             font-size: 2rem;
         }
@@ -552,7 +597,7 @@
 
         .services-container {
             grid-template-columns: 1fr;
-            gap: 1.5rem;
+            gap: 20px;
         }
 
         .service-footer {
@@ -590,7 +635,7 @@
         }
 
         .modal-body {
-            padding: 1.5rem;
+            padding: 24px;
         }
     }
 
@@ -625,14 +670,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const serviceModal = document.getElementById('serviceModal');
     const modalClose = document.getElementById('modalClose');
     const serviceDetails = document.getElementById('serviceDetails');
+
+    if (!serviceModal || !modalClose || !serviceDetails) {
+        return;
+    }
     
     // Mock service data (in real app, this would come from backend)
     const servicesData = {
         @foreach($services as $service)
         {{ $service->id }}: {
             id: {{ $service->id }},
-            name: "{{ $service->name }}",
-            description: "{{ $service->description }}",
+            name: @json($service->name),
+            description: @json($service->description),
+            imageUrl: @json($service->image_url),
             price: "{{ number_format($service->price, 2) }}",
             duration: {{ $service->duration }},
             status: "{{ $service->status }}",
@@ -681,14 +731,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const service = servicesData[serviceId];
             
             if (service) {
+                const serviceMedia = service.imageUrl
+                    ? `<img src="${service.imageUrl}" alt="${service.name}">`
+                    : `<i class="${service.iconClass()}"></i>`;
+
                 // Populate modal with service details
                 serviceDetails.innerHTML = `
-                    <div style="text-align: center; margin-bottom: 2rem;">
-                        <div class="service-icon" style="width: 80px; height: 80px; font-size: 2rem; margin: 0 auto 1.5rem; background: linear-gradient(135deg, var(--accent) 0%, #c19a2f 100%); color: var(--primary);">
-                            <i class="${service.iconClass()}"></i>
+                    <div class="service-modal-heading">
+                        <div class="service-icon">
+                            ${serviceMedia}
                         </div>
                         <h3>${service.name}</h3>
-                        <span class="service-badge ${service.statusClass()}" style="display: inline-block; margin-bottom: 1.5rem;">
+                        <span class="service-badge ${service.statusClass()}">
                             ${service.statusText()}
                         </span>
                     </div>
@@ -715,11 +769,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     <div class="modal-footer">
                         ${service.status === 'active' ? `
-                        <a href="/customer/appointments/create?service=${service.id}" class="btn btn-primary" style="flex: 2;">
+                        <a href="/customer/appointments/create?service=${service.id}" class="btn btn-primary modal-primary-action">
                             <i class="fas fa-calendar-plus"></i> Book This Service
                         </a>
                         ` : `
-                        <button class="btn btn-secondary" disabled style="flex: 2;">
+                        <button class="btn btn-secondary modal-primary-action" disabled>
                             <i class="fas fa-ban"></i> Currently Unavailable
                         </button>
                         `}
@@ -798,7 +852,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Insert filter buttons after page header
     const pageHeader = document.querySelector('.page-header');
-    pageHeader.insertAdjacentElement('afterend', filterButtons);
+    if (pageHeader) {
+        pageHeader.insertAdjacentElement('afterend', filterButtons);
+    }
     
     // Filter functionality
     document.querySelectorAll('[data-filter]').forEach(button => {

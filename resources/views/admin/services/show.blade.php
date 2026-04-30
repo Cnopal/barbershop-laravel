@@ -24,6 +24,9 @@
         <!-- Service Header -->
         <div class="service-header-card">
             <div class="service-icon-large">
+                @if($service->image_url)
+                    <img src="{{ $service->image_url }}" alt="{{ $service->name }}">
+                @else
                 @php
                     // Determine icon based on service name
                     $nameLower = strtolower($service->name);
@@ -41,6 +44,7 @@
                     }
                 @endphp
                 <i class="{{ $icon }}"></i>
+                @endif
             </div>
             
             <div class="service-header-info">
@@ -253,7 +257,7 @@
 
     /* Container */
     .container {
-        max-width: 1200px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 30px;
     }
@@ -263,9 +267,9 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 26px;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 16px;
     }
     
     .header-left, .header-center, .header-right {
@@ -280,16 +284,16 @@
     
     .page-title {
         font-size: 32px;
-        font-weight: 700;
+        font-weight: 800;
         color: var(--primary-color);
         margin: 0;
     }
     
     /* Button Styles */
     .btn {
-        padding: 12px 24px;
+        padding: 11px 16px;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         border: none;
         transition: var(--transition);
@@ -338,19 +342,20 @@
     /* Service Show Container */
     .service-show-container {
         background-color: white;
-        border-radius: 10px;
-        box-shadow: var(--card-shadow);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
         overflow: hidden;
+        border: 1px solid var(--medium-gray);
     }
     
     /* Service Header Card */
     .service-header-card {
-        padding: 40px;
+        padding: 24px;
         border-bottom: 1px solid var(--medium-gray);
         background: linear-gradient(135deg, var(--light-gray) 0%, white 100%);
         display: flex;
         align-items: center;
-        gap: 30px;
+        gap: 22px;
     }
     
     .service-icon-large {
@@ -364,6 +369,13 @@
         color: var(--accent-color);
         font-size: 40px;
         flex-shrink: 0;
+        overflow: hidden;
+    }
+
+    .service-icon-large img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
     
     .service-header-info {
@@ -421,8 +433,8 @@
     .details-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 25px;
-        padding: 40px;
+        gap: 22px;
+        padding: 24px;
     }
     
     @media (max-width: 992px) {
@@ -466,14 +478,14 @@
     }
     
     .detail-card-body {
-        padding: 25px;
+        padding: 24px;
     }
     
     /* Statistics */
     .stat-row {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 20px;
+        gap: 16px;
     }
     
     @media (max-width: 768px) {
@@ -500,7 +512,7 @@
     .stat-icon {
         width: 50px;
         height: 50px;
-        border-radius: 10px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -637,11 +649,11 @@
     
     /* Action Buttons */
     .action-buttons {
-        padding: 30px 40px;
+        padding: 24px;
         border-top: 1px solid var(--medium-gray);
         display: flex;
         justify-content: center;
-        gap: 15px;
+        gap: 12px;
         background-color: var(--light-gray);
     }
     
@@ -670,7 +682,7 @@
     
     .modal-content {
         background-color: white;
-        border-radius: 10px;
+        border-radius: 8px;
         width: 90%;
         max-width: 500px;
         max-height: 90vh;
@@ -679,15 +691,15 @@
     }
     
     .modal-body {
-        padding: 25px;
+        padding: 24px;
     }
     
     .modal-footer {
-        padding: 15px 25px 25px;
+        padding: 16px 24px 24px;
         border-top: 1px solid var(--medium-gray);
         display: flex;
         justify-content: flex-end;
-        gap: 15px;
+        gap: 12px;
     }
     
     .delete-icon {
@@ -733,7 +745,7 @@
         .service-header-card {
             flex-direction: column;
             text-align: center;
-            padding: 30px;
+            padding: 24px;
         }
         
         .service-icon-large {

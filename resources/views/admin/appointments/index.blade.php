@@ -82,7 +82,7 @@
                         @endphp
 
                         <div class="table-row" data-id="{{ $appointment->id }}"
-                            data-customer="{{ strtolower($appointment->customer->name) }}"
+                            data-customer="{{ strtolower($appointment->customer->name . ' ' . $appointment->recipient_display_name) }}"
                             data-barber="{{ strtolower($appointment->barber->name) }}"
                             data-service="{{ strtolower($appointment->service->name) }}"
                             data-date="{{ $appointment->appointment_date->format('Y-m-d') }}"
@@ -91,6 +91,12 @@
                                 <div class="customer-info">
                                     <div class="customer-name">{{ $appointment->customer->name }}</div>
                                     <div class="customer-email">{{ $appointment->customer->email }}</div>
+                                    <div class="customer-email">
+                                        For: {{ $appointment->recipient_display_name }}
+                                        @if($appointment->recipient_age !== null)
+                                            ({{ $appointment->recipient_age }})
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
                             <div class="table-cell">
@@ -162,7 +168,7 @@
         </div>
 
         <!-- Calendar View (Initially Hidden) -->
-        <div class="calendar-container" id="calendarView" style="display: none;">
+        <div class="calendar-container is-hidden" id="calendarView">
             <div id="appointmentCalendar"></div>
         </div>
     </div>
@@ -239,25 +245,20 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            line-height: 1.6;
-            color: var(--primary-color);
-            background-color: #f9fafb;
-        }
-
         /* Container */
         .container {
-            max-width: 1400px;
+            max-width: 1500px;
             margin: 0 auto;
             padding: 30px;
+            color: var(--primary-color);
+            line-height: 1.6;
         }
 
         /* Button Base Styles */
         .btn {
-            padding: 12px 24px;
+            padding: 11px 16px;
             border-radius: 8px;
-            font-weight: 600;
+            font-weight: 800;
             cursor: pointer;
             border: none;
             transition: var(--transition);
@@ -312,28 +313,28 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 26px;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 16px;
         }
 
         .page-title {
             font-size: 32px;
-            font-weight: 700;
+            font-weight: 800;
             color: var(--primary-color);
             line-height: 1.2;
         }
 
         .header-actions {
             display: flex;
-            gap: 15px;
+            gap: 10px;
         }
 
         /* View Toggle */
         .view-toggle {
             display: flex;
             gap: 10px;
-            margin-bottom: 25px;
+            margin-bottom: 22px;
             background: var(--light-gray);
             padding: 8px;
             border-radius: 8px;
@@ -366,13 +367,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
+            margin-bottom: 22px;
             flex-wrap: wrap;
-            gap: 20px;
+            gap: 16px;
             padding: 20px;
             background-color: white;
-            border-radius: 10px;
-            box-shadow: var(--card-shadow);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
         }
 
         .search-container {
@@ -446,10 +447,10 @@
         /* Appointments Table */
         .appointments-table {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 8px;
             box-shadow: var(--card-shadow);
             overflow: hidden;
-            margin-bottom: 25px;
+            margin-bottom: 26px;
             border: 1px solid var(--medium-gray);
         }
 
@@ -637,9 +638,9 @@
         /* Calendar View */
         .calendar-container {
             background-color: white;
-            border-radius: 10px;
+            border-radius: 8px;
             box-shadow: var(--card-shadow);
-            padding: 25px;
+            padding: 24px;
             min-height: 600px;
             border: 1px solid var(--medium-gray);
         }
@@ -826,7 +827,7 @@
 
         .modal-content {
             background-color: white;
-            border-radius: 12px;
+            border-radius: 8px;
             width: 90%;
             max-width: 500px;
             max-height: 90vh;
@@ -1327,6 +1328,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 info.el.title = `
 Customer: ${info.event.extendedProps.customer}
+For: ${info.event.extendedProps.recipient}
 Barber: ${info.event.extendedProps.barber}
 Service: ${info.event.extendedProps.service}
 Time: ${startTime} - ${endTime}

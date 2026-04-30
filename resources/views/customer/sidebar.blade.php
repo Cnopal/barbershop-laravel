@@ -19,15 +19,27 @@
             --dark: #121826;
             --light-gray: #f1f5f9;
             --medium-gray: #e2e8f0;
+            --surface: #ffffff;
             --success: #48bb78;
             --warning: #ed8936;
             --danger: #f56565;
             --info: #4299e1;
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            --radius: 12px;
+            --shadow: 0 4px 12px rgba(26, 31, 54, 0.08);
+            --shadow-lg: 0 14px 32px rgba(26, 31, 54, 0.14);
+            --shadow-xl: 0 24px 60px rgba(26, 31, 54, 0.18);
+            --radius: 10px;
+            --sidebar-width: 280px;
+            --customer-page-max: 1500px;
+            --customer-page-padding: 30px;
+            --customer-page-top-padding: 54px;
+            --customer-section-gap: 26px;
+            --customer-card-gap: 20px;
             --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @view-transition {
+            navigation: auto;
         }
 
         * {
@@ -36,13 +48,26 @@
             box-sizing: border-box;
         }
 
+        html {
+            overflow-y: scroll;
+            scrollbar-gutter: stable;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
             color: var(--primary);
-            background-color: var(--light);
+            background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
             min-height: 100vh;
             display: flex;
+        }
+
+        body.sidebar-open {
+            overflow: hidden;
+        }
+
+        body.customer-nav-pending {
+            cursor: progress;
         }
 
         h1,
@@ -55,8 +80,8 @@
 
         /* Sidebar */
         .sidebar {
-            width: 280px;
-            background: var(--primary);
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #111827 0%, var(--primary) 58%, var(--dark) 100%);
             color: white;
             position: fixed;
             top: 0;
@@ -65,11 +90,15 @@
             overflow-y: auto;
             z-index: 1000;
             transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 18px 0 45px rgba(18, 24, 38, 0.18);
         }
 
         .sidebar-header {
-            padding: 1.5rem;
+            padding: 1.35rem 1.25rem 1.1rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
         }
 
         .logo {
@@ -80,7 +109,13 @@
             font-weight: 700;
             color: white;
             text-decoration: none;
-            margin-bottom: 2rem;
+            margin-bottom: 1.25rem;
+            transition: var(--transition);
+        }
+
+        .logo:hover {
+            color: white;
+            transform: translateX(2px);
         }
 
         .logo i {
@@ -112,6 +147,7 @@
             background: rgba(255, 255, 255, 0.05);
             border-radius: var(--radius);
             margin-top: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .user-avatar {
@@ -157,47 +193,62 @@
             text-overflow: ellipsis;
         }
 
+        .sidebar-nav {
+            flex: 1;
+            padding: 0.85rem 0;
+        }
+
         .nav-section {
-            padding: 1.5rem;
+            padding: 0.65rem 1.25rem;
         }
 
         .section-title {
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.08em;
             color: rgba(255, 255, 255, 0.5);
-            margin-bottom: 1rem;
+            margin-bottom: 0.65rem;
             font-weight: 600;
         }
 
         .nav-links {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.35rem;
         }
 
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            padding: 0.875rem 1rem;
+            gap: 0.85rem;
+            min-height: 46px;
+            padding: 0.75rem 0.9rem;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
             border-radius: var(--radius);
             transition: var(--transition);
             position: relative;
+            border: 1px solid transparent;
         }
 
         .nav-item:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             color: white;
             transform: translateX(4px);
         }
 
+        .nav-item:focus-visible,
+        .logout-btn:focus-visible,
+        .mobile-menu-btn:focus-visible {
+            outline: 3px solid rgba(212, 175, 55, 0.38);
+            outline-offset: 2px;
+        }
+
         .nav-item.active {
-            background: linear-gradient(90deg, rgba(212, 175, 55, 0.2) 0%, rgba(212, 175, 55, 0.1) 100%);
+            background: linear-gradient(90deg, rgba(212, 175, 55, 0.22) 0%, rgba(212, 175, 55, 0.08) 100%);
             color: white;
-            border-left: 3px solid var(--accent);
+            border-color: rgba(212, 175, 55, 0.24);
+            box-shadow: inset 0 0 0 1px rgba(212, 175, 55, 0.08);
         }
 
         .nav-item.active::before {
@@ -226,6 +277,7 @@
             flex: 1;
             font-size: 0.9375rem;
             font-weight: 500;
+            line-height: 1.2;
         }
 
         .badge {
@@ -241,14 +293,20 @@
 
         .sidebar-footer {
             margin-top: auto;
-            padding: 1.5rem;
+            padding: 1.1rem 1.25rem 1.25rem;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .logout-form {
+            margin: 0;
         }
 
         .logout-btn {
             display: flex;
             align-items: center;
             gap: 1rem;
+            width: 100%;
             padding: 0.875rem 1rem;
             color: rgba(255, 255, 255, 0.8);
             text-decoration: none;
@@ -256,6 +314,8 @@
             transition: var(--transition);
             background: rgba(245, 101, 101, 0.1);
             border: 1px solid rgba(245, 101, 101, 0.2);
+            cursor: pointer;
+            font: inherit;
         }
 
         .logout-btn:hover {
@@ -273,15 +333,91 @@
         /* Main Content */
         .main-content {
             flex: 1;
-            margin-left: 280px;
+            margin-left: var(--sidebar-width);
             min-height: 100vh;
             transition: var(--transition);
         }
 
         .content-wrapper {
-            padding: 2rem;
-            max-width: 1400px;
+            width: 100%;
+            padding: 0;
+            max-width: none;
             margin: 0 auto;
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        body.customer-page-loaded .content-wrapper {
+            animation: customerPageEnter 0.22s ease both;
+        }
+
+        body.customer-nav-pending .content-wrapper {
+            opacity: 0.72;
+            transform: translateY(4px);
+            pointer-events: none;
+        }
+
+        .customer-page {
+            width: 100%;
+            max-width: var(--customer-page-max);
+            margin: 0 auto;
+            padding: var(--customer-page-top-padding) var(--customer-page-padding) var(--customer-page-padding) !important;
+            color: var(--primary);
+        }
+
+        .customer-page .page-header,
+        .customer-page .shop-header,
+        .customer-page .profile-page-header {
+            margin-bottom: var(--customer-section-gap) !important;
+        }
+
+        .customer-page-progress {
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            height: 3px;
+            z-index: 2000;
+            pointer-events: none;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.12s ease;
+        }
+
+        .customer-page-progress::before {
+            content: '';
+            display: block;
+            width: 42%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            transform: translateX(-100%);
+        }
+
+        .customer-page-progress.active {
+            opacity: 1;
+        }
+
+        .customer-page-progress.active::before {
+            animation: customerProgress 0.85s ease-in-out infinite;
+        }
+
+        @keyframes customerProgress {
+            to {
+                transform: translateX(260%);
+            }
+        }
+
+        @keyframes customerPageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Mobile Menu Button */
@@ -295,10 +431,10 @@
             background: var(--primary);
             color: white;
             border: none;
-            border-radius: var(--radius);
+            border-radius: 999px;
             font-size: 1.25rem;
             cursor: pointer;
-            z-index: 1001;
+            z-index: 1002;
             align-items: center;
             justify-content: center;
             box-shadow: var(--shadow-lg);
@@ -307,6 +443,19 @@
 
         .mobile-menu-btn:hover {
             background: #2d3748;
+        }
+
+        .mobile-sidebar-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(18, 24, 38, 0.42);
+            backdrop-filter: blur(2px);
+            z-index: 999;
+        }
+
+        .mobile-sidebar-backdrop.active {
+            display: block;
         }
 
         /* Responsive */
@@ -321,6 +470,7 @@
 
             .main-content {
                 margin-left: 0;
+                padding-top: 4.25rem;
             }
 
             .mobile-menu-btn {
@@ -328,17 +478,28 @@
             }
 
             .content-wrapper {
-                padding: 1.5rem;
+                padding: 0;
             }
         }
 
         @media (max-width: 768px) {
+            :root {
+                --customer-page-padding: 20px;
+                --customer-page-top-padding: 34px;
+                --customer-section-gap: 22px;
+                --customer-card-gap: 16px;
+            }
+
             .sidebar {
-                width: 260px;
+                width: min(86vw, 280px);
             }
 
             .content-wrapper {
-                padding: 1rem;
+                padding: 0;
+            }
+
+            .customer-page-progress {
+                left: 0;
             }
         }
 
@@ -428,19 +589,38 @@
         .nav-item:nth-child(8) {
             animation-delay: 0.45s;
         }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+
+            .nav-item {
+                opacity: 1;
+                animation: none;
+            }
+        }
     </style>
 </head>
 
 <body>
     <!-- Mobile Menu Button -->
-    <button class="mobile-menu-btn" id="mobileMenuBtn">
+    <button class="mobile-menu-btn" id="mobileMenuBtn" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Open customer navigation">
         <i class="fas fa-bars"></i>
     </button>
 
+    <div class="mobile-sidebar-backdrop" id="sidebarBackdrop" hidden></div>
+    <div class="customer-page-progress" id="customerPageProgress" aria-hidden="true"></div>
+
     <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
+    <aside class="sidebar" id="sidebar" aria-label="Customer navigation">
         <div class="sidebar-header">
-            <a href="#" class="logo">
+            <a href="{{ route('customer.dashboard') }}" class="logo">
                 <i class="fas fa-cut"></i>
                 <div class="logo-text">
                     <span class="logo-main">Men's Club</span>
@@ -463,62 +643,80 @@
             </div>
         </div>
 
-        <!-- Main Navigation -->
-        <div class="nav-section">
-            <div class="section-title">Dashboard</div>
-            <div class="nav-links">
-                <a href="{{ route('customer.dashboard') }}"
-                    class="nav-item {{ request()->routeIs('customer.dashboard') ? 'active' : '' }}">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span class="nav-text">Dashboard</span>
-                </a>
+        <div class="sidebar-nav">
+            <!-- Main Navigation -->
+            <div class="nav-section">
+                <div class="section-title">Dashboard</div>
+                <div class="nav-links">
+                    <a href="{{ route('customer.dashboard') }}"
+                        class="nav-item {{ request()->routeIs('customer.dashboard') ? 'active' : '' }}">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
 
-                <a href="{{ route('customer.appointments.index') }}"
-                    class="nav-item {{ request()->routeIs('customer.appointments.*') ? 'active' : '' }}">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span class="nav-text">My Appointments</span>
-                </a>
+                    <a href="{{ route('customer.appointments.index') }}"
+                        class="nav-item {{ request()->routeIs('customer.appointments.index', 'customer.appointments.show', 'customer.appointments.edit', 'customer.appointments.pay', 'customer.appointments.payment.*') ? 'active' : '' }}">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span class="nav-text">My Appointments</span>
+                    </a>
 
-                <a href="{{ route('customer.appointments.create') }}"
-                    class="nav-item {{ request()->routeIs('customer.appointments.create') ? 'active' : '' }}">
-                    <i class="fas fa-calendar-plus"></i>
-                    <span class="nav-text">Book Appointment</span>
-                </a>
-                <a href="{{ route('customer.ai-hair.index') }}"
-                    class="nav-item {{ request()->routeIs('customer.ai-hair.*') ? 'active' : '' }}">
-                    <i class="fas fa-magic"></i>
-                    <span class="nav-text">AI Hair Style</span>
-                </a>
-
-
+                    <a href="{{ route('customer.appointments.create') }}"
+                        class="nav-item {{ request()->routeIs('customer.appointments.create', 'customer.appointments.store') ? 'active' : '' }}">
+                        <i class="fas fa-calendar-plus"></i>
+                        <span class="nav-text">Book Appointment</span>
+                    </a>
+                    <a href="{{ route('customer.ai-hair.index') }}"
+                        class="nav-item {{ request()->routeIs('customer.ai-hair.*') ? 'active' : '' }}">
+                        <i class="fas fa-magic"></i>
+                        <span class="nav-text">AI Hair Style</span>
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <!-- Services Section -->
-        <div class="nav-section">
-            <div class="section-title">Services</div>
-            <div class="nav-links">
-                <a href="{{ route('customer.services.index') }}"
-                    class="nav-item {{ request()->routeIs('customer.services.index') ? 'active' : '' }}">
-                    <i class="fas fa-cut"></i>
-                    <span class="nav-text">View Services</span>
-                </a>
+            <!-- Services Section -->
+            <div class="nav-section">
+                <div class="section-title">Services</div>
+                <div class="nav-links">
+                    <a href="{{ route('customer.services.index') }}"
+                        class="nav-item {{ request()->routeIs('customer.services.*') ? 'active' : '' }}">
+                        <i class="fas fa-cut"></i>
+                        <span class="nav-text">View Services</span>
+                    </a>
 
-                <a href="{{ route('customer.barbers.index') }}" class="nav-item {{ request()->routeIs('customer.barbers.index') ? 'active' : '' }}">
-                    <i class="fas fa-users"></i>
-                    <span class="nav-text">Our Barbers</span>
-                </a>
+                    <a href="{{ route('customer.barbers.index') }}" class="nav-item {{ request()->routeIs('customer.barbers.*') ? 'active' : '' }}">
+                        <i class="fas fa-users"></i>
+                        <span class="nav-text">Our Barbers</span>
+                    </a>
+                </div>
             </div>
-        </div>
 
-        <!-- Account Section -->
-        <div class="nav-section">
-            <div class="section-title">Account</div>
-            <div class="nav-links">
-                <a href="{{ route('customer.profile.show')  }}" class="nav-item {{ request()->routeIs('customer.profile.show') ? 'active' : '' }}">
-                    <i class="fas fa-user-edit"></i>
-                    <span class="nav-text">Edit Profile</span>
-                </a>
+            <!-- Shop Section -->
+            <div class="nav-section">
+                <div class="section-title">Shop</div>
+                <div class="nav-links">
+                    <a href="{{ route('customer.products.index') }}"
+                        class="nav-item {{ request()->routeIs('customer.products.*') ? 'active' : '' }}">
+                        <i class="fas fa-store"></i>
+                        <span class="nav-text">Products</span>
+                    </a>
+
+                    <a href="{{ route('customer.product-orders.index') }}"
+                        class="nav-item {{ request()->routeIs('customer.product-orders.*') ? 'active' : '' }}">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="nav-text">My Orders</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Account Section -->
+            <div class="nav-section">
+                <div class="section-title">Account</div>
+                <div class="nav-links">
+                    <a href="{{ route('customer.profile.show') }}" class="nav-item {{ request()->routeIs('customer.profile.*') ? 'active' : '' }}">
+                        <i class="fas fa-user-circle"></i>
+                        <span class="nav-text">Profile</span>
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -553,113 +751,134 @@
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
+            const sidebarBackdrop = document.getElementById('sidebarBackdrop');
+            const pageProgress = document.getElementById('customerPageProgress');
 
-            // Mobile menu toggle
+            if (!mobileMenuBtn || !sidebar || !mainContent) {
+                return;
+            }
+
+            const icon = mobileMenuBtn.querySelector('i');
+            const mobileQuery = window.matchMedia('(max-width: 1024px)');
+
+            function setSidebar(open) {
+                sidebar.classList.toggle('active', open);
+                mobileMenuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                mobileMenuBtn.setAttribute('aria-label', open ? 'Close customer navigation' : 'Open customer navigation');
+                document.body.classList.toggle('sidebar-open', open && mobileQuery.matches);
+
+                if (icon) {
+                    icon.classList.toggle('fa-bars', !open);
+                    icon.classList.toggle('fa-times', open);
+                }
+
+                if (sidebarBackdrop) {
+                    sidebarBackdrop.hidden = !open;
+                    sidebarBackdrop.classList.toggle('active', open);
+                }
+            }
+
+            function closeSidebarOnMobile() {
+                if (mobileQuery.matches && sidebar.classList.contains('active')) {
+                    setSidebar(false);
+                }
+            }
+
+            function normalizeUrl(url) {
+                return `${url.origin}${url.pathname.replace(/\/$/, '')}${url.search}${url.hash}`;
+            }
+
+            function isSamePage(url) {
+                return normalizeUrl(url) === normalizeUrl(new URL(window.location.href));
+            }
+
+            function isTransitionableLink(link) {
+                if (!link?.href) {
+                    return false;
+                }
+
+                const url = new URL(link.href, window.location.href);
+                return url.origin === window.location.origin && !link.hasAttribute('download') && link.target !== '_blank';
+            }
+
+            function startPageTransition() {
+                document.body.classList.add('customer-nav-pending');
+                pageProgress?.classList.add('active');
+            }
+
             mobileMenuBtn.addEventListener('click', function () {
-                sidebar.classList.toggle('active');
-                const icon = this.querySelector('i');
-
-                if (sidebar.classList.contains('active')) {
-                    icon.classList.remove('fa-bars');
-                    icon.classList.add('fa-times');
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    icon.classList.remove('fa-times');
-                    icon.classList.add('fa-bars');
-                    document.body.style.overflow = '';
-                }
+                setSidebar(!sidebar.classList.contains('active'));
             });
 
-            // Close sidebar when clicking outside on mobile
-            if (window.innerWidth <= 1024) {
-                mainContent.addEventListener('click', function () {
-                    if (sidebar.classList.contains('active')) {
-                        sidebar.classList.remove('active');
-                        mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                        mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-                        document.body.style.overflow = '';
+            sidebarBackdrop?.addEventListener('click', function () {
+                setSidebar(false);
+            });
+
+            mainContent.addEventListener('click', closeSidebarOnMobile);
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', closeSidebarOnMobile);
+            });
+
+            document.querySelectorAll('.sidebar a[href]').forEach(link => {
+                link.addEventListener('click', function (event) {
+                    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
+                        return;
                     }
+
+                    if (!isTransitionableLink(link)) {
+                        return;
+                    }
+
+                    const targetUrl = new URL(link.href, window.location.href);
+
+                    if (isSamePage(targetUrl)) {
+                        event.preventDefault();
+                        closeSidebarOnMobile();
+                        return;
+                    }
+
+                    startPageTransition();
+                    closeSidebarOnMobile();
                 });
-            }
 
-            // Active navigation item highlight
-            const currentPath = window.location.pathname;
-            const navItems = document.querySelectorAll('.nav-item');
+                ['mouseenter', 'focus', 'touchstart'].forEach(eventName => {
+                    link.addEventListener(eventName, function () {
+                        if (!isTransitionableLink(link) || link.dataset.prefetched === 'true') {
+                            return;
+                        }
 
-            navItems.forEach(item => {
-                if (item.getAttribute('href') === currentPath) {
-                    item.classList.add('active');
-                }
+                        const targetUrl = new URL(link.href, window.location.href);
+                        if (isSamePage(targetUrl)) {
+                            return;
+                        }
 
-                item.addEventListener('click', function (e) {
-                    // Remove active class from all items
-                    navItems.forEach(nav => nav.classList.remove('active'));
-                    // Add active class to clicked item
-                    this.classList.add('active');
-
-                    // Close sidebar on mobile after clicking
-                    if (window.innerWidth <= 1024) {
-                        sidebar.classList.remove('active');
-                        mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                        mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-                        document.body.style.overflow = '';
-                    }
+                        const prefetch = document.createElement('link');
+                        prefetch.rel = 'prefetch';
+                        prefetch.href = link.href;
+                        document.head.appendChild(prefetch);
+                        link.dataset.prefetched = 'true';
+                    }, { passive: true });
                 });
             });
 
-            // Handle window resize
             window.addEventListener('resize', function () {
-                if (window.innerWidth > 1024) {
-                    sidebar.classList.remove('active');
-                    mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                    mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-                    document.body.style.overflow = '';
+                if (!mobileQuery.matches) {
+                    setSidebar(false);
                 }
             });
 
-            // Smooth hover effects
-            const navLinks = document.querySelectorAll('.nav-item:not(.active)');
-            navLinks.forEach(link => {
-                link.addEventListener('mouseenter', function () {
-                    this.style.transform = 'translateX(4px)';
-                });
-
-                link.addEventListener('mouseleave', function () {
-                    this.style.transform = 'translateX(0)';
-                });
-            });
-
-            // Sidebar scroll effect
-            let lastScrollTop = 0;
-            sidebar.addEventListener('scroll', function () {
-                const scrollTop = this.scrollTop;
-                const sidebarHeader = document.querySelector('.sidebar-header');
-
-                if (scrollTop > lastScrollTop && scrollTop > 50) {
-                    sidebarHeader.style.opacity = '0.8';
-                    sidebarHeader.style.transform = 'translateY(-10px)';
-                } else {
-                    sidebarHeader.style.opacity = '1';
-                    sidebarHeader.style.transform = 'translateY(0)';
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape' && sidebar.classList.contains('active')) {
+                    setSidebar(false);
                 }
-
-                lastScrollTop = scrollTop;
             });
 
-            // Auto-close sidebar on mobile when clicking logout
-            const logoutBtn = document.querySelector('.logout-btn');
-            if (logoutBtn) {
-                logoutBtn.addEventListener('click', function () {
-                    if (window.innerWidth <= 1024) {
-                        setTimeout(() => {
-                            sidebar.classList.remove('active');
-                            mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                            mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-                            document.body.style.overflow = '';
-                        }, 100);
-                    }
-                });
-            }
+            window.addEventListener('pageshow', function () {
+                document.body.classList.remove('customer-nav-pending');
+                document.body.classList.add('customer-page-loaded');
+                pageProgress?.classList.remove('active');
+            });
         });
     </script>
 </body>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\ProductOrder;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
@@ -85,7 +86,9 @@ class CustomerController extends Controller
         $totalAppointments = $appointments->count();
         $completedAppointments = $appointments->where('status', 'completed')->count();
         $upcomingAppointments = $appointments->whereIn('status', ['pending_payment', 'confirmed'])->count();
-        $totalSpent = $appointments->where('status', 'completed')->sum('price');
+        $appointmentSpent = $appointments->where('status', 'completed')->sum('price');
+        $productSpent = ProductOrder::paid()->where('customer_id', $customer->id)->sum('total');
+        $totalSpent = $appointmentSpent + $productSpent;
 
         return view('admin.customers.show', compact(
             'customer', 'appointments', 'totalAppointments', 'completedAppointments', 'upcomingAppointments', 'totalSpent'

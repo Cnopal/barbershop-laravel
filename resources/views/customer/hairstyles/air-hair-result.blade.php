@@ -1,7 +1,7 @@
 @extends('customer.sidebar')
 
 @section('content')
-<div class="min-h-screen bg-gradient-to-br from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
+<div class="customer-page ai-hair-page min-h-screen bg-gradient-to-br from-gray-50 to-white py-8 px-4 sm:px-6 lg:px-8">
     <div class="max-w-7xl mx-auto">
         
         <!-- Header -->

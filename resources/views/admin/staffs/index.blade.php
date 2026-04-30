@@ -171,7 +171,7 @@
 
     /* Container */
     .container {
-        max-width: 1400px;
+        max-width: 1500px;
         margin: 0 auto;
         padding: 30px;
     }
@@ -181,22 +181,22 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 40px;
+        margin-bottom: 26px;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 16px;
     }
     
     .page-title {
         font-size: 32px;
-        font-weight: 700;
+        font-weight: 800;
         color: var(--primary-color);
     }
     
     /* Button Styles */
     .btn {
-        padding: 12px 24px;
+        padding: 11px 16px;
         border-radius: 8px;
-        font-weight: 600;
+        font-weight: 800;
         cursor: pointer;
         border: none;
         transition: var(--transition);
@@ -247,9 +247,14 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 30px;
+        margin-bottom: 22px;
         flex-wrap: wrap;
-        gap: 20px;
+        gap: 16px;
+        padding: 20px;
+        background: white;
+        border: 1px solid var(--medium-gray);
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
     }
     
     .search-container {
@@ -300,15 +305,15 @@
     /* Barbers Grid */
     .barbers-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 25px;
-        margin-bottom: 40px;
+        grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+        gap: 20px;
+        margin-bottom: 26px;
     }
     
     .barber-card {
         background-color: white;
-        border-radius: 10px;
-        padding: 25px;
+        border-radius: 8px;
+        padding: 24px;
         box-shadow: var(--card-shadow);
         transition: var(--transition);
         display: flex;
@@ -507,7 +512,7 @@
     
     .modal-content {
         background-color: white;
-        border-radius: 10px;
+        border-radius: 8px;
         width: 90%;
         max-width: 500px;
         max-height: 90vh;
@@ -543,15 +548,15 @@
     }
     
     .modal-body {
-        padding: 25px;
+        padding: 24px;
     }
     
     .modal-footer {
-        padding: 15px 25px 25px;
+        padding: 16px 24px 24px;
         border-top: 1px solid var(--medium-gray);
         display: flex;
         justify-content: flex-end;
-        gap: 15px;
+        gap: 12px;
     }
     
     /* Delete Confirmation Modal */

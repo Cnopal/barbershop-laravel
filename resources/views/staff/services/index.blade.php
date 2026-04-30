@@ -15,33 +15,43 @@
         --transition: all 0.3s ease;
     }
 
+    .staff-ui-page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 30px;
+        color: #1a1f36;
+    }
+
     .page-header {
-        margin-bottom: 2rem;
+        margin-bottom: 26px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 16px;
     }
 
     .page-header h2 {
-        font-size: 1.75rem;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         color: var(--primary);
         margin: 0;
     }
 
     .services-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(285px, 1fr));
+        gap: 20px;
     }
 
     .service-card {
         background: white;
-        border-radius: 12px;
-        padding: 2rem;
-        box-shadow: var(--card-shadow);
+        border: 1px solid var(--medium-gray);
+        border-radius: 8px;
+        padding: 24px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
         border-top: 4px solid var(--accent);
         transition: var(--transition);
+        overflow: hidden;
     }
 
     .service-card:hover {
@@ -51,6 +61,24 @@
 
     .service-header {
         margin-bottom: 1rem;
+    }
+
+    .service-media {
+        height: 150px;
+        margin: -24px -24px 18px;
+        background: var(--light-gray);
+        color: var(--accent);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        overflow: hidden;
+    }
+
+    .service-media img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
     }
 
     .service-name {
@@ -106,10 +134,11 @@
 
     .empty-state {
         background: white;
-        border-radius: 12px;
-        padding: 3rem 2rem;
+        border: 1px solid var(--medium-gray);
+        border-radius: 8px;
+        padding: 40px 20px;
         text-align: center;
-        box-shadow: var(--card-shadow);
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
     }
 
     .empty-state i {
@@ -130,7 +159,17 @@
         margin: 0;
     }
 
+    .pagination-wrap {
+        margin-top: 26px;
+        display: flex;
+        justify-content: center;
+    }
+
     @media (max-width: 768px) {
+        .staff-ui-page {
+            padding: 20px;
+        }
+
         .page-header {
             flex-direction: column;
             align-items: flex-start;
@@ -147,6 +186,7 @@
     }
 </style>
 
+<div class="staff-ui-page">
 <div class="page-header">
     <h2>Services Offered</h2>
 </div>
@@ -155,6 +195,13 @@
     <div class="services-grid">
         @foreach($services as $service)
             <div class="service-card">
+                <div class="service-media">
+                    @if($service->image_url)
+                        <img src="{{ $service->image_url }}" alt="{{ $service->name }}">
+                    @else
+                        <i class="fas fa-cut"></i>
+                    @endif
+                </div>
                 <div class="service-header">
                     <div class="service-name">{{ $service->name }}</div>
                     @if($service->description)
@@ -179,7 +226,9 @@
         @endforeach
     </div>
 
-    {{ $services->links() }}
+    <div class="pagination-wrap">
+        {{ $services->links() }}
+    </div>
 @else
     <div class="empty-state">
         <i class="fas fa-inbox"></i>
@@ -187,4 +236,5 @@
         <p>There are no active services at the moment.</p>
     </div>
 @endif
+</div>
 @endsection

@@ -2,7 +2,7 @@
 
 
 @section('content')
-<div class="appointments-page">
+<div class="customer-page appointments-page">
     <!-- Page Header -->
     <div class="page-header">
         <div class="header-content">
@@ -24,7 +24,7 @@
         <div class="filter-buttons">
             <button class="filter-btn active" data-filter="all">All</button>
             <button class="filter-btn" data-filter="upcoming">Upcoming</button>
-            <button class="filter-btn" data-filter="pending">Pending</button>
+            <button class="filter-btn" data-filter="pending_payment">Pending Payment</button>
             <button class="filter-btn" data-filter="confirmed">Confirmed</button>
             <button class="filter-btn" data-filter="completed">Completed</button>
             <button class="filter-btn" data-filter="cancelled">Cancelled</button>
@@ -38,6 +38,7 @@
              data-id="{{ $appointment->id }}"
              data-service="{{ strtolower($appointment->service->name) }}"
              data-barber="{{ strtolower($appointment->barber->name) }}"
+             data-recipient="{{ strtolower($appointment->recipient_display_name) }}"
              data-date="{{ $appointment->appointment_date->format('Y-m-d') }}"
              data-status="{{ $appointment->status }}">
             
@@ -48,7 +49,7 @@
                     <div class="appointment-id">#{{ str_pad($appointment->id, 6, '0', STR_PAD_LEFT) }}</div>
                 </div>
                 <span class="status-badge status-{{ $appointment->status }}">
-                    {{ ucfirst($appointment->status) }}
+                    {{ ucwords(str_replace('_', ' ', $appointment->status)) }}
                 </span>
             </div>
 
@@ -70,6 +71,17 @@
                 </div>
                 
                 <div class="detail-row">
+                    <div class="detail-item">
+                        <span class="detail-label">
+                            <i class="fas fa-user"></i> For
+                        </span>
+                        <span class="detail-value">
+                            {{ $appointment->recipient_display_name }}
+                            @if($appointment->recipient_age !== null)
+                                ({{ $appointment->recipient_age }})
+                            @endif
+                        </span>
+                    </div>
                     <div class="detail-item">
                         <span class="detail-label">
                             <i class="fas fa-calendar"></i> Date
@@ -179,19 +191,26 @@
         --transition: all 0.3s ease;
     }
 
+    .appointments-page {
+        max-width: 1500px;
+        margin: 0 auto;
+        padding: 30px;
+        color: #1a1f36;
+    }
+
     /* Page Header */
     .page-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        margin-bottom: 26px;
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 16px;
     }
 
     .header-content h1 {
-        font-size: 2rem;
-        font-weight: 700;
+        font-size: 32px;
+        font-weight: 800;
         color: var(--primary);
         margin-bottom: 0.5rem;
     }
@@ -203,10 +222,11 @@
     /* Filter Controls */
     .filter-controls {
         background: white;
-        border-radius: var(--radius);
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        box-shadow: var(--shadow);
+        border: 1px solid var(--medium-gray);
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 12px rgba(26, 31, 54, 0.06);
     }
 
     .search-container {
@@ -244,6 +264,7 @@
     }
 
     .filter-btn {
+        min-height: 36px;
         padding: 0.5rem 1rem;
         border: 1px solid var(--medium-gray);
         background: white;
@@ -265,18 +286,24 @@
     /* Appointments Container */
     .appointments-container {
         display: grid;
-        gap: 1.5rem;
+        gap: 20px;
         margin-bottom: 2rem;
+        min-height: var(--appointments-list-height, 320px);
+        align-content: start;
     }
 
     /* Appointment Card */
     .appointment-card {
         background: white;
-        border-radius: var(--radius);
+        border-radius: 8px;
         overflow: hidden;
         box-shadow: var(--shadow);
         transition: var(--transition);
         border: 1px solid var(--medium-gray);
+    }
+
+    .appointment-card.is-filtered-out {
+        display: none;
     }
 
     .appointment-card:hover {
@@ -289,7 +316,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 1.5rem;
+        padding: 24px;
         background: var(--light-gray);
         border-bottom: 1px solid var(--medium-gray);
     }
@@ -311,7 +338,7 @@
         color: var(--secondary);
         background: white;
         padding: 0.25rem 0.75rem;
-        border-radius: 12px;
+        border-radius: 8px;
         border: 1px solid var(--medium-gray);
     }
 
@@ -325,7 +352,8 @@
         letter-spacing: 0.5px;
     }
 
-    .status-pending {
+    .status-pending,
+    .status-pending_payment {
         background: rgba(237, 137, 54, 0.1);
         color: var(--warning);
         border: 1px solid rgba(237, 137, 54, 0.2);
@@ -645,6 +673,10 @@
 
     /* Responsive */
     @media (max-width: 768px) {
+        .appointments-page {
+            padding: 20px;
+        }
+
         .page-header {
             flex-direction: column;
             align-items: flex-start;
@@ -709,67 +741,76 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Search functionality
     const searchInput = document.getElementById('searchInput');
+    const appointmentsContainer = document.querySelector('.appointments-container');
     const appointmentCards = document.querySelectorAll('.appointment-card');
-    
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase().trim();
-        
+    let activeFilter = 'all';
+
+    function reserveListHeight() {
+        if (!appointmentsContainer) return;
+
+        const listTop = appointmentsContainer.getBoundingClientRect().top;
+        const comfortableViewportSpace = Math.max(window.innerHeight - listTop - 32, 320);
+        const reservedHeight = Math.min(Math.max(appointmentsContainer.offsetHeight, 320), comfortableViewportSpace);
+
+        appointmentsContainer.style.setProperty(
+            '--appointments-list-height',
+            `${reservedHeight}px`
+        );
+    }
+
+    function shouldShowForFilter(card, filter) {
+        const status = card.getAttribute('data-status');
+        const date = card.getAttribute('data-date');
+        const today = new Date().toISOString().split('T')[0];
+
+        switch(filter) {
+            case 'all':
+                return true;
+            case 'upcoming':
+                return (status === 'pending_payment' || status === 'confirmed') && date >= today;
+            case 'pending_payment':
+                return status === 'pending_payment';
+            case 'confirmed':
+                return status === 'confirmed';
+            case 'completed':
+                return status === 'completed';
+            case 'cancelled':
+                return status === 'cancelled';
+            default:
+                return true;
+        }
+    }
+
+    function applyAppointmentFilters() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
         appointmentCards.forEach(card => {
             const service = card.getAttribute('data-service');
             const barber = card.getAttribute('data-barber');
-            
-            if (searchTerm === '' || 
-                service.includes(searchTerm) || 
-                barber.includes(searchTerm)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
+            const recipient = card.getAttribute('data-recipient');
+            const matchesSearch = searchTerm === '' || service.includes(searchTerm) || barber.includes(searchTerm) || recipient.includes(searchTerm);
+            const matchesFilter = shouldShowForFilter(card, activeFilter);
+
+            card.classList.toggle('is-filtered-out', !(matchesSearch && matchesFilter));
         });
-    });
+    }
+
+    requestAnimationFrame(reserveListHeight);
+    
+    searchInput?.addEventListener('input', applyAppointmentFilters);
     
     // Filter functionality
     const filterButtons = document.querySelectorAll('.filter-btn');
     
     filterButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const filter = this.getAttribute('data-filter');
+            activeFilter = this.getAttribute('data-filter');
             
             // Update active button
             filterButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             
-            // Filter cards
-            appointmentCards.forEach(card => {
-                const status = card.getAttribute('data-status');
-                const date = card.getAttribute('data-date');
-                const today = new Date().toISOString().split('T')[0];
-                
-                let shouldShow = false;
-                
-                switch(filter) {
-                    case 'all':
-                        shouldShow = true;
-                        break;
-                    case 'upcoming':
-                        shouldShow = (status === 'pending' || status === 'confirmed') && date >= today;
-                        break;
-                    case 'pending':
-                        shouldShow = status === 'pending';
-                        break;
-                    case 'confirmed':
-                        shouldShow = status === 'confirmed';
-                        break;
-                    case 'completed':
-                        shouldShow = status === 'completed';
-                        break;
-                    case 'cancelled':
-                        shouldShow = status === 'cancelled';
-                        break;
-                }
-                
-                card.style.display = shouldShow ? 'block' : 'none';
-            });
+            applyAppointmentFilters();
         });
     });
     
