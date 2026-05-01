@@ -665,6 +665,11 @@
                         <i class="fas fa-calendar-plus"></i>
                         <span class="nav-text">Book Appointment</span>
                     </a>
+                    <a href="{{ route('customer.walk-ins.index') }}"
+                        class="nav-item {{ request()->routeIs('customer.walk-ins.*') ? 'active' : '' }}">
+                        <i class="fas fa-list-ol"></i>
+                        <span class="nav-text">Walk-in Queue</span>
+                    </a>
                     <a href="{{ route('customer.ai-hair.index') }}"
                         class="nav-item {{ request()->routeIs('customer.ai-hair.*') ? 'active' : '' }}">
                         <i class="fas fa-magic"></i>

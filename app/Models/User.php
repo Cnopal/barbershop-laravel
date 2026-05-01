@@ -61,4 +61,14 @@ class User extends Authenticatable
         return $this->hasMany(Appointment::class, 'customer_id');
     }
 
+    public function walkInQueues()
+    {
+        return $this->hasMany(WalkInQueue::class, 'customer_id');
+    }
+
+    public function barberWalkInQueues()
+    {
+        return $this->hasMany(WalkInQueue::class, 'barber_id');
+    }
+
 }

@@ -9,12 +9,16 @@ use App\Http\Controllers\Admin\ServiceController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\AppointmentController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
+use App\Http\Controllers\Admin\WalkInQueueController as AdminWalkInQueueController;
 use App\Http\Controllers\PosController;
 use App\Http\Controllers\ProductOrderManagementController;
+use App\Http\Controllers\WalkInQueueDisplayController;
 
 use App\Http\Controllers\Customer\AppointmentController as CustomerAppointmentController;
 use App\Http\Controllers\Customer\CustomerServiceController;
 use App\Http\Controllers\Customer\ProductController as CustomerProductController;
+use App\Http\Controllers\Customer\WalkInQueueController as CustomerWalkInQueueController;
 
 
 use App\Http\Controllers\Staff\AppointmentController as StaffAppointmentController;
@@ -22,6 +26,7 @@ use App\Http\Controllers\Staff\ScheduleController;
 use App\Http\Controllers\Staff\FeedbackController;
 use App\Http\Controllers\Staff\ServiceController as StaffServiceController;
 use App\Http\Controllers\Staff\ProductController as StaffProductController;
+use App\Http\Controllers\Staff\WalkInQueueController as StaffWalkInQueueController;
 use App\Http\Controllers\Staff\ProfileController;
 use App\Http\Controllers\Customer\AiHairController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
@@ -37,6 +42,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/queue', [WalkInQueueDisplayController::class, 'index'])->name('walk-ins.display');
+
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -46,6 +53,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::resource('staffs', StaffController::class);
     Route::resource('services', ServiceController::class);
     Route::resource('products', AdminProductController::class);
+    Route::get('/reports/{report}', [AdminReportController::class, 'show'])->name('reports.show');
     Route::get('/product-orders', [ProductOrderManagementController::class, 'index'])->name('product-orders.index');
     Route::get('/product-orders/{order}', [ProductOrderManagementController::class, 'show'])->name('product-orders.show');
     Route::patch('/product-orders/{order}/status', [ProductOrderManagementController::class, 'updateStatus'])->name('product-orders.status');
@@ -60,6 +68,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::get('/appointments/available-slots', [AppointmentController::class, 'availableSlots'])
         ->name('appointments.available-slots');
     Route::resource('appointments', AppointmentController::class);
+
+    Route::get('/walk-ins', [AdminWalkInQueueController::class, 'index'])->name('walk-ins.index');
+    Route::post('/walk-ins', [AdminWalkInQueueController::class, 'store'])->name('walk-ins.store');
+    Route::patch('/walk-ins/{walkIn}/status', [AdminWalkInQueueController::class, 'updateStatus'])->name('walk-ins.status');
+    Route::delete('/walk-ins/{walkIn}', [AdminWalkInQueueController::class, 'destroy'])->name('walk-ins.destroy');
 
     // Admin Profile
     Route::get('/profile', [\App\Http\Controllers\Admin\ProfileController::class, 'show'])->name('profile.show');
@@ -76,6 +89,11 @@ Route::middleware(['auth', 'role:staff'])->prefix('staff')->as('staff.')->group(
     // Appointments - slots route must be before resource routes
     Route::get('/appointments/slots/available', [StaffAppointmentController::class, 'getAvailableSlots'])->name('appointments.slots');
     Route::resource('appointments', StaffAppointmentController::class);
+
+    Route::get('/walk-ins', [StaffWalkInQueueController::class, 'index'])->name('walk-ins.index');
+    Route::post('/walk-ins', [StaffWalkInQueueController::class, 'store'])->name('walk-ins.store');
+    Route::patch('/walk-ins/{walkIn}/status', [StaffWalkInQueueController::class, 'updateStatus'])->name('walk-ins.status');
+    Route::delete('/walk-ins/{walkIn}', [StaffWalkInQueueController::class, 'destroy'])->name('walk-ins.destroy');
 
     // Schedule
     Route::get('/schedule', [ScheduleController::class, 'index'])->name('schedule');
@@ -117,6 +135,7 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->as('customer.'
     Route::get('/appointments/slots/available', [CustomerAppointmentController::class, 'getAvailableSlots'])
         ->name('appointments.slots');
     Route::resource('appointments', CustomerAppointmentController::class);
+    Route::get('/walk-in-queue', [CustomerWalkInQueueController::class, 'index'])->name('walk-ins.index');
     Route::resource('services', CustomerServiceController::class);
     Route::get('/products', [CustomerProductController::class, 'index'])->name('products.index');
     Route::get('/products/{product}', [CustomerProductController::class, 'show'])->name('products.show');

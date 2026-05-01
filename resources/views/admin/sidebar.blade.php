@@ -810,6 +810,10 @@
                 <i class="fas fa-calendar-check"></i>
                 <span>Appointment</span>
             </a>
+            <a href="{{ route('admin.walk-ins.index') }}" class="nav-item {{ request()->routeIs('admin.walk-ins.*') ? 'active' : '' }}">
+                <i class="fas fa-list-ol"></i>
+                <span>Walk-in Queue</span>
+            </a>
             <a href="{{ route('admin.services.index') }}" class="nav-item {{ request()->routeIs('admin.services.*') ? 'active' : '' }}">
                 <i class="fas fa-user-tie"></i>
                 <span>Service</span>

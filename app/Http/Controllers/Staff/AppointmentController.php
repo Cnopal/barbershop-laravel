@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Appointment;
 use App\Models\Service;
 use App\Models\User;
+use App\Services\BarberAvailabilityService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 
@@ -71,7 +72,7 @@ class AppointmentController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, BarberAvailabilityService $availability)
     {
         $request->validate([
             'customer_id' => 'required|exists:users,id',
@@ -93,19 +94,30 @@ class AppointmentController extends Controller
         $start = Carbon::parse($request->appointment_date . ' ' . $request->start_time);
         $end = $start->copy()->addMinutes($service->duration);
 
-        $conflict = Appointment::where('barber_id', $staffId)
-            ->whereDate('appointment_date', $request->appointment_date)
-            ->whereIn('status', ['pending', 'confirmed', 'pending_payment'])
-            ->where(function ($q) use ($start, $end) {
-                $q->where('start_time', '<', $end->format('H:i:s'))
-                  ->where('end_time', '>', $start->format('H:i:s'));
-            })
-            ->exists();
+        $appointmentConflict = $availability->findAppointmentConflict(
+            $staffId,
+            $request->appointment_date,
+            $start,
+            $end
+        );
 
-        if ($conflict) {
+        if ($appointmentConflict) {
             return back()
                 ->withInput()
-                ->withErrors(['start_time' => 'You are not available at this time']);
+                ->withErrors(['start_time' => 'You are not available at this time. ' . $availability->appointmentConflictMessage($appointmentConflict)]);
+        }
+
+        $walkInConflict = $availability->findServingWalkInConflict(
+            $staffId,
+            $request->appointment_date,
+            $start,
+            $end
+        );
+
+        if ($walkInConflict) {
+            return back()
+                ->withInput()
+                ->withErrors(['start_time' => 'You are not available at this time. ' . $availability->walkInConflictMessage($walkInConflict)]);
         }
 
         Appointment::create([
@@ -196,7 +208,7 @@ class AppointmentController extends Controller
     /**
      * Get available slots for staff creating appointments
      */
-    public function getAvailableSlots(Request $request)
+    public function getAvailableSlots(Request $request, BarberAvailabilityService $availability)
     {
         $request->validate([
             'date' => 'required|date',
@@ -248,28 +260,13 @@ class AppointmentController extends Controller
             }
         }
 
-        // Get staff's existing appointments for that day (only active statuses)
-        $existing = Appointment::where('barber_id', $staffId)
-            ->where('appointment_date', $request->date)
-            ->whereIn('status', ['pending', 'confirmed', 'pending_payment'])
-            ->get(['start_time', 'end_time']);
-
-        $available = array_filter($slots, function ($slot) use ($existing) {
+        $available = array_filter($slots, function ($slot) use ($availability, $staffId, $request) {
             // Filter out past slots
             if ($slot['past']) {
                 return false;
             }
 
-            // Filter out overlapping slots
-            foreach ($existing as $appointment) {
-                if (
-                    strtotime($slot['start']) < strtotime($appointment->end_time) &&
-                    strtotime($slot['end']) > strtotime($appointment->start_time)
-                ) {
-                    return false;
-                }
-            }
-            return true;
+            return !$availability->slotHasConflict($staffId, $request->date, $slot['start'], $slot['end']);
         });
 
         return response()->json([

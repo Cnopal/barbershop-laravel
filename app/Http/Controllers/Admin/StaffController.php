@@ -17,7 +17,7 @@ class StaffController extends Controller
 
     public function index()
     {
-        $staffs = User::where('role', 'staff')->paginate(9);
+        $staffs = User::where('role', 'staff')->paginate(12);
         return view('admin.staffs.index', compact('staffs'));
     }
 

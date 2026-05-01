@@ -349,7 +349,7 @@
     <div class="sidebar" id="sidebar">
         <div class="logo">
             <i class="fas fa-cut"></i>
-            <h1>BarberPro</h1>
+            <h1>Men's Club</h1>
         </div>
 
         <nav class="nav-links">
@@ -366,6 +366,10 @@
             <a href="{{ route('staff.appointments.index') }}"
                 class="nav-item {{ request()->routeIs('staff.appointments.*') ? 'active' : '' }}">
                 <i class="fas fa-briefcase"></i> Appointments
+            </a>
+            <a href="{{ route('staff.walk-ins.index') }}"
+                class="nav-item {{ request()->routeIs('staff.walk-ins.*') ? 'active' : '' }}">
+                <i class="fas fa-list-ol"></i> Walk-in Queue
             </a>
             <a href="{{ route('staff.services.index') }}"
                 class="nav-item {{ request()->routeIs('staff.services.*') ? 'active' : '' }}">

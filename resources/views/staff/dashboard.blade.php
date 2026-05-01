@@ -68,6 +68,15 @@
         font-weight: 500;
     }
 
+    .stat-breakdown {
+        margin-top: 10px;
+        display: grid;
+        gap: 4px;
+        color: var(--secondary);
+        font-size: 12px;
+        font-weight: 600;
+    }
+
     .two-column-layout {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -150,6 +159,27 @@
     .appointment-status.confirmed {
         background: #c6f6d5;
         color: #22543d;
+    }
+
+    .appointment-status.waiting {
+        background: #fefcbf;
+        color: #744210;
+    }
+
+    .appointment-status.serving {
+        background: #bee3f8;
+        color: #2c5282;
+    }
+
+    .appointment-status.completed {
+        background: #c6f6d5;
+        color: #22543d;
+    }
+
+    .appointment-status.skipped,
+    .appointment-status.cancelled {
+        background: #fed7d7;
+        color: #742a2a;
     }
 
     .empty-state {
@@ -281,6 +311,12 @@
     </div>
 
     <div class="stat-card blue">
+        <div class="stat-icon"><i class="fas fa-list-ol"></i></div>
+        <div class="stat-value">{{ $todayWalkIns }}</div>
+        <div class="stat-label">Today's Walk-ins</div>
+    </div>
+
+    <div class="stat-card blue">
         <div class="stat-icon"><i class="fas fa-calendar-alt"></i></div>
         <div class="stat-value">{{ $upcomingAppointments }}</div>
         <div class="stat-label">Upcoming Appointments</div>
@@ -288,14 +324,23 @@
 
     <div class="stat-card green">
         <div class="stat-icon"><i class="fas fa-check"></i></div>
-        <div class="stat-value">{{ $completedAppointments }}</div>
-        <div class="stat-label">Completed Appointments</div>
+        <div class="stat-value">{{ $completedAppointments + $completedWalkIns }}</div>
+        <div class="stat-label">Completed Services</div>
+        <div class="stat-breakdown">
+            <span>{{ $completedAppointments }} appointments</span>
+            <span>{{ $completedWalkIns }} walk-ins</span>
+        </div>
     </div>
 
     <div class="stat-card orange">
         <div class="stat-icon"><i class="fas fa-money-bill-wave"></i></div>
         <div class="stat-value">RM {{ number_format($totalRevenue, 2) }}</div>
         <div class="stat-label">Total Revenue</div>
+        <div class="stat-breakdown">
+            <span>Appointments RM{{ number_format($appointmentRevenue, 2) }}</span>
+            <span>Walk-ins RM{{ number_format($walkInRevenue, 2) }}</span>
+            <span>Products RM{{ number_format($productRevenue, 2) }}</span>
+        </div>
     </div>
 </div>
 
@@ -364,6 +409,40 @@
             </div>
         @endif
     </div>
+</div>
+
+<div class="section-card" style="margin-top: 30px;">
+    <div class="section-title">
+        <i class="fas fa-list-ol"></i> Recent Walk-ins
+    </div>
+
+    @if($recentWalkIns->count() > 0)
+        @foreach($recentWalkIns as $queue)
+            <div class="appointment-item">
+                <div class="appointment-info">
+                    <div class="appointment-customer">{{ $queue->display_customer_name }}</div>
+                    <div class="appointment-service">{{ $queue->service->name ?? 'Walk-in service' }}</div>
+                    <div class="appointment-time">
+                        <i class="fas fa-calendar"></i>
+                        {{ $queue->queue_date->format('d M Y') }} · {{ $queue->formatted_wait }}
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <span class="appointment-status {{ strtolower($queue->status) }}">
+                        {{ $queue->status_label }}
+                    </span>
+                    <div style="font-size: 14px; font-weight: 600; color: var(--primary); margin-top: 5px;">
+                        RM {{ number_format($queue->price, 2) }}
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    @else
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No walk-ins found</p>
+        </div>
+    @endif
 </div>
 
 <div class="section-card" style="margin-top: 30px;">

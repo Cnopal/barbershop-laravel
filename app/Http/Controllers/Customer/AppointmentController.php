@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Service;
 use App\Models\User;
+use App\Services\BarberAvailabilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -52,7 +53,7 @@ class AppointmentController extends Controller
     }
 
     // Store - Save new appointment
-    public function store(Request $request)
+    public function store(Request $request, BarberAvailabilityService $availability)
     {
         $request->validate([
             'service_id' => 'required|exists:services,id',
@@ -95,18 +96,26 @@ class AppointmentController extends Controller
             return back()->withInput()->with('error', 'You already have an appointment during this time.');
         }
 
-        // Barber conflict
-        $hasBarberConflict = Appointment::where('barber_id', $request->barber_id)
-            ->where('appointment_date', $request->appointment_date)
-            ->whereIn('status', ['pending', 'pending_payment', 'confirmed'])
-            ->where(function ($q) use ($start_time, $end_time) {
-                $q->where('start_time', '<', $end_time)
-                    ->where('end_time', '>', $start_time);
-            })
-            ->exists();
+        $appointmentConflict = $availability->findAppointmentConflict(
+            (int) $request->barber_id,
+            $request->appointment_date,
+            Carbon::parse($request->appointment_date . ' ' . $start_time, 'Asia/Kuala_Lumpur'),
+            Carbon::parse($request->appointment_date . ' ' . $end_time, 'Asia/Kuala_Lumpur')
+        );
 
-        if ($hasBarberConflict) {
-            return back()->withInput()->with('error', 'Selected barber is already booked.');
+        if ($appointmentConflict) {
+            return back()->withInput()->with('error', 'Selected barber is already booked. ' . $availability->appointmentConflictMessage($appointmentConflict));
+        }
+
+        $walkInConflict = $availability->findServingWalkInConflict(
+            (int) $request->barber_id,
+            $request->appointment_date,
+            Carbon::parse($request->appointment_date . ' ' . $start_time, 'Asia/Kuala_Lumpur'),
+            Carbon::parse($request->appointment_date . ' ' . $end_time, 'Asia/Kuala_Lumpur')
+        );
+
+        if ($walkInConflict) {
+            return back()->withInput()->with('error', 'Selected barber is not available. ' . $availability->walkInConflictMessage($walkInConflict));
         }
 
         // At least 2 hours in advance
@@ -241,7 +250,7 @@ class AppointmentController extends Controller
     }
 
     // Add this to your controller (getAvailableSlots method):
-    public function getAvailableSlots(Request $request)
+    public function getAvailableSlots(Request $request, BarberAvailabilityService $availability)
     {
         $request->validate([
             'date' => 'required|date',
@@ -293,28 +302,18 @@ class AppointmentController extends Controller
             }
         }
 
-        // Get barber's existing appointments for that day
-        $existing = Appointment::where('barber_id', $request->barber_id)
-            ->where('appointment_date', $request->date)
-            ->whereIn('status', ['pending', 'pending_payment', 'confirmed'])
-            ->get(['start_time', 'end_time']);
-
-        $available = array_filter($slots, function ($slot) use ($existing) {
+        $available = array_filter($slots, function ($slot) use ($availability, $request) {
             // Filter out past slots
             if ($slot['past']) {
                 return false;
             }
 
-            // Filter out overlapping slots
-            foreach ($existing as $appointment) {
-                if (
-                    strtotime($slot['start']) < strtotime($appointment->end_time) &&
-                    strtotime($slot['end']) > strtotime($appointment->start_time)
-                ) {
-                    return false;
-                }
-            }
-            return true;
+            return !$availability->slotHasConflict(
+                (int) $request->barber_id,
+                $request->date,
+                $slot['start'],
+                $slot['end']
+            );
         });
 
         return response()->json([

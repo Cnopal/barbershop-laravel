@@ -19,8 +19,13 @@ class Service extends Model
 
 
     public function appointments()
-{
-    return $this->hasMany(Appointment::class);
-}
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
+    public function walkInQueues()
+    {
+        return $this->hasMany(WalkInQueue::class);
+    }
 
 }

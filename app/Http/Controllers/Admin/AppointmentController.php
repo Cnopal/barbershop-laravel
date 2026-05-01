@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Service;
 use App\Models\Appointment;
+use App\Services\BarberAvailabilityService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -82,7 +83,7 @@ class AppointmentController extends Controller
     /**
      * Store a newly created appointment.
      */
-    public function store(Request $request)
+    public function store(Request $request, BarberAvailabilityService $availability)
     {
         $request->validate([
             'customer_id' => 'required|exists:users,id',
@@ -105,21 +106,30 @@ class AppointmentController extends Controller
         $start = Carbon::parse($request->appointment_date . ' ' . $request->start_time);
         $end = $start->copy()->addMinutes($service->duration);
 
-        // Check barber availability - only check for statuses that block the slot
-        // Completed and cancelled appointments don't block availability
-        $conflict = Appointment::where('barber_id', $request->barber_id)
-            ->where('appointment_date', $request->appointment_date)
-            ->whereIn('status', ['pending', 'confirmed', 'pending_payment'])
-            ->where(function ($q) use ($start, $end) {
-                $q->where('start_time', '<', $end->format('H:i:s'))
-                    ->where('end_time', '>', $start->format('H:i:s'));
-            })
-            ->exists();
+        $appointmentConflict = $availability->findAppointmentConflict(
+            (int) $request->barber_id,
+            $request->appointment_date,
+            $start,
+            $end
+        );
 
-        if ($conflict) {
+        if ($appointmentConflict) {
             return back()
                 ->withInput()
-                ->withErrors(['start_time' => 'Barber is not available at this time']);
+                ->withErrors(['start_time' => 'Barber is not available at this time. ' . $availability->appointmentConflictMessage($appointmentConflict)]);
+        }
+
+        $walkInConflict = $availability->findServingWalkInConflict(
+            (int) $request->barber_id,
+            $request->appointment_date,
+            $start,
+            $end
+        );
+
+        if ($walkInConflict) {
+            return back()
+                ->withInput()
+                ->withErrors(['start_time' => 'Barber is not available at this time. ' . $availability->walkInConflictMessage($walkInConflict)]);
         }
 
         Appointment::create([
@@ -167,7 +177,7 @@ class AppointmentController extends Controller
     /**
      * Update appointment.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, BarberAvailabilityService $availability)
     {
         $appointment = Appointment::findOrFail($id);
 
@@ -199,22 +209,31 @@ class AppointmentController extends Controller
 
         $end = $start->copy()->addMinutes($service->duration);
 
-        // Check barber availability (exclude current appointment)
-        // Only check for statuses that block the slot (not completed or cancelled)
-        $conflict = Appointment::where('barber_id', $request->barber_id)
-            ->where('appointment_date', $dateOnly)
-            ->whereIn('status', ['pending', 'confirmed', 'pending_payment'])
-            ->where('id', '!=', $appointment->id)
-            ->where(function ($q) use ($start, $end) {
-                $q->where('start_time', '<', $end->format('H:i:s'))
-                    ->where('end_time', '>', $start->format('H:i:s'));
-            })
-            ->exists();
+        $appointmentConflict = $availability->findAppointmentConflict(
+            (int) $request->barber_id,
+            $dateOnly,
+            $start,
+            $end,
+            $appointment->id
+        );
 
-        if ($conflict) {
+        if ($appointmentConflict) {
             return back()
                 ->withInput()
-                ->withErrors(['start_time' => 'Barber is not available at this time']);
+                ->withErrors(['start_time' => 'Barber is not available at this time. ' . $availability->appointmentConflictMessage($appointmentConflict)]);
+        }
+
+        $walkInConflict = $availability->findServingWalkInConflict(
+            (int) $request->barber_id,
+            $dateOnly,
+            $start,
+            $end
+        );
+
+        if ($walkInConflict) {
+            return back()
+                ->withInput()
+                ->withErrors(['start_time' => 'Barber is not available at this time. ' . $availability->walkInConflictMessage($walkInConflict)]);
         }
 
         $appointment->update([
@@ -255,7 +274,7 @@ class AppointmentController extends Controller
     /**
      * Get available time slots for the admin appointment creation
      */
-    public function availableSlots(Request $request)
+    public function availableSlots(Request $request, BarberAvailabilityService $availability)
     {
         $request->validate([
             'barber_id' => 'required|integer|exists:users,id',
@@ -314,33 +333,14 @@ class AppointmentController extends Controller
                 }
             }
 
-            // Get barber's existing appointments for that day
-            // Only count pending/confirmed/pending_payment status (not completed or cancelled)
-            $existing = Appointment::where('barber_id', $barberId)
-                ->where('appointment_date', $date)
-                ->whereIn('status', ['pending', 'confirmed', 'pending_payment'])
-                ->get(['start_time', 'end_time']);
-
             // Filter out unavailable slots
-            $available = array_filter($slots, function ($slot) use ($existing) {
+            $available = array_filter($slots, function ($slot) use ($availability, $barberId, $date) {
                 // Filter out past slots
                 if ($slot['past']) {
                     return false;
                 }
 
-                // Filter out overlapping slots
-                foreach ($existing as $appointment) {
-                    // Convert to comparable format (H:i)
-                    $slotStart = $slot['start']; // H:i format
-                    $slotEnd = $slot['end'];     // H:i format
-                    $apptStart = substr($appointment->start_time, 0, 5); // H:i format
-                    $apptEnd = substr($appointment->end_time, 0, 5);    // H:i format
-                    
-                    if ($slotStart < $apptEnd && $slotEnd > $apptStart) {
-                        return false;
-                    }
-                }
-                return true;
+                return !$availability->slotHasConflict((int) $barberId, $date, $slot['start'], $slot['end']);
             });
 
             return response()->json([
