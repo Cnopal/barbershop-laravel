@@ -13,14 +13,70 @@ use Illuminate\Support\Facades\Hash;
 
 class AppointmentController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $appointments = Appointment::where('barber_id', auth()->id())
-            ->with(['customer', 'service'])
-            ->latest()
-            ->paginate(20);
+        $filters = $request->validate([
+            'search' => 'nullable|string|max:255',
+            'status' => 'nullable|in:all,pending_payment,confirmed,completed,cancelled',
+            'from' => 'nullable|date',
+            'to' => 'nullable|date|after_or_equal:from',
+            'sort' => 'nullable|in:latest,date_asc,date_desc,customer,service,price_desc',
+        ]);
 
-        return view('staff.appointments.index', compact('appointments'));
+        $query = Appointment::where('barber_id', auth()->id())
+            ->with(['customer', 'service']);
+
+        if (!empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($appointmentQuery) use ($search) {
+                $appointmentQuery->where('recipient_name', 'like', "%{$search}%")
+                    ->orWhereHas('customer', function ($customerQuery) use ($search) {
+                        $customerQuery->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('service', function ($serviceQuery) use ($search) {
+                        $serviceQuery->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if (!empty($filters['status']) && $filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
+        }
+
+        if (!empty($filters['from'])) {
+            $query->whereDate('appointment_date', '>=', $filters['from']);
+        }
+
+        if (!empty($filters['to'])) {
+            $query->whereDate('appointment_date', '<=', $filters['to']);
+        }
+
+        match ($filters['sort'] ?? 'latest') {
+            'date_asc' => $query->orderBy('appointment_date')->orderBy('start_time'),
+            'date_desc' => $query->orderByDesc('appointment_date')->orderByDesc('start_time'),
+            'customer' => $query->join('users as customers', 'appointments.customer_id', '=', 'customers.id')
+                ->orderBy('customers.name')
+                ->select('appointments.*'),
+            'service' => $query->join('services', 'appointments.service_id', '=', 'services.id')
+                ->orderBy('services.name')
+                ->orderByDesc('appointment_date')
+                ->select('appointments.*'),
+            'price_desc' => $query->orderByDesc('price')->orderByDesc('appointment_date'),
+            default => $query->latest(),
+        };
+
+        $appointments = $query->paginate(12)->withQueryString();
+
+        $summary = [
+            'shown' => $appointments->total(),
+            'confirmed' => Appointment::where('barber_id', auth()->id())->where('status', 'confirmed')->count(),
+            'completed' => Appointment::where('barber_id', auth()->id())->where('status', 'completed')->count(),
+            'pending_payment' => Appointment::where('barber_id', auth()->id())->where('status', 'pending_payment')->count(),
+        ];
+
+        return view('staff.appointments.index', compact('appointments', 'filters', 'summary'));
     }
 
     public function create()
