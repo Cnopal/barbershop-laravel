@@ -269,9 +269,19 @@
             display: block;
         }
 
-        html:has(.content-wrapper .modal.active),
-        body:has(.content-wrapper .modal.active) {
+        html.modal-open,
+        body.modal-open,
+        html:has(.content-wrapper .modal:is(.active, .show)),
+        body:has(.content-wrapper .modal:is(.active, .show)) {
             overflow: hidden;
+        }
+
+        body.modal-open .main-content,
+        body.modal-open .content-wrapper,
+        body:has(.content-wrapper .modal:is(.active, .show)) .main-content,
+        body:has(.content-wrapper .modal:is(.active, .show)) .content-wrapper {
+            transform: none !important;
+            animation: none !important;
         }
 
         .content-wrapper .modal {
@@ -288,7 +298,8 @@
             z-index: 4000 !important;
         }
 
-        .content-wrapper .modal.active {
+        .content-wrapper .modal.active,
+        .content-wrapper .modal.show {
             display: flex !important;
         }
 
@@ -488,6 +499,23 @@
     </div>
 
     <script>
+        (function () {
+            const syncModalViewportLock = function () {
+                const hasOpenModal = Boolean(document.querySelector('.modal.active, .modal.show'));
+                document.documentElement.classList.toggle('modal-open', hasOpenModal);
+                document.body.classList.toggle('modal-open', hasOpenModal);
+            };
+
+            syncModalViewportLock();
+
+            new MutationObserver(syncModalViewportLock).observe(document.body, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+        })();
+
         // Mobile sidebar toggle
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');

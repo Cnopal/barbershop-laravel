@@ -1032,9 +1032,17 @@
                 padding: 24px !important;
             }
 
-            html:has(.main-content .modal.active),
-            body:has(.main-content .modal.active) {
+            html.modal-open,
+            body.modal-open,
+            html:has(.main-content .modal:is(.active, .show)),
+            body:has(.main-content .modal:is(.active, .show)) {
                 overflow: hidden;
+            }
+
+            body.modal-open .main-content,
+            body:has(.main-content .modal:is(.active, .show)) .main-content {
+                transform: none !important;
+                animation: none !important;
             }
 
             .main-content .modal-content {
@@ -1063,7 +1071,8 @@
                 z-index: 4000 !important;
             }
 
-        .main-content .modal.active {
+        .main-content .modal.active,
+        .main-content .modal.show {
             display: flex !important;
         }
 
@@ -1222,6 +1231,23 @@
     </div>
 
     <script>
+        (function () {
+            const syncModalViewportLock = function () {
+                const hasOpenModal = Boolean(document.querySelector('.modal.active, .modal.show'));
+                document.documentElement.classList.toggle('modal-open', hasOpenModal);
+                document.body.classList.toggle('modal-open', hasOpenModal);
+            };
+
+            syncModalViewportLock();
+
+            new MutationObserver(syncModalViewportLock).observe(document.body, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+        })();
+
         // Mobile sidebar toggle
         const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');

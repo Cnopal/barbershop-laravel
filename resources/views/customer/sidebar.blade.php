@@ -504,9 +504,19 @@
             }
         }
 
-        html:has(.main-content .modal.active),
-        body:has(.main-content .modal.active) {
+        html.modal-open,
+        body.modal-open,
+        html:has(.main-content .modal:is(.active, .show)),
+        body:has(.main-content .modal:is(.active, .show)) {
             overflow: hidden;
+        }
+
+        body.modal-open .main-content,
+        body.modal-open .content-wrapper,
+        body:has(.main-content .modal:is(.active, .show)) .main-content,
+        body:has(.main-content .modal:is(.active, .show)) .content-wrapper {
+            transform: none !important;
+            animation: none !important;
         }
 
         .main-content .modal {
@@ -523,7 +533,8 @@
             z-index: 4000 !important;
         }
 
-        .main-content .modal.active {
+        .main-content .modal.active,
+        .main-content .modal.show {
             display: flex !important;
         }
 
@@ -844,6 +855,21 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            const syncModalViewportLock = function () {
+                const hasOpenModal = Boolean(document.querySelector('.modal.active, .modal.show'));
+                document.documentElement.classList.toggle('modal-open', hasOpenModal);
+                document.body.classList.toggle('modal-open', hasOpenModal);
+            };
+
+            syncModalViewportLock();
+
+            new MutationObserver(syncModalViewportLock).observe(document.body, {
+                subtree: true,
+                childList: true,
+                attributes: true,
+                attributeFilter: ['class'],
+            });
+
             const mobileMenuBtn = document.getElementById('mobileMenuBtn');
             const sidebar = document.getElementById('sidebar');
             const mainContent = document.getElementById('mainContent');
