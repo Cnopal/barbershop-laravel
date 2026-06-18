@@ -19,12 +19,12 @@
                         <img src="{{ $service->image_url }}" alt="{{ $service->name }}">
                     @else
                     @php
-                        $icon = 'fas fa-cut';
+                        $icon = 'fas fa-scissors';
                         $nameLower = strtolower($service->name);
                         if (str_contains($nameLower, 'shave') || str_contains($nameLower, 'beard')) {
-                            $icon = 'fas fa-razor';
+                            $icon = 'fas fa-scissors';
                         } elseif (str_contains($nameLower, 'color') || str_contains($nameLower, 'dye')) {
-                            $icon = 'fas fa-paint-brush';
+                            $icon = 'fas fa-palette';
                         } elseif (str_contains($nameLower, 'wash') || str_contains($nameLower, 'shampoo')) {
                             $icon = 'fas fa-shower';
                         } elseif (str_contains($nameLower, 'style') || str_contains($nameLower, 'styling')) {
@@ -34,7 +34,7 @@
                         } elseif (str_contains($nameLower, 'massage') || str_contains($nameLower, 'treatment')) {
                             $icon = 'fas fa-spa';
                         } elseif (str_contains($nameLower, 'facial')) {
-                            $icon = 'fas fa-user-md';
+                            $icon = 'fas fa-user-doctor';
                         }
                     @endphp
                     <i class="{{ $icon }}"></i>
@@ -102,7 +102,7 @@
         @empty
         <div class="empty-state">
             <div class="empty-icon">
-                <i class="fas fa-cut"></i>
+                <i class="fas fa-scissors"></i>
             </div>
             <h3>No Services Available</h3>
             <p>Check back soon for our service offerings</p>
@@ -852,9 +852,9 @@ document.addEventListener('DOMContentLoaded', function() {
             iconClass: function() {
                 const nameLower = this.name.toLowerCase();
                 if (nameLower.includes('shave') || nameLower.includes('beard')) {
-                    return 'fas fa-razor';
+                    return 'fas fa-scissors';
                 } else if (nameLower.includes('color') || nameLower.includes('dye')) {
-                    return 'fas fa-paint-brush';
+                    return 'fas fa-palette';
                 } else if (nameLower.includes('wash') || nameLower.includes('shampoo')) {
                     return 'fas fa-shower';
                 } else if (nameLower.includes('style') || nameLower.includes('styling')) {
@@ -864,9 +864,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (nameLower.includes('massage') || nameLower.includes('treatment')) {
                     return 'fas fa-spa';
                 } else if (nameLower.includes('facial')) {
-                    return 'fas fa-user-md';
+                    return 'fas fa-user-doctor';
                 }
-                return 'fas fa-cut';
+                return 'fas fa-scissors';
             }
         },
         @endforeach

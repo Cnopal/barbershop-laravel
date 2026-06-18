@@ -288,6 +288,7 @@
                 @endforelse
             </div>
         </section>
+
     </main>
 
     <script>

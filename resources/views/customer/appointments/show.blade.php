@@ -44,7 +44,10 @@
                     <h3><i class="fas fa-hourglass-half"></i> Payment Pending</h3>
                     <p>
                         Complete payment before {{ $appointment->paymentDeadline()?->format('M d, Y h:i A') }}.
-                        This appointment will be cancelled automatically after 15 minutes.
+                        <span>
+                        Payment expires in 
+                        ( {{ $appointment->paymentMinutesRemaining() }} min )
+                    </span>
                     </p>
                 </div>
                 <a href="{{ route('customer.appointments.pay', $appointment->id) }}" class="btn btn-primary">

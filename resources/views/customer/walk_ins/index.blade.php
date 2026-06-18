@@ -9,9 +9,6 @@
             <h1>My Walk-in Queue</h1>
             <p>Track your walk-in turn when staff links the queue to your account.</p>
         </div>
-        <a href="{{ route('walk-ins.display') }}" class="btn btn-outline" target="_blank">
-            <i class="fas fa-tv"></i> Queue Screen
-        </a>
     </div>
 
     @if($activeQueue)
@@ -59,6 +56,73 @@
             <p>If you already checked in at the counter, ask staff to link the queue to your registered account.</p>
         </section>
     @endif
+
+    <section class="live-queue-board">
+        <div class="section-header board-header">
+            <div>
+                <h2>Live Queue Board</h2>
+                <span>{{ now('Asia/Kuala_Lumpur')->format('h:i A') }}</span>
+            </div>
+            <span class="queue-count">{{ $servingQueues->count() + $waitingQueues->count() }} active</span>
+        </div>
+
+        <div class="live-queue-grid">
+            <div class="live-queue-panel">
+                <div class="live-panel-title">
+                    <i class="fas fa-bell"></i>
+                    <h3>Now Serving</h3>
+                </div>
+
+                <div class="live-list">
+                    @forelse($servingQueues as $queue)
+                        <article class="live-row serving-row {{ $queue->customer_id === auth()->id() ? 'is-yours' : '' }}">
+                            <div class="live-number">{{ $queue->queue_code }}</div>
+                            <div class="live-main">
+                                <strong>{{ $queue->display_customer_name }}</strong>
+                                <div class="live-meta">
+                                    <span>{{ $queue->barber->name ?? 'Any barber' }}</span>
+                                    <span>{{ $queue->service->name ?? 'Walk-in service' }}</span>
+                                </div>
+                            </div>
+                            <span class="queue-tag serving-tag">
+                                {{ $queue->customer_id === auth()->id() ? 'You' : 'Serving' }}
+                            </span>
+                        </article>
+                    @empty
+                        <div class="live-empty">No customer is being served right now.</div>
+                    @endforelse
+                </div>
+            </div>
+
+            <div class="live-queue-panel">
+                <div class="live-panel-title">
+                    <i class="fas fa-list-ol"></i>
+                    <h3>Waiting Queue</h3>
+                </div>
+
+                <div class="live-list">
+                    @forelse($waitingQueues as $index => $queue)
+                        <article class="live-row {{ $queue->customer_id === auth()->id() ? 'is-yours' : '' }}">
+                            <div class="live-number">{{ $queue->queue_code }}</div>
+                            <div class="live-main">
+                                <strong>{{ $queue->display_customer_name }}</strong>
+                                <div class="live-meta">
+                                    <span>{{ $queue->barber->name ?? 'Any barber' }}</span>
+                                    <span>{{ $queue->service->name ?? 'Walk-in service' }}</span>
+                                </div>
+                            </div>
+                            <div class="queue-position">
+                                <span>Barber queue #{{ $queue->lane_position ?? $index + 1 }}</span>
+                                <strong>{{ $queue->customer_id === auth()->id() ? 'You' : $queue->formatted_wait }}</strong>
+                            </div>
+                        </article>
+                    @empty
+                        <div class="live-empty">Queue is clear.</div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </section>
 
     <section class="history-panel">
         <div class="section-header">
@@ -121,6 +185,7 @@
 
     .active-queue-card,
     .empty-queue,
+    .live-queue-board,
     .history-panel {
         background: #fff;
         border: 1px solid #e2e8f0;
@@ -205,6 +270,165 @@
         margin-bottom: 18px;
     }
 
+    .live-queue-board {
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+
+    .board-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .board-header div {
+        display: grid;
+        gap: 5px;
+    }
+
+    .board-header span,
+    .queue-count {
+        color: #718096;
+        font-size: 14px;
+        font-weight: 800;
+    }
+
+    .queue-count {
+        color: #1a1f36;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        padding: 7px 12px;
+        background: #f8fafc;
+        white-space: nowrap;
+    }
+
+    .live-queue-grid {
+        display: grid;
+        grid-template-columns: minmax(280px, 0.85fr) 1.15fr;
+        gap: 18px;
+        padding: 18px;
+    }
+
+    .live-queue-panel {
+        min-width: 0;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+        overflow: hidden;
+    }
+
+    .live-panel-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 18px;
+        border-bottom: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .live-panel-title i {
+        color: #d4af37;
+    }
+
+    .live-panel-title h3 {
+        margin: 0;
+        color: #1a1f36;
+        font-size: 18px;
+    }
+
+    .live-list {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+    }
+
+    .live-row {
+        display: grid;
+        grid-template-columns: 92px minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 14px;
+        padding: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    .live-row.is-yours {
+        border-color: #d4af37;
+        background: #fffbeb;
+        box-shadow: 0 8px 22px rgba(212, 175, 55, 0.16);
+    }
+
+    .serving-row {
+        border-color: rgba(66, 153, 225, 0.35);
+        background: #ebf8ff;
+    }
+
+    .live-number {
+        color: #d4af37;
+        font-size: 24px;
+        font-weight: 900;
+    }
+
+    .live-main {
+        min-width: 0;
+    }
+
+    .live-main strong {
+        display: block;
+        color: #1a1f36;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .live-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 12px;
+        margin-top: 5px;
+        color: #718096;
+        font-size: 13px;
+    }
+
+    .queue-tag,
+    .queue-position {
+        justify-self: end;
+        display: grid;
+        gap: 2px;
+        text-align: right;
+    }
+
+    .queue-tag,
+    .queue-position strong {
+        border-radius: 999px;
+        padding: 6px 10px;
+        background: #edf2f7;
+        color: #1a1f36;
+        font-size: 12px;
+        font-weight: 900;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .serving-tag {
+        background: #bee3f8;
+        color: #2c5282;
+    }
+
+    .queue-position span {
+        color: #718096;
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    .live-empty {
+        padding: 28px 16px;
+        text-align: center;
+        color: #718096;
+    }
+
     .section-header {
         padding: 20px 24px;
         border-bottom: 1px solid #e2e8f0;
@@ -270,9 +494,21 @@
 
     @media (max-width: 860px) {
         .active-queue-card,
+        .live-queue-grid,
         .history-row,
         .info-grid {
             grid-template-columns: 1fr;
+        }
+
+        .live-row {
+            grid-template-columns: 1fr;
+            align-items: start;
+        }
+
+        .queue-tag,
+        .queue-position {
+            justify-self: start;
+            text-align: left;
         }
     }
 </style>

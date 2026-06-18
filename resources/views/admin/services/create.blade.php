@@ -138,7 +138,7 @@
                     <div class="service-preview">
                         <div class="preview-header">
                             <div class="preview-icon" id="previewIcon">
-                                <i class="fas fa-cut"></i>
+                                <i class="fas fa-scissors"></i>
                             </div>
                             <div class="preview-info">
                                 <h4 id="previewName">Service Name</h4>
@@ -659,12 +659,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Icon mapping based on service name keywords
     const iconMap = {
-        'shave': 'fas fa-razor',
-        'beard': 'fas fa-razor',
-        'razor': 'fas fa-razor',
-        'color': 'fas fa-paint-brush',
-        'dye': 'fas fa-paint-brush',
-        'paint': 'fas fa-paint-brush',
+        'shave': 'fas fa-scissors',
+        'beard': 'fas fa-scissors',
+        'razor': 'fas fa-scissors',
+        'color': 'fas fa-palette',
+        'dye': 'fas fa-palette',
+        'paint': 'fas fa-palette',
         'wash': 'fas fa-shower',
         'shampoo': 'fas fa-shower',
         'clean': 'fas fa-shower',
@@ -673,15 +673,15 @@ document.addEventListener('DOMContentLoaded', function() {
         'spray': 'fas fa-spray-can',
         'trim': 'fas fa-scissors',
         'scissors': 'fas fa-scissors',
-        'cut': 'fas fa-cut',
-        'haircut': 'fas fa-cut',
+        'cut': 'fas fa-scissors',
+        'haircut': 'fas fa-scissors',
         'massage': 'fas fa-spa',
         'spa': 'fas fa-spa',
         'facial': 'fas fa-smile',
         'treatment': 'fas fa-medkit',
         'therapy': 'fas fa-heart',
         'wax': 'fas fa-fire',
-        'threading': 'fas fa-thread',
+        'threading': 'fas fa-grip-lines',
         'manicure': 'fas fa-hand-sparkles',
         'pedicure': 'fas fa-shoe-prints'
     };
@@ -735,7 +735,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const serviceName = nameInput.value.toLowerCase();
-        let selectedIcon = 'fas fa-cut'; // Default icon
+        let selectedIcon = 'fas fa-scissors'; // Default icon
         
         // Find matching icon
         for (const [keyword, icon] of Object.entries(iconMap)) {

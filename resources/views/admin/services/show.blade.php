@@ -30,11 +30,11 @@
                 @php
                     // Determine icon based on service name
                     $nameLower = strtolower($service->name);
-                    $icon = 'fas fa-cut';
+                    $icon = 'fas fa-scissors';
                     if (str_contains($nameLower, 'shave') || str_contains($nameLower, 'beard')) {
-                        $icon = 'fas fa-razor';
+                        $icon = 'fas fa-scissors';
                     } elseif (str_contains($nameLower, 'color') || str_contains($nameLower, 'dye')) {
-                        $icon = 'fas fa-paint-brush';
+                        $icon = 'fas fa-palette';
                     } elseif (str_contains($nameLower, 'wash') || str_contains($nameLower, 'shampoo')) {
                         $icon = 'fas fa-shower';
                     } elseif (str_contains($nameLower, 'style') || str_contains($nameLower, 'styling')) {

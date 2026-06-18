@@ -80,7 +80,7 @@ class AppointmentController extends Controller
             'recipient_name' => 'nullable|required_if:booking_for,other|string|max:255',
             'recipient_age' => 'nullable|required_if:booking_for,other|integer|min:0|max:120',
             'appointment_date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required|date_format:H:i:s', // ✅ FIX
+            'start_time' => 'required|date_format:H:i:s', 
             'notes' => 'nullable|string|max:500',
         ]);
 

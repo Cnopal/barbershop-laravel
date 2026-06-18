@@ -130,6 +130,7 @@ class AiHairController extends Controller
                 'face_shape' => $apiData['face_shape'],
                 'confidence' => $apiData['confidence'] ?? '85%',
                 'recommendations' => $apiData['recommendations'] ?? [],
+                'recommendation_details' => $this->recommendationDetails($apiData['recommendations'] ?? []),
                 'description' => $apiData['description'] ?? $this->getDefaultDescription($apiData['face_shape']),
                 'characteristics' => $apiData['characteristics'] ?? $this->getDefaultCharacteristics($apiData['face_shape']),
                 'measurements_mm' => $apiData['measurements_mm'] ?? $this->getDefaultMeasurements($apiData['face_shape']),
@@ -149,6 +150,201 @@ class AiHairController extends Controller
             'error' => 'Unexpected response format from analysis service',
             'message' => 'The face analysis service returned data in an unexpected format.'
         ];
+    }
+
+    private function recommendationDetails(array $recommendations): array
+    {
+        return collect($recommendations)
+            ->mapWithKeys(fn ($recommendation) => [
+                (string) $recommendation => $this->hairstyleDetail((string) $recommendation),
+            ])
+            ->all();
+    }
+
+    private function hairstyleDetail(string $recommendation): array
+    {
+        $catalog = $this->hairstyleCatalog();
+
+        if (isset($catalog[$recommendation])) {
+            return $catalog[$recommendation];
+        }
+
+        $normalizedRecommendation = strtolower(trim($recommendation));
+
+        foreach ($catalog as $name => $style) {
+            if (strtolower($name) === $normalizedRecommendation) {
+                return $style;
+            }
+        }
+
+        return array_merge($catalog['Generic Salon Haircut'], [
+            'name' => $recommendation,
+            'description' => 'A balanced salon-ready hairstyle that can be customized based on your hair type and lifestyle.',
+        ]);
+    }
+
+    private function hairstyleCatalog(): array
+    {
+        $sprite = 'images/hairstyles/hairstyle-sprite.png';
+        $styles = [
+            'Classic Pompadour' => [
+                'description' => 'Volume on top with short sides for a timeless look.',
+                'sprite_col' => 0,
+                'sprite_row' => 0,
+            ],
+            'Side Part' => [
+                'description' => 'Clean and professional with a defined part.',
+                'sprite_col' => 1,
+                'sprite_row' => 0,
+            ],
+            'Textured Undercut' => [
+                'description' => 'Modern contrast with textured top and short sides.',
+                'sprite_col' => 2,
+                'sprite_row' => 0,
+            ],
+            'Layered Medium Length' => [
+                'description' => 'Versatile layers that add movement and dimension.',
+                'sprite_col' => 3,
+                'sprite_row' => 0,
+            ],
+            'Modern Quiff' => [
+                'description' => 'Contemporary volume with a textured finish.',
+                'sprite_col' => 4,
+                'sprite_row' => 0,
+            ],
+            'Slick Back' => [
+                'description' => 'Sleek, polished styling for a sophisticated look.',
+                'sprite_col' => 5,
+                'sprite_row' => 0,
+            ],
+            'Textured Crop' => [
+                'description' => 'Low-maintenance short hair with modern texture.',
+                'sprite_col' => 0,
+                'sprite_row' => 1,
+            ],
+            'High Fade Quiff' => [
+                'description' => 'Sharp fade combined with a lifted, voluminous top.',
+                'sprite_col' => 1,
+                'sprite_row' => 1,
+            ],
+            'Side Part with Fade' => [
+                'description' => 'Classic side-part styling with clean faded edges.',
+                'sprite_col' => 2,
+                'sprite_row' => 1,
+            ],
+            'Angular Fringe' => [
+                'description' => 'A shaped fringe that frames the face with definition.',
+                'sprite_col' => 3,
+                'sprite_row' => 1,
+            ],
+            'Spiky Hair' => [
+                'description' => 'Defined, edgy texture with extra lift on top.',
+                'sprite_col' => 4,
+                'sprite_row' => 1,
+            ],
+            'Asymmetric Cut' => [
+                'description' => 'A modern uneven silhouette for a more unique profile.',
+                'sprite_col' => 5,
+                'sprite_row' => 1,
+            ],
+            'Buzz Cut' => [
+                'description' => 'Ultra-short, neat, and easy to maintain.',
+                'sprite_col' => 0,
+                'sprite_row' => 2,
+            ],
+            'Crew Cut' => [
+                'description' => 'Traditional short cut with clean, masculine lines.',
+                'sprite_col' => 1,
+                'sprite_row' => 2,
+            ],
+            'French Crop' => [
+                'description' => 'Short sides with a blunt, textured fringe.',
+                'sprite_col' => 2,
+                'sprite_row' => 2,
+            ],
+            'Faux Hawk' => [
+                'description' => 'A modern mohawk-inspired style with wearable volume.',
+                'sprite_col' => 3,
+                'sprite_row' => 2,
+            ],
+            'Short Textured' => [
+                'description' => 'Short length with natural-looking texture and shape.',
+                'sprite_col' => 4,
+                'sprite_row' => 2,
+            ],
+            'Flat Top' => [
+                'description' => 'A structured flat top with a bold retro edge.',
+                'sprite_col' => 5,
+                'sprite_row' => 2,
+            ],
+            'Side Swept Fringe' => [
+                'description' => 'Soft fringe swept to one side for a relaxed finish.',
+                'sprite_col' => 0,
+                'sprite_row' => 3,
+            ],
+            'Medium Length Layers' => [
+                'description' => 'Face-framing layers with a natural medium-length flow.',
+                'sprite_col' => 1,
+                'sprite_row' => 3,
+            ],
+            'Long Top Short Sides' => [
+                'description' => 'Strong length contrast with styling flexibility on top.',
+                'sprite_col' => 2,
+                'sprite_row' => 3,
+            ],
+            'Textured Quiff' => [
+                'description' => 'A lifted quiff with added texture and movement.',
+                'sprite_col' => 3,
+                'sprite_row' => 3,
+            ],
+            'Messy Layers' => [
+                'description' => 'Intentional messy layers for a casual, textured look.',
+                'sprite_col' => 4,
+                'sprite_row' => 3,
+            ],
+            'Textured Fringe' => [
+                'description' => 'A forward fringe with natural texture and soft shape.',
+                'sprite_col' => 5,
+                'sprite_row' => 3,
+            ],
+            'Side Part Pompadour' => [
+                'description' => 'A classic side part blended with pompadour volume.',
+                'sprite_col' => 0,
+                'sprite_row' => 4,
+            ],
+            'Modern Caesar Cut' => [
+                'description' => 'A contemporary short cut with a compact fringe.',
+                'sprite_col' => 1,
+                'sprite_row' => 4,
+            ],
+            'Full Fringe' => [
+                'description' => 'Full fringe coverage that softens the forehead area.',
+                'sprite_col' => 2,
+                'sprite_row' => 4,
+            ],
+            'Layered Cut with Bangs' => [
+                'description' => 'Layered movement with bangs to frame the face.',
+                'sprite_col' => 3,
+                'sprite_row' => 4,
+            ],
+            'Side Swept' => [
+                'description' => 'A natural side-swept finish with easy everyday styling.',
+                'sprite_col' => 4,
+                'sprite_row' => 4,
+            ],
+            'Generic Salon Haircut' => [
+                'description' => 'A balanced salon-ready hairstyle that can be customized to your face shape.',
+                'sprite_col' => 5,
+                'sprite_row' => 4,
+            ],
+        ];
+
+        return collect($styles)
+            ->mapWithKeys(fn ($style, $name) => [$name => array_merge($style, [
+                'name' => $name,
+                'image' => $sprite,
+            ])])
+            ->all();
     }
     
     /**

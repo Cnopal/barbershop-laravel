@@ -227,7 +227,25 @@
                     @if(isset($data['recommendations']) && count($data['recommendations']) > 0)
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         @foreach($data['recommendations'] as $index => $recommendation)
+                        @php
+                            $style = $data['recommendation_details'][$recommendation] ?? [];
+                            $styleImage = asset($style['image'] ?? 'images/hairstyles/hairstyle-sprite.png');
+                            $styleCol = $style['sprite_col'] ?? 5;
+                            $styleRow = $style['sprite_row'] ?? 4;
+                        @endphp
                         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                            <button
+                                type="button"
+                                onclick="openModal({{ $index }})"
+                                class="hairstyle-image-frame hairstyle-sprite-image w-full"
+                                style="--hair-col: {{ $styleCol }}; --hair-row: {{ $styleRow }}; background-image: url('{{ $styleImage }}');"
+                                aria-label="View {{ $recommendation }} details"
+                            >
+                                <span class="hairstyle-image-badge">
+                                    <i class="fas fa-search-plus"></i>
+                                    View
+                                </span>
+                            </button>
                             <div class="p-6">
                                 <div class="flex items-center justify-between mb-4">
                                     <div class="flex items-center">
@@ -240,43 +258,9 @@
                                         <i class="fas fa-info-circle"></i>
                                     </button>
                                 </div>
-                                
-                                @php
-                                    $styleDescriptions = [
-                                        'Classic Pompadour' => 'Volume on top with short sides for a timeless look',
-                                        'Side Part' => 'Clean and professional with a defined part',
-                                        'Textured Undercut' => 'Modern contrast with textured top and short sides',
-                                        'Layered Medium Length' => 'Versatile layers that add movement and dimension',
-                                        'Modern Quiff' => 'Contemporary volume with textured finish',
-                                        'Slick Back' => 'Sleek, polished style for a sophisticated look',
-                                        'Textured Crop' => 'Low maintenance with modern texture',
-                                        'High Fade Quiff' => 'Sharp fade combined with voluminous top',
-                                        'Side Part with Fade' => 'Classic styling with modern fade edges',
-                                        'Angular Fringe' => 'Geometric fringe that frames the face',
-                                        'Spiky Hair' => 'Edgy texture with defined spikes',
-                                        'Asymmetric Cut' => 'Modern asymmetry for a unique look',
-                                        'Buzz Cut' => 'Ultra-short and easy to maintain',
-                                        'Crew Cut' => 'Traditional short cut with clean lines',
-                                        'French Crop' => 'Short with a blunt, textured fringe',
-                                        'Faux Hawk' => 'Modern take on the mohawk style',
-                                        'Short Textured' => 'Short length with added texture',
-                                        'Flat Top' => 'Classic flat top for retro style',
-                                        'Side Swept Fringe' => 'Soft fringe swept to one side',
-                                        'Medium Length Layers' => 'Face-framing layers at medium length',
-                                        'Long Top Short Sides' => 'Dramatic contrast in length',
-                                        'Textured Quiff' => 'Modern quiff with added texture',
-                                        'Messy Layers' => 'Intentional messy, textured look',
-                                        'Textured Fringe' => 'Fringe with natural texture',
-                                        'Side Part Pompadour' => 'Combination of classic styles',
-                                        'Modern Caesar Cut' => 'Contemporary short cut with fringe',
-                                        'Full Fringe' => 'Full coverage fringe style',
-                                        'Layered Cut with Bangs' => 'Layered cut complemented by bangs',
-                                        'Side Swept' => 'Natural side-swept style'
-                                    ];
-                                @endphp
-                                
+
                                 <p class="text-gray-600 text-sm mb-4">
-                                    {{ $styleDescriptions[$recommendation] ?? 'Perfectly complements your facial features and proportions' }}
+                                    {{ $style['description'] ?? 'Perfectly complements your facial features and proportions.' }}
                                 </p>
                                 
                                 <div class="flex items-center justify-between">
@@ -286,7 +270,7 @@
                                     </span>
                                     <button onclick="openModal({{ $index }})" 
                                             class="text-sm font-medium text-blue-600 hover:text-blue-700">
-                                        View details →
+                                        View details ->
                                     </button>
                                 </div>
                             </div>
@@ -305,19 +289,19 @@
                             Analyze Another Image
                         </a>
                         
-                        <button onclick="window.print()"
+                        <!-- <button onclick="window.print()"
                                 class="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center justify-center shadow-lg hover:shadow-xl">
                             <i class="fas fa-print mr-3"></i>
                             Print Report
                         </button>
-                        
+                         -->
                         
                     </div>
                 </div>
 
                 <!-- Recommendation Modal -->
-                <div id="recommendationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
-                    <div class="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-auto">
+                <div id="recommendationModal" class="modal fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50 p-4">
+                    <div class="bg-white rounded-2xl max-w-lg w-full max-h-[calc(100dvh-2rem)] overflow-hidden">
                         <div class="p-6">
                             <div class="flex justify-between items-center mb-6">
                                 <h3 id="modalTitle" class="text-xl font-bold text-gray-900"></h3>
@@ -334,10 +318,11 @@
                                             class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors">
                                         Close
                                     </button>
-                                    <button  class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all">
+                                    <a href="{{ route('customer.appointments.create') }}"
+                                       class="flex-1 px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all text-center">
                                         <i class="fas fa-calendar mr-2"></i>
-                                        <a href="{{ route('customer.appointments.create') }}">Book Appointment</a>
-                                    </button>
+                                        Book Appointment
+                                    </a>
                                 </div>
                             </div>
                         </div>
@@ -408,9 +393,101 @@
     .card-body > *:nth-child(3) { animation-delay: 0.3s; }
     .card-body > *:nth-child(4) { animation-delay: 0.4s; }
     .card-body > *:nth-child(5) { animation-delay: 0.5s; }
+
+    .hairstyle-sprite-image {
+        background-repeat: no-repeat;
+        background-size: 600% 500%;
+        background-position: calc(var(--hair-col, 5) * 20%) calc(var(--hair-row, 4) * 25%);
+    }
+
+    .hairstyle-image-frame {
+        position: relative;
+        display: block;
+        aspect-ratio: 5 / 4;
+        border: 0;
+        background-color: #e5e7eb;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .hairstyle-image-frame::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0) 35%, rgba(15, 23, 42, 0.48) 100%);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+    }
+
+    .hairstyle-image-frame:hover::after,
+    .hairstyle-image-frame:focus-visible::after {
+        opacity: 1;
+    }
+
+    .hairstyle-image-badge {
+        position: absolute;
+        right: 14px;
+        bottom: 14px;
+        z-index: 2;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        color: #1f2937;
+        padding: 8px 12px;
+        font-size: 13px;
+        font-weight: 700;
+        opacity: 0;
+        transform: translateY(8px);
+        transition: opacity 0.2s ease, transform 0.2s ease;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.2);
+    }
+
+    .hairstyle-image-frame:hover .hairstyle-image-badge,
+    .hairstyle-image-frame:focus-visible .hairstyle-image-badge {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .hairstyle-modal-image {
+        aspect-ratio: 5 / 4;
+        border-radius: 16px;
+        background-color: #e5e7eb;
+        box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.28);
+    }
+
+    @media (max-height: 768px) {
+        .hairstyle-modal-image {
+            max-height: 260px;
+        }
+    }
 </style>
 
+@php
+    $recommendationDetailsForJs = collect($data['recommendation_details'] ?? [])
+        ->map(fn ($style) => array_merge($style, [
+            'image_url' => asset($style['image'] ?? 'images/hairstyles/hairstyle-sprite.png'),
+        ]))
+        ->all();
+@endphp
+
 <script>
+    const recommendationDetails = @json($recommendationDetailsForJs);
+    const defaultHairstyleImage = @json(asset('images/hairstyles/hairstyle-sprite.png'));
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, function(character) {
+            return {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[character];
+        });
+    }
+
     // Modal functions
     function openModal(index) {
         const modal = document.getElementById('recommendationModal');
@@ -419,6 +496,11 @@
         
         const recommendation = @json($data['recommendations'] ?? [])[index];
         const faceShape = @json($data['face_shape'] ?? '');
+        const style = recommendationDetails[recommendation] || {};
+        const imageUrl = style.image_url || defaultHairstyleImage;
+        const styleCol = Number.isFinite(Number(style.sprite_col)) ? Number(style.sprite_col) : 5;
+        const styleRow = Number.isFinite(Number(style.sprite_row)) ? Number(style.sprite_row) : 4;
+        const styleDescription = style.description || 'Perfectly complements your facial features and proportions.';
         
         const benefits = {
             'Oval': [
@@ -469,6 +551,17 @@
         title.textContent = recommendation;
         content.innerHTML = `
             <div class="space-y-4">
+                <div
+                    class="hairstyle-modal-image hairstyle-sprite-image"
+                    style="--hair-col: ${styleCol}; --hair-row: ${styleRow}; background-image: url('${imageUrl}');"
+                    aria-label="${escapeHtml(recommendation)} hairstyle image"
+                ></div>
+
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-900 mb-1">Style Overview</h4>
+                    <p class="text-gray-700 text-sm">${escapeHtml(styleDescription)}</p>
+                </div>
+
                 <div>
                     <h4 class="font-semibold text-gray-900 mb-2">Why this style works:</h4>
                     <ul class="space-y-2">
@@ -494,13 +587,19 @@
         `;
         
         modal.classList.remove('hidden');
-        modal.classList.add('flex');
+        modal.classList.add('active', 'flex');
+        document.documentElement.classList.add('modal-open');
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
     }
     
     function closeModal() {
         const modal = document.getElementById('recommendationModal');
-        modal.classList.remove('flex');
+        modal.classList.remove('active', 'flex');
         modal.classList.add('hidden');
+        document.documentElement.classList.remove('modal-open');
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
     }
     
     // Close modal on outside click

@@ -169,6 +169,11 @@
                         <div class="queue-number">
                             <strong>{{ $queue->queue_code }}</strong>
                             <span>#{{ str_pad($queue->queue_number, 3, '0', STR_PAD_LEFT) }}</span>
+                            @if($queue->status === \App\Models\WalkInQueue::STATUS_WAITING)
+                                <em>Barber queue #{{ $queue->lane_position ?? $loop->iteration }}</em>
+                            @elseif($queue->status === \App\Models\WalkInQueue::STATUS_SERVING)
+                                <em>Serving now</em>
+                            @endif
                         </div>
 
                         <div class="queue-main">
@@ -551,6 +556,20 @@
     .queue-number span {
         color: #718096;
         font-weight: 700;
+    }
+
+    .queue-number em {
+        display: block;
+        margin-top: 6px;
+        color: #1a1f36;
+        font-size: 12px;
+        font-style: normal;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .queue-row.status-serving .queue-number em {
+        color: #2c5282;
     }
 
     .queue-title {

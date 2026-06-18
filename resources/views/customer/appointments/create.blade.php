@@ -84,13 +84,13 @@
                             <div class="service-card">
                                 <div class="service-icon">
                                     @php
-                                        $icon = 'fas fa-cut';
+                                        $icon = 'fas fa-scissors';
                                         $nameLower = strtolower($service->name);
-                                        if (str_contains($nameLower, 'shave') || str_contains($nameLower, 'beard')) {
-                                            $icon = 'fas fa-razor';
+                                        if (str_contains($nameLower, 'shave')) {
+                                            $icon = 'fas fa-scissors';
                                         } elseif (str_contains($nameLower, 'style') || str_contains($nameLower, 'styling')) {
                                             $icon = 'fas fa-spray-can';
-                                        } elseif (str_contains($nameLower, 'trim')) {
+                                        } elseif (str_contains($nameLower, 'trim') || str_contains($nameLower, 'haircut')) {
                                             $icon = 'fas fa-scissors';
                                         } elseif (str_contains($nameLower, 'wash') || str_contains($nameLower, 'shampoo')) {
                                             $icon = 'fas fa-shower';

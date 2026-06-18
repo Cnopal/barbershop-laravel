@@ -61,12 +61,12 @@
                         @else
                         @php
                             // Determine icon based on service name
-                            $icon = 'fas fa-cut';
+                            $icon = 'fas fa-scissors';
                             $nameLower = strtolower($service->name);
                             if (str_contains($nameLower, 'shave') || str_contains($nameLower, 'beard')) {
-                                $icon = 'fas fa-razor';
+                                $icon = 'fas fa-scissors';
                             } elseif (str_contains($nameLower, 'color') || str_contains($nameLower, 'dye')) {
-                                $icon = 'fas fa-paint-brush';
+                                $icon = 'fas fa-palette';
                             } elseif (str_contains($nameLower, 'wash') || str_contains($nameLower, 'shampoo')) {
                                 $icon = 'fas fa-shower';
                             } elseif (str_contains($nameLower, 'style') || str_contains($nameLower, 'styling')) {
@@ -139,7 +139,7 @@
             </div>
         @empty
             <div class="empty-state">
-                <i class="fas fa-cut empty-icon"></i>
+                <i class="fas fa-scissors empty-icon"></i>
                 <h3>No services found</h3>
                 <p>Please add new services to get started</p>
             </div>

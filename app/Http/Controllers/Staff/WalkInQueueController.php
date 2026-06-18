@@ -20,6 +20,8 @@ class WalkInQueueController extends Controller
             ->orderBy('queue_number')
             ->get();
 
+        $this->addLanePositions($queues);
+
         return view('staff.walk_ins.index', [
             'queues' => $queues,
             'customers' => User::where('role', 'customer')->orderBy('name')->get(),
@@ -86,5 +88,23 @@ class WalkInQueueController extends Controller
         }
 
         return $validated;
+    }
+
+    private function addLanePositions($queues): void
+    {
+        $lanePositions = [];
+
+        $queues
+            ->whereIn('status', WalkInQueue::ACTIVE_STATUSES)
+            ->each(function (WalkInQueue $queue) use (&$lanePositions) {
+                if ($queue->status === WalkInQueue::STATUS_SERVING) {
+                    $queue->setAttribute('lane_position', 0);
+                    return;
+                }
+
+                $laneKey = $queue->barber_id ? 'barber_' . $queue->barber_id : 'any';
+                $lanePositions[$laneKey] = ($lanePositions[$laneKey] ?? 0) + 1;
+                $queue->setAttribute('lane_position', $lanePositions[$laneKey]);
+            });
     }
 }

@@ -85,7 +85,7 @@ class WalkInQueueService
 
     public function recalculateEstimates(string $date): void
     {
-        $runningWait = 0;
+        $runningWaitByBarber = [];
         $calculationStart = Carbon::parse($date, 'Asia/Kuala_Lumpur')->isToday()
             ? now('Asia/Kuala_Lumpur')
             : Carbon::parse($date . ' 09:00:00', 'Asia/Kuala_Lumpur');
@@ -98,12 +98,14 @@ class WalkInQueueService
 
         foreach ($queues as $queue) {
             $duration = $queue->service?->duration ?: self::DEFAULT_SERVICE_MINUTES;
+            $barberKey = $queue->barber_id ? 'barber_' . $queue->barber_id : 'any';
+            $runningWait = $runningWaitByBarber[$barberKey] ?? 0;
 
             if ($queue->status === WalkInQueue::STATUS_SERVING) {
                 $queue->updateQuietly(['estimated_wait_minutes' => 0]);
                 $startedAt = $queue->started_at ?: now('Asia/Kuala_Lumpur');
                 $elapsed = max(0, $startedAt->diffInMinutes(now('Asia/Kuala_Lumpur')));
-                $runningWait += max(5, $duration - $elapsed);
+                $runningWaitByBarber[$barberKey] = $runningWait + max(5, $duration - $elapsed);
                 continue;
             }
 
@@ -116,7 +118,7 @@ class WalkInQueueService
             $runningWait = max(0, (int) ceil(($availableStart->getTimestamp() - $calculationStart->getTimestamp()) / 60));
 
             $queue->updateQuietly(['estimated_wait_minutes' => $runningWait]);
-            $runningWait += $duration;
+            $runningWaitByBarber[$barberKey] = $runningWait + $duration;
         }
     }
 
@@ -143,6 +145,20 @@ class WalkInQueueService
         if ($conflict) {
             throw ValidationException::withMessages([
                 'status' => 'Cannot start this walk-in. ' . $this->availability->appointmentConflictMessage($conflict) . ' Choose another barber or wait until the appointment slot is clear.',
+            ]);
+        }
+
+        $walkInConflict = $this->availability->findServingWalkInConflict(
+            $queue->barber_id,
+            $queue->queue_date->toDateString(),
+            $start,
+            $end,
+            $queue->id
+        );
+
+        if ($walkInConflict) {
+            throw ValidationException::withMessages([
+                'status' => 'Cannot start this walk-in. ' . $this->availability->walkInConflictMessage($walkInConflict) . ' Choose another barber or wait until this walk-in is completed.',
             ]);
         }
     }
