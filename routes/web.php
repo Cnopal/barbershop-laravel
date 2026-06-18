@@ -53,6 +53,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->as('admin.')->group(
     Route::resource('staffs', StaffController::class);
     Route::resource('services', ServiceController::class);
     Route::resource('products', AdminProductController::class);
+    Route::get('/reports/{report}/export-pdf', [AdminReportController::class, 'exportPdf'])->name('reports.export-pdf');
     Route::get('/reports/{report}', [AdminReportController::class, 'show'])->name('reports.show');
     Route::get('/product-orders', [ProductOrderManagementController::class, 'index'])->name('product-orders.index');
     Route::get('/product-orders/{order}', [ProductOrderManagementController::class, 'show'])->name('product-orders.show');

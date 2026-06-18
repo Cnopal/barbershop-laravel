@@ -1004,16 +1004,24 @@
 
             .table-header,
             .table-row {
-                grid-template-columns: 1fr 1fr 1fr 1.5fr;
+                grid-template-columns: 1fr 1fr 1fr 1.35fr auto;
             }
 
             .header-cell:nth-child(5),
             .header-cell:nth-child(6),
-            .header-cell:nth-child(7),
             .table-cell:nth-child(5),
-            .table-cell:nth-child(6),
-            .table-cell:nth-child(7) {
+            .table-cell:nth-child(6) {
                 display: none;
+            }
+
+            .header-cell:nth-child(7),
+            .table-cell:nth-child(7) {
+                display: flex;
+                justify-content: flex-end;
+            }
+
+            .action-buttons {
+                justify-content: flex-end;
             }
 
             .appointments-table {
@@ -1091,6 +1099,12 @@
                 gap: 5px;
                 border-bottom: 1px solid var(--light-gray);
                 padding-bottom: 15px;
+            }
+
+            .table-cell:nth-child(5),
+            .table-cell:nth-child(6),
+            .table-cell:nth-child(7) {
+                display: flex;
             }
 
             .table-cell:last-child {

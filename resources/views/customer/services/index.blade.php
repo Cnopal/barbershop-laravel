@@ -186,6 +186,25 @@
         margin-bottom: 26px;
     }
 
+    .filter-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 22px;
+        flex-wrap: wrap;
+    }
+
+    .filter-buttons .btn {
+        flex: 0 1 auto;
+        min-width: 132px;
+    }
+
+    .filter-buttons .btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+
     /* Service Card */
     .service-card {
         background: white;
@@ -423,16 +442,16 @@
     .modal {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
+        inset: 0;
         width: 100%;
-        height: 100%;
+        min-height: 100vh;
+        min-height: 100dvh;
         background: rgba(0, 0, 0, 0.5);
         backdrop-filter: blur(4px);
         z-index: 1000;
         align-items: center;
         justify-content: center;
-        padding: 1rem;
+        padding: clamp(12px, 2vw, 20px);
         animation: fadeIn 0.3s ease;
     }
 
@@ -450,11 +469,15 @@
         border-radius: var(--radius);
         width: 100%;
         max-width: 500px;
-        max-height: 90vh;
-        overflow-y: auto;
+        height: auto;
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px);
+        overflow: hidden;
         box-shadow: var(--shadow-xl);
         animation: slideIn 0.3s ease;
         position: relative;
+        display: flex;
+        flex-direction: column;
     }
 
     @keyframes slideIn {
@@ -495,9 +518,16 @@
 
     .modal-body {
         padding: 24px;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
     }
 
     /* Service Details in Modal */
+    #serviceDetails {
+        min-height: 0;
+    }
+
     #serviceDetails .service-modal-heading {
         text-align: center;
         margin-bottom: 22px;
@@ -582,6 +612,124 @@
     }
 
     /* Responsive Design */
+    @media (max-width: 1366px), (max-height: 768px) {
+        .services-page {
+            padding: 24px;
+        }
+
+        .page-header {
+            margin-bottom: 20px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        .services-container {
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .filter-buttons {
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .service-header,
+        .service-body,
+        .service-footer {
+            padding: 18px;
+        }
+
+        .service-icon {
+            width: 56px;
+            height: 56px;
+            margin-bottom: 0.75rem;
+            font-size: 1.5rem;
+        }
+
+        .service-info h3 {
+            font-size: 1.2rem;
+        }
+
+        .service-description {
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .service-details {
+            padding: 1rem;
+        }
+    }
+
+    @media (max-height: 768px) and (min-width: 769px) {
+        .modal {
+            padding: 12px;
+        }
+
+        .modal-content {
+            max-width: 560px;
+            max-height: calc(100vh - 24px);
+            max-height: calc(100dvh - 24px);
+        }
+
+        .modal-body {
+            padding: 18px;
+        }
+
+        #serviceDetails .service-modal-heading {
+            display: grid;
+            grid-template-columns: 64px minmax(0, 1fr) auto;
+            align-items: center;
+            gap: 12px 16px;
+            text-align: left;
+            margin-bottom: 16px;
+            padding-right: 42px;
+        }
+
+        #serviceDetails .service-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        #serviceDetails h3 {
+            text-align: left;
+            font-size: 1.35rem;
+            margin: 0;
+        }
+
+        #serviceDetails .service-badge {
+            margin-bottom: 0;
+        }
+
+        #serviceDetails .service-description {
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        #serviceDetails .details-grid {
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        #serviceDetails .detail-card {
+            padding: 14px;
+        }
+
+        #serviceDetails .detail-value {
+            font-size: 1.2rem;
+        }
+    }
+
     @media (max-width: 768px) {
         .services-page {
             padding: 20px;
@@ -830,13 +978,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Filter by status (optional feature)
     const filterButtons = document.createElement('div');
     filterButtons.className = 'filter-buttons';
-    filterButtons.style.cssText = `
-        display: flex;
-        justify-content: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-    `;
     
     filterButtons.innerHTML = `
         <button class="btn btn-outline active" data-filter="all">

@@ -10,6 +10,14 @@
             <h1>{{ $title }}</h1>
             <p>{{ $description }}</p>
         </div>
+        <div class="report-header-actions">
+            <a
+                href="{{ route('admin.reports.export-pdf', ['report' => $reportKey, 'start_date' => $startDate, 'end_date' => $endDate]) }}"
+                class="pdf-export-btn"
+            >
+                <i class="fas fa-file-pdf"></i> Export PDF
+            </a>
+        </div>
     </div>
 
     <form method="GET" action="{{ route('admin.reports.show', $reportKey) }}" class="filter-panel">
@@ -111,6 +119,12 @@
         margin-bottom: 22px;
     }
 
+    .report-header-actions {
+        display: flex;
+        justify-content: flex-end;
+        flex-shrink: 0;
+    }
+
     .report-detail-header h1 {
         margin: 10px 0 6px;
         color: var(--primary);
@@ -131,6 +145,27 @@
         color: var(--accent);
         font-weight: 800;
         text-decoration: none;
+    }
+
+    .pdf-export-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        border-radius: 8px;
+        padding: 9px 16px;
+        background: #e53e3e;
+        color: #fff;
+        font-weight: 900;
+        text-decoration: none;
+        box-shadow: 0 8px 18px rgba(229, 62, 62, 0.18);
+        white-space: nowrap;
+    }
+
+    .pdf-export-btn:hover {
+        background: #c53030;
+        color: #fff;
     }
 
     .filter-panel {
@@ -289,6 +324,15 @@
 
         .report-detail-header h1 {
             font-size: 24px;
+        }
+
+        .report-detail-header {
+            flex-direction: column;
+        }
+
+        .report-header-actions,
+        .pdf-export-btn {
+            width: 100%;
         }
 
         .filter-panel {

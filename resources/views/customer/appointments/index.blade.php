@@ -109,6 +109,16 @@
                     </div>
                 </div>
                 @endif
+
+                @if($appointment->canRetryPayment())
+                <div class="payment-window">
+                    <i class="fas fa-hourglass-half"></i>
+                    <span>
+                        Payment expires at {{ $appointment->paymentDeadline()?->format('h:i A') }}
+                        ({{ $appointment->paymentMinutesRemaining() }} min left)
+                    </span>
+                </div>
+                @endif
             </div>
 
             <!-- Appointment Actions -->
@@ -117,6 +127,13 @@
                    class="btn btn-outline btn-small">
                     <i class="fas fa-eye"></i> View
                 </a>
+
+                @if($appointment->canRetryPayment())
+                <a href="{{ route('customer.appointments.pay', $appointment->id) }}"
+                   class="btn btn-primary btn-small">
+                    <i class="fas fa-credit-card"></i> Pay Now
+                </a>
+                @endif
                 
                 @if(in_array($appointment->status, ['pending_payment', 'confirmed']))
                
@@ -420,6 +437,24 @@
         color: var(--accent);
         font-size: 1.125rem;
         font-weight: 600;
+    }
+
+    .payment-window {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding: 0.75rem 1rem;
+        border: 1px solid rgba(237, 137, 54, 0.28);
+        border-radius: 8px;
+        background: rgba(237, 137, 54, 0.08);
+        color: #7b341e;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+
+    .payment-window i {
+        color: var(--warning);
     }
 
     /* Appointment Actions */

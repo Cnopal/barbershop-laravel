@@ -24,6 +24,12 @@
 
                 @if(in_array($appointment->status, ['pending', 'pending_payment', 'confirmed']))
                     <div class="action-buttons">
+                        @if($appointment->canRetryPayment())
+                            <a href="{{ route('customer.appointments.pay', $appointment->id) }}"
+                                class="btn btn-primary btn-small">
+                                <i class="fas fa-credit-card"></i> Pay Now
+                            </a>
+                        @endif
                         <button class="btn btn-danger btn-small" id="cancelBtn">
                             <i class="fas fa-times"></i> Cancel
                         </button>
@@ -31,6 +37,21 @@
                 @endif
             </div>
         </div>
+
+        @if($appointment->canRetryPayment())
+            <div class="payment-window-card">
+                <div>
+                    <h3><i class="fas fa-hourglass-half"></i> Payment Pending</h3>
+                    <p>
+                        Complete payment before {{ $appointment->paymentDeadline()?->format('M d, Y h:i A') }}.
+                        This appointment will be cancelled automatically after 15 minutes.
+                    </p>
+                </div>
+                <a href="{{ route('customer.appointments.pay', $appointment->id) }}" class="btn btn-primary">
+                    <i class="fas fa-credit-card"></i> Pay Now
+                </a>
+            </div>
+        @endif
 
         <!-- Appointment Details Grid -->
         <div class="details-grid">
@@ -431,6 +452,38 @@
         .action-buttons {
             display: flex;
             gap: 12px;
+        }
+
+        .payment-window-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 22px;
+            padding: 20px 24px;
+            border: 1px solid rgba(237, 137, 54, 0.28);
+            border-radius: var(--radius);
+            background: rgba(237, 137, 54, 0.08);
+            box-shadow: var(--shadow);
+        }
+
+        .payment-window-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 0 0.35rem;
+            color: #7b341e;
+            font-size: 1rem;
+        }
+
+        .payment-window-card h3 i {
+            color: var(--warning);
+        }
+
+        .payment-window-card p {
+            margin: 0;
+            color: #7b341e;
+            line-height: 1.5;
         }
 
         /* Button Styles */
@@ -955,6 +1008,11 @@
 
             .action-buttons {
                 flex-direction: column;
+            }
+
+            .payment-window-card {
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .details-grid {

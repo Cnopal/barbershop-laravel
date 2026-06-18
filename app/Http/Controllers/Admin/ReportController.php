@@ -9,9 +9,11 @@ use App\Models\ProductOrderItem;
 use App\Models\Service;
 use App\Models\User;
 use App\Models\WalkInQueue;
+use App\Services\ReportPdfService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
@@ -50,7 +52,30 @@ class ReportController extends Controller
         ],
     ];
 
+    public function __construct(private ReportPdfService $reportPdf)
+    {
+    }
+
     public function show(Request $request, string $report)
+    {
+        return view('admin.reports.show', $this->reportPayload($request, $report));
+    }
+
+    public function exportPdf(Request $request, string $report)
+    {
+        $payload = $this->reportPayload($request, $report);
+        $pdf = $this->reportPdf->render($payload);
+        $filename = Str::slug($payload['title'] . '-' . $payload['startDate'] . '-to-' . $payload['endDate']) . '.pdf';
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Content-Length' => strlen($pdf),
+            'Cache-Control' => 'private, no-store, no-cache, must-revalidate',
+        ]);
+    }
+
+    private function reportPayload(Request $request, string $report): array
     {
         abort_unless(array_key_exists($report, self::REPORTS), 404);
 
@@ -74,7 +99,7 @@ class ReportController extends Controller
             'new-customers' => $this->newCustomersReport($start, $end),
         };
 
-        return view('admin.reports.show', [
+        return [
             'reportKey' => $report,
             'title' => self::REPORTS[$report]['title'],
             'description' => self::REPORTS[$report]['description'],
@@ -83,7 +108,7 @@ class ReportController extends Controller
             'summary' => $data['summary'] ?? [],
             'startDate' => $startDate,
             'endDate' => $endDate,
-        ]);
+        ];
     }
 
     private function period(array $validated): array

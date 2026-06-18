@@ -269,6 +269,51 @@
             display: block;
         }
 
+        html:has(.content-wrapper .modal.active),
+        body:has(.content-wrapper .modal.active) {
+            overflow: hidden;
+        }
+
+        .content-wrapper .modal {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            margin: 0 !important;
+            padding: clamp(12px, 2vw, 20px) !important;
+            overflow: hidden !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 4000 !important;
+        }
+
+        .content-wrapper .modal.active {
+            display: flex !important;
+        }
+
+        .content-wrapper .modal-content {
+            height: auto !important;
+            margin: 0 !important;
+            max-height: calc(100vh - 32px) !important;
+            max-height: calc(100dvh - 32px) !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            transform: none;
+        }
+
+        .content-wrapper .modal-header,
+        .content-wrapper .modal-footer {
+            flex-shrink: 0 !important;
+        }
+
+        .content-wrapper .modal-body {
+            min-height: 0 !important;
+            overflow: hidden !important;
+            overscroll-behavior: none !important;
+        }
+
         /* Mobile layout */
         @media (max-width: 992px) {
             .main-content {

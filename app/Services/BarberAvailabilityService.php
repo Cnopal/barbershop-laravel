@@ -23,6 +23,8 @@ class BarberAvailabilityService
         Carbon $end,
         ?int $excludeAppointmentId = null
     ): ?Appointment {
+        Appointment::cancelExpiredPendingPayments();
+
         return Appointment::with(['customer', 'service'])
             ->where('barber_id', $barberId)
             ->whereDate('appointment_date', $date)

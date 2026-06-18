@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,6 +14,11 @@ class Appointment extends Model
     public const BOOKING_FOR_OTHER = 'other';
     public const CHILD_RATE_AGE_LIMIT = 12;
     public const CHILD_RATE_PRICE = 15.00;
+    public const PAYMENT_RETRY_MINUTES = 15;
+    public const STATUS_PENDING_PAYMENT = 'pending_payment';
+    public const STATUS_CONFIRMED = 'confirmed';
+    public const STATUS_COMPLETED = 'completed';
+    public const STATUS_CANCELLED = 'cancelled';
 
     protected $fillable = [
         'customer_id',
@@ -25,6 +31,9 @@ class Appointment extends Model
         'start_time',
         'end_time',
         'price',
+        'stripe_session_id',
+        'payment_expires_at',
+        'paid_at',
         'status',
         'notes',
     ];
@@ -33,6 +42,8 @@ class Appointment extends Model
         'appointment_date' => 'date',
         'price' => 'decimal:2',
         'recipient_age' => 'integer',
+        'payment_expires_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     /* =========================
@@ -95,6 +106,88 @@ class Appointment extends Model
         return $this->recipient_age !== null && $this->recipient_age < self::CHILD_RATE_AGE_LIMIT;
     }
 
+    public function startPaymentWindow(?CarbonInterface $now = null): CarbonInterface
+    {
+        $deadline = ($now ?: now('Asia/Kuala_Lumpur'))->copy()->addMinutes(self::PAYMENT_RETRY_MINUTES);
+
+        $this->forceFill([
+            'status' => self::STATUS_PENDING_PAYMENT,
+            'payment_expires_at' => $deadline,
+            'paid_at' => null,
+        ])->save();
+
+        return $deadline;
+    }
+
+    public function ensurePaymentWindow(): ?CarbonInterface
+    {
+        if ($this->status !== self::STATUS_PENDING_PAYMENT) {
+            return null;
+        }
+
+        $deadline = $this->paymentDeadline();
+
+        if (!$deadline) {
+            $deadline = now('Asia/Kuala_Lumpur')->addMinutes(self::PAYMENT_RETRY_MINUTES);
+        }
+
+        if (!$this->payment_expires_at) {
+            $this->forceFill(['payment_expires_at' => $deadline])->save();
+        }
+
+        return $deadline;
+    }
+
+    public function paymentDeadline(): ?CarbonInterface
+    {
+        if ($this->payment_expires_at) {
+            return $this->payment_expires_at->copy()->timezone('Asia/Kuala_Lumpur');
+        }
+
+        return null;
+    }
+
+    public function isPaymentExpired(?CarbonInterface $now = null): bool
+    {
+        if ($this->status !== self::STATUS_PENDING_PAYMENT) {
+            return false;
+        }
+
+        $deadline = $this->paymentDeadline();
+
+        return $deadline !== null && $deadline->lte($now ?: now('Asia/Kuala_Lumpur'));
+    }
+
+    public function canRetryPayment(?CarbonInterface $now = null): bool
+    {
+        return $this->status === self::STATUS_PENDING_PAYMENT
+            && !$this->isPaymentExpired($now);
+    }
+
+    public function paymentMinutesRemaining(?CarbonInterface $now = null): int
+    {
+        $deadline = $this->paymentDeadline();
+
+        if (!$deadline || $this->status !== self::STATUS_PENDING_PAYMENT) {
+            return 0;
+        }
+
+        $now = $now ?: now('Asia/Kuala_Lumpur');
+
+        return max(0, (int) ceil($now->diffInSeconds($deadline, false) / 60));
+    }
+
+    public function cancelIfPaymentExpired(?CarbonInterface $now = null): bool
+    {
+        if (!$this->isPaymentExpired($now)) {
+            return false;
+        }
+
+        $this->forceFill(['status' => self::STATUS_CANCELLED])->save();
+
+        return true;
+    }
+
     /* =========================
         QUERY SCOPES
     ========================== */
@@ -107,7 +200,7 @@ class Appointment extends Model
     public function scopeUpcoming($query)
     {
         return $query->whereDate('appointment_date', '>=', today())
-                     ->whereIn('status', ['pending', 'confirmed']);
+                     ->whereIn('status', [self::STATUS_PENDING_PAYMENT, self::STATUS_CONFIRMED]);
     }
 
     public function scopeByStatus($query, $status)
@@ -120,7 +213,22 @@ class Appointment extends Model
         return $query->whereBetween('appointment_date', [$start, $end]);
     }
 
+    public function scopeExpiredPendingPayment($query, ?CarbonInterface $now = null)
+    {
+        $now = $now ?: now('Asia/Kuala_Lumpur');
 
+        return $query->where('status', self::STATUS_PENDING_PAYMENT)
+            ->whereNotNull('payment_expires_at')
+            ->where('payment_expires_at', '<=', $now);
+    }
 
-    
+    public static function cancelExpiredPendingPayments(?CarbonInterface $now = null): int
+    {
+        $now = $now ?: now('Asia/Kuala_Lumpur');
+
+        return static::expiredPendingPayment($now)->update([
+            'status' => self::STATUS_CANCELLED,
+            'updated_at' => $now,
+        ]);
+    }
 }

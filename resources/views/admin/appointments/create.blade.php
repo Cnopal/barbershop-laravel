@@ -940,6 +940,115 @@
         color: var(--primary-color);
     }
 
+    @media (max-width: 1366px), (max-height: 768px) {
+        .container {
+            padding: 22px;
+        }
+
+        .page-header {
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .page-title {
+            font-size: 28px;
+        }
+
+        .btn {
+            padding: 11px 18px;
+        }
+
+        .btn-small {
+            padding: 7px 16px;
+        }
+
+        .form-row {
+            gap: 16px;
+        }
+
+        .form-card {
+            margin-bottom: 16px;
+        }
+
+        .form-card-header {
+            padding: 16px 18px;
+        }
+
+        .form-card-header h3 {
+            font-size: 16px;
+            gap: 10px;
+        }
+
+        .form-card-header i {
+            width: 32px;
+            height: 32px;
+            font-size: 16px;
+        }
+
+        .form-card-body {
+            padding: 18px;
+        }
+
+        .recipient-options,
+        .recipient-field-grid {
+            gap: 12px;
+        }
+
+        .recipient-option {
+            min-height: 40px;
+            padding: 8px 12px;
+        }
+
+        .appointment-summary {
+            gap: 12px;
+        }
+
+        .summary-item {
+            padding-bottom: 10px;
+        }
+
+        .summary-item.total {
+            padding-top: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            padding: 11px 14px;
+            font-size: 14px;
+        }
+
+        textarea.form-control {
+            min-height: 88px;
+            padding: 12px 14px;
+        }
+
+        .form-text {
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        .form-actions {
+            padding: 18px;
+        }
+
+        #toastContainer {
+            right: 22px !important;
+            bottom: 22px !important;
+        }
+
+        .toast {
+            max-width: min(420px, calc(100vw - 44px));
+            padding: 16px 20px;
+        }
+    }
+
     /* Responsive Styles */
     @media (max-width: 768px) {
         .container {

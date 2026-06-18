@@ -458,6 +458,97 @@
             display: block;
         }
 
+        @media (max-width: 1366px), (max-height: 768px) {
+            :root {
+                --customer-page-padding: 24px;
+                --customer-page-top-padding: 34px;
+                --customer-section-gap: 20px;
+                --customer-card-gap: 16px;
+            }
+
+            .sidebar-header {
+                padding: 1rem 1.1rem 0.9rem;
+            }
+
+            .logo {
+                margin-bottom: 1rem;
+            }
+
+            .user-profile {
+                padding: 0.85rem;
+            }
+
+            .sidebar-nav {
+                padding: 0.65rem 0;
+            }
+
+            .nav-section {
+                padding: 0.5rem 1.1rem;
+            }
+
+            .section-title {
+                margin-bottom: 0.5rem;
+            }
+
+            .nav-links {
+                gap: 0.25rem;
+            }
+
+            .nav-item {
+                min-height: 42px;
+                padding: 0.65rem 0.8rem;
+            }
+
+            .sidebar-footer {
+                padding: 0.9rem 1.1rem 1rem;
+            }
+        }
+
+        html:has(.main-content .modal.active),
+        body:has(.main-content .modal.active) {
+            overflow: hidden;
+        }
+
+        .main-content .modal {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            height: 100dvh !important;
+            margin: 0 !important;
+            padding: clamp(12px, 2vw, 20px) !important;
+            overflow: hidden !important;
+            align-items: center !important;
+            justify-content: center !important;
+            z-index: 4000 !important;
+        }
+
+        .main-content .modal.active {
+            display: flex !important;
+        }
+
+        .main-content .modal-content {
+            height: auto !important;
+            margin: 0 !important;
+            max-height: calc(100vh - 32px) !important;
+            max-height: calc(100dvh - 32px) !important;
+            overflow: hidden !important;
+            display: flex !important;
+            flex-direction: column !important;
+            transform: none;
+        }
+
+        .main-content .modal-header,
+        .main-content .modal-footer {
+            flex-shrink: 0 !important;
+        }
+
+        .main-content .modal-body {
+            min-height: 0 !important;
+            overflow: hidden !important;
+            overscroll-behavior: none !important;
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .sidebar {

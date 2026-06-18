@@ -20,11 +20,17 @@ class AppointmentController extends Controller
     // Index - List all appointments
     public function index()
     {
+        Appointment::cancelExpiredPendingPayments();
+
         $appointments = Appointment::with(['service', 'barber'])
             ->where('customer_id', Auth::id())
             ->orderBy('appointment_date', 'desc')
             ->orderBy('start_time', 'desc')
             ->paginate(10);
+
+        $appointments->getCollection()->each(function (Appointment $appointment) {
+            $appointment->ensurePaymentWindow();
+        });
 
         return view('customer.appointments.index', compact('appointments'));
     }
@@ -36,6 +42,14 @@ class AppointmentController extends Controller
             abort(403);
         }
 
+        if ($appointment->cancelIfPaymentExpired()) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Payment window expired. Your appointment has been cancelled.');
+        }
+
+        $appointment->ensurePaymentWindow();
+
         $appointment->load(['service', 'barber']);
 
         return view('customer.appointments.show', compact('appointment'));
@@ -44,6 +58,8 @@ class AppointmentController extends Controller
     // Create - Show booking form
     public function create()
     {
+        Appointment::cancelExpiredPendingPayments();
+
         $services = Service::where('status', 'active')->get();
         $barbers = User::where('role', 'staff')
             ->where('status', 'active')
@@ -55,6 +71,8 @@ class AppointmentController extends Controller
     // Store - Save new appointment
     public function store(Request $request, BarberAvailabilityService $availability)
     {
+        Appointment::cancelExpiredPendingPayments();
+
         $request->validate([
             'service_id' => 'required|exists:services,id',
             'barber_id' => 'required|exists:users,id',
@@ -146,6 +164,7 @@ class AppointmentController extends Controller
             'end_time' => $end_time,
             'price' => $price,
             'status' => 'pending_payment',
+            'payment_expires_at' => now('Asia/Kuala_Lumpur')->addMinutes(Appointment::PAYMENT_RETRY_MINUTES),
             'notes' => $request->notes,
         ]);
 
@@ -161,30 +180,74 @@ class AppointmentController extends Controller
     {
         abort_if($appointment->customer_id !== Auth::id(), 403);
 
-        // Set Stripe API key
-        Stripe::setApiKey(env('STRIPE_SECRET'));
+        $appointment->loadMissing('service', 'customer');
 
-        $session = Session::create([
-            'payment_method_types' => ['card'],
-            'line_items' => [
-                [
-                    'price_data' => [
-                        'currency' => 'myr',
-                        'product_data' => [
-                            'name' => $appointment->service->name . ' for ' . $appointment->recipient_display_name,
+        if ($appointment->cancelIfPaymentExpired()) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Payment window expired. Your appointment has been cancelled.');
+        }
+
+        if ($appointment->status === Appointment::STATUS_CONFIRMED) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('success', 'Payment already completed.');
+        }
+
+        if ($appointment->status !== Appointment::STATUS_PENDING_PAYMENT) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'This appointment is not available for payment.');
+        }
+
+        $appointment->ensurePaymentWindow();
+
+        if ($appointment->isPaymentExpired()) {
+            $appointment->cancelIfPaymentExpired();
+
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Payment window expired. Your appointment has been cancelled.');
+        }
+
+        if (!env('STRIPE_SECRET')) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Stripe payment is not configured yet.');
+        }
+
+        try {
+            Stripe::setApiKey(env('STRIPE_SECRET'));
+
+            $session = Session::create([
+                'payment_method_types' => ['card'],
+                'line_items' => [
+                    [
+                        'price_data' => [
+                            'currency' => 'myr',
+                            'product_data' => [
+                                'name' => $appointment->service->name . ' for ' . $appointment->recipient_display_name,
+                            ],
+                            'unit_amount' => (int) round($appointment->price * 100), // in sen
                         ],
-                        'unit_amount' => (int) round($appointment->price * 100), // in sen
-                    ],
-                    'quantity' => 1,
-                ]
-            ],
-            'mode' => 'payment',
-            'success_url' => route('customer.appointments.payment.success', $appointment->id),
-            'cancel_url' => route('customer.appointments.payment.cancel', $appointment->id),
-        ]);
+                        'quantity' => 1,
+                    ]
+                ],
+                'mode' => 'payment',
+                'success_url' => route('customer.appointments.payment.success', $appointment->id) . '?session_id={CHECKOUT_SESSION_ID}',
+                'cancel_url' => route('customer.appointments.payment.cancel', $appointment->id),
+                'metadata' => [
+                    'appointment_id' => $appointment->id,
+                    'customer_id' => $appointment->customer_id,
+                ],
+            ]);
+        } catch (\Throwable $exception) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Unable to start Stripe checkout. Please try again before the payment window expires.');
+        }
 
-        // Update status ke pending_payment
-        $appointment->update(['status' => 'pending_payment']);
+        $appointment->update(['stripe_session_id' => $session->id]);
 
         // Redirect user to Stripe checkout page
         return redirect($session->url);
@@ -194,13 +257,43 @@ class AppointmentController extends Controller
     // =========================
     // PAYMENT SUCCESS
     // =========================
-    public function paymentSuccess(Appointment $appointment)
+    public function paymentSuccess(Request $request, Appointment $appointment)
     {
         abort_if($appointment->customer_id !== Auth::id(), 403);
 
+        if ($appointment->status === Appointment::STATUS_CONFIRMED) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('success', 'Payment already completed.');
+        }
+
+        if (!$request->filled('session_id')) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Payment session was missing. Please try again.');
+        }
+
+        if ($appointment->stripe_session_id && $appointment->stripe_session_id !== $request->session_id) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Payment session did not match this appointment.');
+        }
+
+        if ($appointment->cancelIfPaymentExpired()) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Payment was not completed within 15 minutes. Your appointment has been cancelled.');
+        }
+
+        if ($appointment->status !== Appointment::STATUS_PENDING_PAYMENT) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'This appointment is not available for payment.');
+        }
+
         $appointment->update([
-            'status' => 'confirmed',
-            'paid_at' => now(),
+            'status' => Appointment::STATUS_CONFIRMED,
+            'paid_at' => now('Asia/Kuala_Lumpur'),
         ]);
 
         return redirect()
@@ -215,9 +308,20 @@ class AppointmentController extends Controller
     {
         abort_if($appointment->customer_id !== Auth::id(), 403);
 
+        if ($appointment->cancelIfPaymentExpired()) {
+            return redirect()
+                ->route('customer.appointments.show', $appointment->id)
+                ->with('error', 'Payment window expired. Your appointment has been cancelled.');
+        }
+
+        $minutesRemaining = $appointment->paymentMinutesRemaining();
+        $message = $minutesRemaining > 0
+            ? "Payment cancelled. You can retry payment within {$minutesRemaining} minute(s)."
+            : 'Payment cancelled.';
+
         return redirect()
             ->route('customer.appointments.show', $appointment->id)
-            ->with('error', 'Payment cancelled.');
+            ->with('error', $message);
     }
 
 
@@ -252,6 +356,8 @@ class AppointmentController extends Controller
     // Add this to your controller (getAvailableSlots method):
     public function getAvailableSlots(Request $request, BarberAvailabilityService $availability)
     {
+        Appointment::cancelExpiredPendingPayments();
+
         $request->validate([
             'date' => 'required|date',
             'barber_id' => 'required|exists:users,id',

@@ -93,6 +93,14 @@
                     <tr>
                         <th>
                             <div class="table-header">
+                                <span>No.</span>
+                                <button class="sort-btn" data-sort="name">
+                                    <i class="fas fa-sort"></i>
+                                </button>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="table-header">
                                 <span>Customer</span>
                                 <button class="sort-btn" data-sort="name">
                                     <i class="fas fa-sort"></i>
@@ -136,6 +144,7 @@
                         @php
                             // $appointmentsCount = $customer->appointments_count ?? 0;
                             // $lastAppointment = $customer->appointments->sortByDesc('appointment_date')->first();
+                            $countNum = $loop->iteration + ($customers->currentPage() - 1) * $customers->perPage();
                         @endphp
                         
                         <tr class="customer-row" 
@@ -145,6 +154,13 @@
                             
                             data-created="{{ $customer->created_at->timestamp }}">
 
+                            <td>
+                                <div class="appointments-info">
+                                   
+                                    <span class="appointments-label">{{ $countNum }}</span>
+                                   
+                                </div>
+                            </td>
                             <td>
                                 <div class="customer-info">
                                     <div class="customer-avatar">

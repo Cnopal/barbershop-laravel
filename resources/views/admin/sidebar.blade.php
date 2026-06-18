@@ -560,6 +560,53 @@
         }
 
         /* Responsive Design */
+        /* Standard laptop viewport */
+        @media (max-width: 1366px), (max-height: 768px) {
+            .main-content {
+                padding: 22px;
+            }
+
+            .header {
+                margin-bottom: 20px;
+            }
+
+            .header h2 {
+                font-size: 28px;
+            }
+
+            .stats-container,
+            .content-row {
+                gap: 16px;
+                margin-bottom: 20px;
+            }
+
+            .stat-card,
+            .card {
+                padding: 20px;
+            }
+
+            .sidebar {
+                padding: 18px 0;
+            }
+
+            .logo {
+                padding: 0 22px 22px;
+                margin-bottom: 18px;
+            }
+
+            .nav-item {
+                padding: 12px 22px;
+            }
+
+            .admin-profile-section {
+                padding: 12px 22px;
+            }
+
+            .sidebar-footer {
+                padding: 16px 22px;
+            }
+        }
+
         /* Large tablets and small laptops */
         @media (max-width: 1200px) {
             .stats-container {
@@ -985,8 +1032,50 @@
                 padding: 24px !important;
             }
 
+            html:has(.main-content .modal.active),
+            body:has(.main-content .modal.active) {
+                overflow: hidden;
+            }
+
             .main-content .modal-content {
                 border-radius: 8px !important;
+                height: auto !important;
+                margin: 0 !important;
+                max-height: calc(100vh - 32px) !important;
+                max-height: calc(100dvh - 32px) !important;
+                overflow: hidden !important;
+                display: flex !important;
+                flex-direction: column !important;
+                transform: none;
+            }
+
+            .main-content .modal {
+                position: fixed !important;
+                inset: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                margin: 0 !important;
+                padding: clamp(12px, 2vw, 20px) !important;
+                overflow: hidden !important;
+                align-items: center !important;
+                justify-content: center !important;
+                z-index: 4000 !important;
+            }
+
+        .main-content .modal.active {
+            display: flex !important;
+        }
+
+            .main-content .modal-header,
+            .main-content .modal-footer {
+                flex-shrink: 0 !important;
+            }
+
+            .main-content .modal-body {
+                min-height: 0 !important;
+                overflow: hidden !important;
+                overscroll-behavior: none !important;
             }
 
             .main-content .modal-footer,
@@ -1001,6 +1090,94 @@
 
             .main-content .is-hidden {
                 display: none;
+            }
+
+            @media (max-width: 1366px), (max-height: 768px) {
+                .main-content > .container,
+                .main-content > .product-admin-page,
+                .main-content > .profile-container,
+                .main-content > .profile-page,
+                .main-content > .admin-profile-page,
+                .main-content > .edit-profile-page {
+                    padding: 22px !important;
+                }
+
+                .main-content .page-header,
+                .main-content .product-page-header,
+                .main-content > .container > .header {
+                    gap: 14px !important;
+                    margin-bottom: 20px !important;
+                }
+
+                .main-content .page-title,
+                .main-content .product-page-header h1,
+                .main-content > .container > .header h2 {
+                    font-size: 28px !important;
+                }
+
+                .main-content .control-bar,
+                .main-content .product-toolbar {
+                    gap: 14px !important;
+                    margin-bottom: 18px !important;
+                    padding: 16px !important;
+                }
+
+                .main-content .stats-container,
+                .main-content .product-stats,
+                .main-content .content-row,
+                .main-content .barbers-grid,
+                .main-content .services-grid,
+                .main-content .product-grid,
+                .main-content .details-grid,
+                .main-content .info-grid,
+                .main-content .form-row {
+                    gap: 16px !important;
+                    margin-bottom: 20px !important;
+                }
+
+                .main-content .stat-card,
+                .main-content .card,
+                .main-content .barber-card,
+                .main-content .customer-profile-card,
+                .main-content .service-card,
+                .main-content .profile-section,
+                .main-content .detail-card,
+                .main-content .summary-card {
+                    padding: 20px !important;
+                }
+
+                .main-content .form-card-body,
+                .main-content .card-body,
+                .main-content .modal-body,
+                .main-content .detail-card-body,
+                .main-content .profile-card-body,
+                .main-content .profile-info-grid {
+                    padding: 20px !important;
+                }
+
+                .main-content .modal {
+                    padding: 16px !important;
+                }
+
+                .main-content .modal-content {
+                    height: auto !important;
+                    max-height: calc(100vh - 32px) !important;
+                    max-height: calc(100dvh - 32px) !important;
+                    overflow: hidden !important;
+                    display: flex !important;
+                    flex-direction: column !important;
+                }
+
+                .main-content .modal-header,
+                .main-content .modal-footer {
+                    flex-shrink: 0;
+                }
+
+                .main-content .modal-body {
+                    min-height: 0;
+                    overflow: hidden !important;
+                    overscroll-behavior: none;
+                }
             }
 
             @media (max-width: 768px) {
