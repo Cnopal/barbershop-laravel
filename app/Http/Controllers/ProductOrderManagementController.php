@@ -13,6 +13,8 @@ class ProductOrderManagementController extends Controller
 {
     public function index(Request $request)
     {
+        ProductOrder::cancelExpiredPendingPayments();
+
         $query = ProductOrder::with(['customer', 'items'])
             ->online()
             ->latest();
@@ -58,6 +60,9 @@ class ProductOrderManagementController extends Controller
 
     public function show(ProductOrder $order)
     {
+        ProductOrder::cancelExpiredPendingPayments();
+        $order->refresh();
+
         abort_if($order->order_type !== 'online', 404);
 
         $order->load(['customer', 'items.product']);

@@ -38,11 +38,12 @@
             <div class="shop-price">RM{{ number_format($product->price, 2) }}</div>
             <p class="shop-description">{{ $product->description ?: 'Premium grooming product available for online purchase.' }}</p>
 
-            <form method="POST" action="{{ route('customer.products.checkout', $product) }}" class="shop-buy-box">
+            <form method="POST" action="{{ route('customer.products.checkout') }}" class="shop-buy-box">
                 @csrf
+                <input type="hidden" name="product_ids[]" value="{{ $product->id }}">
                 <div class="shop-qty-row">
                     <label for="quantity"><strong>Quantity</strong></label>
-                    <input id="quantity" class="shop-input" type="number" name="quantity" min="1" max="{{ $product->stock }}" value="{{ old('quantity', 1) }}" required>
+                    <input id="quantity" class="shop-input" type="number" name="quantities[{{ $product->id }}]" min="1" max="{{ $product->stock }}" value="{{ old('quantities.' . $product->id, 1) }}" required>
                 </div>
                 <div class="shop-stock">{{ $product->stock }} available</div>
                 <button type="submit" class="shop-btn primary">

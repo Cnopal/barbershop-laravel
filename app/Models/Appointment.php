@@ -14,7 +14,7 @@ class Appointment extends Model
     public const BOOKING_FOR_OTHER = 'other';
     public const CHILD_RATE_AGE_LIMIT = 12;
     public const CHILD_RATE_PRICE = 15.00;
-    public const PAYMENT_RETRY_MINUTES = 10;
+    public const PAYMENT_RETRY_MINUTES = 2;
     public const STATUS_PENDING_PAYMENT = 'pending_payment';
     public const STATUS_CONFIRMED = 'confirmed';
     public const STATUS_COMPLETED = 'completed';

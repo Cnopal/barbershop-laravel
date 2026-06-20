@@ -68,8 +68,11 @@
 
     <div class="shop-order-list">
         @forelse($orders as $order)
-            <a href="{{ route('customer.product-orders.show', $order) }}" class="shop-order-row">
-                <div>
+            @php
+                $deadline = $order->paymentDeadline();
+            @endphp
+            <article class="shop-order-row">
+                <a href="{{ route('customer.product-orders.show', $order) }}" class="shop-order-main">
                     <strong>{{ $order->order_number }}</strong>
                     <span>
                         {{ $order->items->sum('quantity') }} item(s)
@@ -79,12 +82,29 @@
                     <small class="shop-order-products">
                         {{ $order->items->pluck('product_name')->join(', ') }}
                     </small>
+                    @if($order->canRetryPayment() && $deadline)
+                        <small class="shop-payment-inline">
+                            Payment expires at {{ $deadline->format('h:i A') }} ({{ $order->paymentMinutesRemaining() }} min left)
+                        </small>
+                    @endif
+                </a>
+                <div class="shop-order-side">
+                    <div class="shop-order-badges">
+                        <span class="shop-status {{ $order->payment_status }}">{{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}</span>
+                        <span class="shop-status order-{{ $order->order_status }}">{{ $order->order_status_label }}</span>
+                    </div>
+                    <div class="shop-order-actions">
+                        @if($order->canRetryPayment())
+                            <a href="{{ route('customer.product-orders.pay', $order) }}" class="shop-btn primary compact">
+                                <i class="fas fa-credit-card"></i> Pay Now
+                            </a>
+                        @endif
+                        <a href="{{ route('customer.product-orders.show', $order) }}" class="shop-btn compact">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </div>
                 </div>
-                <div class="shop-order-badges">
-                    <span class="shop-status {{ $order->payment_status }}">{{ ucfirst(str_replace('_', ' ', $order->payment_status)) }}</span>
-                    <span class="shop-status order-{{ $order->order_status }}">{{ $order->order_status_label }}</span>
-                </div>
-            </a>
+            </article>
         @empty
             <div class="shop-empty">
                 <i class="fas fa-shopping-bag"></i>

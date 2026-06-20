@@ -40,6 +40,7 @@
                 \App\Models\ProductOrder::ORDER_RECEIVED => 'Received',
             ];
             $currentIndex = array_search($order->order_status, array_keys($steps), true);
+            $deadline = $order->paymentDeadline();
         @endphp
 
         <div class="shop-order-progress">
@@ -67,6 +68,18 @@
                 @endforeach
             @endif
         </div>
+
+        @if($order->canRetryPayment() && $deadline)
+            <div class="shop-payment-window">
+                <div>
+                    <strong>Payment expires at {{ $deadline->format('h:i A') }}</strong>
+                    <span>{{ $order->paymentMinutesRemaining() }} minute(s) remaining</span>
+                </div>
+                <a href="{{ route('customer.product-orders.pay', $order) }}" class="shop-btn primary">
+                    <i class="fas fa-credit-card"></i> Pay Now
+                </a>
+            </div>
+        @endif
 
         <table class="shop-order-table">
             <thead>

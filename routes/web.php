@@ -139,9 +139,11 @@ Route::middleware(['auth', 'role:customer'])->prefix('customer')->as('customer.'
     Route::get('/walk-in-queue', [CustomerWalkInQueueController::class, 'index'])->name('walk-ins.index');
     Route::resource('services', CustomerServiceController::class);
     Route::get('/products', [CustomerProductController::class, 'index'])->name('products.index');
+    Route::post('/products/checkout', [CustomerProductController::class, 'checkout'])->name('products.checkout');
     Route::get('/products/{product}', [CustomerProductController::class, 'show'])->name('products.show');
-    Route::post('/products/{product}/checkout', [CustomerProductController::class, 'checkout'])->name('products.checkout');
+    Route::post('/products/{product}/checkout', [CustomerProductController::class, 'checkout'])->name('products.checkout.single');
     Route::get('/product-orders', [CustomerProductController::class, 'orders'])->name('product-orders.index');
+    Route::get('/product-orders/{order}/pay', [CustomerProductController::class, 'pay'])->name('product-orders.pay');
     Route::get('/product-orders/{order}', [CustomerProductController::class, 'orderShow'])->name('product-orders.show');
     Route::get('/product-orders/{order}/payment/success', [CustomerProductController::class, 'paymentSuccess'])->name('product-orders.payment.success');
     Route::get('/product-orders/{order}/payment/cancel', [CustomerProductController::class, 'paymentCancel'])->name('product-orders.payment.cancel');
