@@ -35,11 +35,43 @@
                 <form action="{{ route('customer.ai-hair.analyze') }}" method="POST" enctype="multipart/form-data" id="uploadForm" class="space-y-6">
                     @csrf
                     
+                    <!-- Camera Capture -->
+                    <div class="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Camera Capture</h3>
+                                <p class="text-sm text-gray-600">Open your camera, snap a frontal photo, then analyze it.</p>
+                            </div>
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" id="openCameraBtn" class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-blue-700">
+                                    Open Camera
+                                </button>
+                                <button type="button" id="capturePhotoBtn" class="hidden inline-flex items-center justify-center rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-green-700">
+                                    Snap Photo
+                                </button>
+                                <button type="button" id="retakePhotoBtn" class="hidden inline-flex items-center justify-center rounded-xl bg-purple-600 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-purple-700">
+                                    Retake
+                                </button>
+                                <button type="button" id="closeCameraBtn" class="hidden inline-flex items-center justify-center rounded-xl bg-gray-700 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-gray-800">
+                                    Close
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="cameraPanel" class="hidden mt-5">
+                            <div class="camera-frame rounded-2xl shadow-inner">
+                                <video id="cameraVideo" autoplay playsinline muted></video>
+                            </div>
+                            <canvas id="cameraCanvas" class="hidden"></canvas>
+                        </div>
+
+                        <p id="cameraStatus" class="mt-3 text-sm text-gray-600"></p>
+                    </div>
                     <!-- Drag & Drop Upload Area -->
                     <div class="relative">
-                        <input type="file" name="image" id="image" class="hidden" accept="image/*" required>
+                        <input type="file" name="image" id="image" class="hidden" accept="image/*" capture="user" required>
                         
-                        <label for="image" class="cursor-pointer">
+                        <label for="image" class="cursor-pointer block">
                             <div id="dropArea" class="border-3 border-dashed border-gray-300 rounded-2xl p-8 text-center transition-all duration-300 hover:border-blue-400 hover:bg-blue-50">
                                 <div class="max-w-sm mx-auto">
                                     <div class="w-20 h-20 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -49,13 +81,17 @@
                                     </div>
                                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Click to upload or drag & drop</h3>
                                     <p class="text-gray-500 text-sm mb-4">JPG, PNG, GIF up to 5MB</p>
-                                    <div id="fileName" class="text-sm text-gray-600 hidden"></div>
-                                    <div id="imagePreview" class="mt-4 hidden">
-                                        <img id="previewImage" class="max-h-48 mx-auto rounded-lg shadow-md" src="" alt="Preview">
-                                    </div>
                                 </div>
                             </div>
                         </label>
+
+                        <div id="imagePreview" class="mt-4 hidden rounded-2xl border border-gray-200 bg-gray-50 p-4 text-center">
+                            <img id="previewImage" class="max-h-64 mx-auto rounded-xl shadow-md" src="" alt="Preview">
+                            <div id="fileName" class="mt-3 text-sm text-gray-600 hidden"></div>
+                            <button type="button" id="changePhotoBtn" class="mt-4 inline-flex items-center justify-center rounded-xl border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-100">
+                                Choose Another Photo
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Tips Section -->
@@ -247,6 +283,19 @@
         border-color: #3B82F6 !important;
         background-color: #EFF6FF !important;
     }
+
+    .camera-frame {
+        aspect-ratio: 4 / 3;
+        background: #111827;
+        overflow: hidden;
+    }
+
+    .camera-frame video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transform: scaleX(-1);
+    }
 </style>
 
 <script>
@@ -256,6 +305,7 @@
         const fileName = document.getElementById('fileName');
         const imagePreview = document.getElementById('imagePreview');
         const previewImage = document.getElementById('previewImage');
+        const changePhotoBtn = document.getElementById('changePhotoBtn');
         const uploadForm = document.getElementById('uploadForm');
         const analyzeBtn = document.getElementById('analyzeBtn');
         const btnText = document.getElementById('btnText');
@@ -263,74 +313,188 @@
         const successModal = document.getElementById('successModal');
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
-        
-        // File size limit (5MB)
+        const openCameraBtn = document.getElementById('openCameraBtn');
+        const capturePhotoBtn = document.getElementById('capturePhotoBtn');
+        const retakePhotoBtn = document.getElementById('retakePhotoBtn');
+        const closeCameraBtn = document.getElementById('closeCameraBtn');
+        const cameraPanel = document.getElementById('cameraPanel');
+        const cameraVideo = document.getElementById('cameraVideo');
+        const cameraCanvas = document.getElementById('cameraCanvas');
+        const cameraStatus = document.getElementById('cameraStatus');
+
         const maxSize = 5 * 1024 * 1024;
-        
-        // Prevent default drag behaviors
+        let cameraStream = null;
+
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, preventDefaults, false);
             document.body.addEventListener(eventName, preventDefaults, false);
         });
-        
+
         function preventDefaults(e) {
             e.preventDefault();
             e.stopPropagation();
         }
-        
-        // Highlight drop area when dragging over it
+
         ['dragenter', 'dragover'].forEach(eventName => {
             dropArea.addEventListener(eventName, highlight, false);
         });
-        
+
         ['dragleave', 'drop'].forEach(eventName => {
             dropArea.addEventListener(eventName, unhighlight, false);
         });
-        
+
         function highlight() {
             dropArea.classList.add('drag-over');
         }
-        
+
         function unhighlight() {
             dropArea.classList.remove('drag-over');
         }
-        
-        // Handle dropped files
-        dropArea.addEventListener('drop', handleDrop, false);
-        
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-        }
-        
-        // Handle file selection via click
+
+        dropArea.addEventListener('drop', function(e) {
+            handleFiles(e.dataTransfer.files, 'upload');
+        }, false);
+
         fileInput.addEventListener('change', function() {
-            handleFiles(this.files);
+            handleFiles(this.files, 'upload');
         });
-        
-        function handleFiles(files) {
+
+        openCameraBtn.addEventListener('click', startCamera);
+        retakePhotoBtn.addEventListener('click', startCamera);
+        capturePhotoBtn.addEventListener('click', capturePhoto);
+        closeCameraBtn.addEventListener('click', function() {
+            stopCamera();
+            cameraStatus.textContent = 'Camera closed.';
+        });
+        changePhotoBtn.addEventListener('click', resetSelectedImage);
+        window.addEventListener('beforeunload', stopCamera);
+
+        async function startCamera() {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                showError('Camera is not supported in this browser. Please upload a photo instead.');
+                cameraStatus.textContent = 'Camera is not supported in this browser.';
+                return;
+            }
+
+            try {
+                stopCamera(false);
+                cameraStatus.textContent = 'Opening camera...';
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: 'user',
+                        width: { ideal: 1280 },
+                        height: { ideal: 960 }
+                    },
+                    audio: false
+                });
+
+                cameraVideo.srcObject = cameraStream;
+                await cameraVideo.play();
+
+                cameraPanel.classList.remove('hidden');
+                capturePhotoBtn.classList.remove('hidden');
+                closeCameraBtn.classList.remove('hidden');
+                openCameraBtn.classList.add('hidden');
+                retakePhotoBtn.classList.add('hidden');
+                cameraStatus.textContent = 'Camera ready.';
+            } catch (error) {
+                console.error('Camera error:', error);
+                cameraStatus.textContent = 'Camera permission denied or unavailable. Try upload instead.';
+                showError('Unable to open camera. Please allow camera access or upload a photo.');
+            }
+        }
+
+        function stopCamera(hidePanel = true) {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+
+            cameraVideo.srcObject = null;
+            capturePhotoBtn.classList.add('hidden');
+            closeCameraBtn.classList.add('hidden');
+            openCameraBtn.classList.remove('hidden');
+
+            if (hidePanel) {
+                cameraPanel.classList.add('hidden');
+            }
+        }
+
+        function capturePhoto() {
+            if (!cameraStream || !cameraVideo.videoWidth || !cameraVideo.videoHeight) {
+                showError('Camera is not ready yet');
+                return;
+            }
+
+            cameraCanvas.width = cameraVideo.videoWidth;
+            cameraCanvas.height = cameraVideo.videoHeight;
+            const context = cameraCanvas.getContext('2d');
+            context.drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+
+            cameraCanvas.toBlob(blob => {
+                if (!blob) {
+                    showError('Unable to capture photo. Please try again.');
+                    return;
+                }
+
+                const file = new File([blob], `ai-hair-camera-${Date.now()}.jpg`, { type: 'image/jpeg' });
+                if (!setFileInput(file)) {
+                    return;
+                }
+                handleFiles(fileInput.files, 'camera');
+                stopCamera();
+                retakePhotoBtn.classList.remove('hidden');
+                cameraStatus.textContent = 'Photo captured. Ready to analyze.';
+            }, 'image/jpeg', 0.92);
+        }
+
+        function setFileInput(file) {
+            if (typeof DataTransfer === 'undefined') {
+                showError('Your browser cannot attach camera photos automatically. Please upload a photo instead.');
+                return false;
+            }
+
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            return true;
+        }
+
+        function resetSelectedImage() {
+            fileInput.value = '';
+            previewImage.src = '';
+            fileName.textContent = '';
+            fileName.classList.add('hidden');
+            imagePreview.classList.add('hidden');
+            dropArea.classList.remove('hidden');
+            retakePhotoBtn.classList.add('hidden');
+            cameraStatus.textContent = '';
+        }
+
+        function handleFiles(files, source = 'upload') {
             if (files.length === 0) return;
-            
+
             const file = files[0];
-            
-            // Check file type
+
             if (!file.type.match('image.*')) {
                 showError('Please select an image file (JPG, PNG, GIF)');
                 return;
             }
-            
-            // Check file size
+
             if (file.size > maxSize) {
                 showError('File size exceeds 5MB limit');
                 return;
             }
-            
-            // Display file name
+
+            if (source === 'upload') {
+                stopCamera();
+                retakePhotoBtn.classList.add('hidden');
+                cameraStatus.textContent = '';
+            }
+
             fileName.textContent = `Selected: ${file.name}`;
             fileName.classList.remove('hidden');
-            
-            // Preview image
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 previewImage.src = e.target.result;
@@ -339,46 +503,41 @@
             };
             reader.readAsDataURL(file);
         }
-        
-        // Form submission
+
         uploadForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const files = fileInput.files;
-            
+
             if (files.length === 0) {
-                showError('Please select an image file');
+                showError('Please select or snap an image first');
                 return;
             }
-            
+
             const file = files[0];
-            
-            // Validate file
+
             if (!file.type.match('image.*')) {
                 showError('Please select an image file (JPG, PNG, GIF)');
                 return;
             }
-            
+
             if (file.size > maxSize) {
                 showError('File size exceeds 5MB limit');
                 return;
             }
-            
-            // Show loading state
+
+            stopCamera();
             loadingSpinner.classList.remove('hidden');
             btnText.textContent = 'Analyzing...';
             analyzeBtn.disabled = true;
             analyzeBtn.classList.remove('hover:from-blue-600', 'hover:to-purple-700', 'hover:-translate-y-1', 'hover:shadow-xl');
-            
-            // Show progress modal
             successModal.classList.remove('hidden');
-            
-            // Simulate progress
+
             let progress = 0;
             const interval = setInterval(() => {
                 progress += 5;
                 progressBar.style.width = `${progress}%`;
-                
+
                 if (progress <= 30) {
                     progressText.textContent = 'Uploading image...';
                 } else if (progress <= 60) {
@@ -388,32 +547,28 @@
                 } else {
                     progressText.textContent = 'Generating recommendations...';
                 }
-                
+
                 if (progress >= 100) {
                     clearInterval(interval);
                 }
             }, 100);
-            
-            // Submit form after a short delay to allow UI to update
+
             setTimeout(() => {
                 uploadForm.submit();
             }, 500);
         });
-        
+
         function showError(message) {
-            // Create error toast
             const toast = document.createElement('div');
-            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg transform translate-x-full opacity-0 transition-all duration-300';
+            toast.className = 'fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-xl shadow-lg transform translate-x-full opacity-0 transition-all duration-300 z-50';
             toast.textContent = message;
             document.body.appendChild(toast);
-            
-            // Animate in
+
             setTimeout(() => {
                 toast.classList.remove('translate-x-full', 'opacity-0');
                 toast.classList.add('translate-x-0', 'opacity-100');
             }, 10);
-            
-            // Remove after 5 seconds
+
             setTimeout(() => {
                 toast.classList.remove('translate-x-0', 'opacity-100');
                 toast.classList.add('translate-x-full', 'opacity-0');
@@ -422,8 +577,7 @@
                 }, 300);
             }, 5000);
         }
-        
-        // Handle click anywhere to close modal (for testing)
+
         successModal.addEventListener('click', function(e) {
             if (e.target === successModal) {
                 successModal.classList.add('hidden');
