@@ -395,9 +395,11 @@
     .card-body > *:nth-child(5) { animation-delay: 0.5s; }
 
     .hairstyle-sprite-image {
+        --sprite-x: calc(var(--hair-col, 5) * 20%);
+        --sprite-y: calc(var(--hair-row, 4) * 25%);
         background-repeat: no-repeat;
         background-size: 600% 500%;
-        background-position: calc(var(--hair-col, 5) * 20%) calc(var(--hair-row, 4) * 25%);
+        background-position: var(--sprite-x) var(--sprite-y);
     }
 
     .hairstyle-image-frame {
@@ -408,6 +410,21 @@
         background-color: #e5e7eb;
         cursor: pointer;
         overflow: hidden;
+        isolation: isolate;
+    }
+
+    .hairstyle-image-frame::before,
+    .hairstyle-modal-image::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        background-image: inherit;
+        background-repeat: no-repeat;
+        background-size: 600% 500%;
+        background-position: var(--sprite-x) var(--sprite-y);
+        transform: scale(1.025);
+        transform-origin: center;
+        z-index: 0;
     }
 
     .hairstyle-image-frame::after {
@@ -417,6 +434,7 @@
         background: linear-gradient(180deg, rgba(15, 23, 42, 0) 35%, rgba(15, 23, 42, 0.48) 100%);
         opacity: 0;
         transition: opacity 0.2s ease;
+        z-index: 1;
     }
 
     .hairstyle-image-frame:hover::after,
@@ -451,10 +469,12 @@
     }
 
     .hairstyle-modal-image {
+        position: relative;
         aspect-ratio: 5 / 4;
         border-radius: 16px;
         background-color: #e5e7eb;
         box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.28);
+        overflow: hidden;
     }
 
     @media (max-height: 768px) {

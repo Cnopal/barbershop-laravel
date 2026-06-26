@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
@@ -8,6 +8,8 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=inter:300,400,500,600,700|playfair-display:400,500,600,700&display=swap" rel="stylesheet" />
 
     <style>
         /* CSS Variables */
@@ -267,6 +269,7 @@
             text-align: center;
             font-size: 1.125rem;
             flex-shrink: 0;
+            /* display: none; */
         }
 
         .nav-item.active i {
@@ -705,6 +708,176 @@
             .nav-item {
                 opacity: 1;
                 animation: none;
+            }
+        }
+
+        /* Customer refresh: align logged-in area with landing page style */
+        :root {
+            --primary: #0a0a0a;
+            --secondary: #2a2a2a;
+            --accent: #d4af37;
+            --accent-light: #f8e5a0;
+            --light: #fafafa;
+            --dark: #0f0f0f;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e6e6e6;
+            --surface: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.10);
+            --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.14);
+            --radius: 8px;
+            --sidebar-width: 292px;
+            --customer-page-max: 1280px;
+            --customer-page-padding: 32px;
+            --customer-page-top-padding: 40px;
+            --customer-section-gap: 28px;
+            --customer-card-gap: 18px;
+            --transition: all 0.28s ease;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--primary);
+            background:
+                radial-gradient(circle at 10% 0%, rgba(212, 175, 55, 0.13), transparent 28rem),
+                linear-gradient(180deg, #ffffff 0%, #f5f5f5 100%);
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Playfair Display', serif;
+            letter-spacing: 0;
+        }
+
+        .sidebar {
+            top: 16px;
+            left: 16px;
+            height: calc(100vh - 32px);
+            border: 1px solid rgba(230, 230, 230, 0.88);
+            border-radius: 8px;
+            color: var(--primary);
+            background: rgba(255, 255, 255, 0.88);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px) saturate(160%);
+        }
+
+        .sidebar-header,
+        .sidebar-footer {
+            border-color: rgba(10, 10, 10, 0.08);
+        }
+
+        .logo {
+            color: var(--primary);
+            padding: 0.55rem 0.65rem;
+            border-radius: 8px;
+            background: linear-gradient(135deg, transparent, rgba(212, 175, 55, 0.08));
+        }
+
+        .logo:hover {
+            color: var(--primary);
+            background: rgba(212, 175, 55, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .logo i,
+        .nav-item.active i {
+            color: var(--accent);
+        }
+
+        .logo-main {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+        }
+
+        .logo-sub,
+        .user-info p,
+        .section-title {
+            color: rgba(10, 10, 10, 0.56);
+            opacity: 1;
+        }
+
+        .user-profile {
+            background: rgba(245, 245, 245, 0.92);
+            border-color: rgba(10, 10, 10, 0.06);
+        }
+
+        .user-avatar {
+            color: var(--primary);
+            background: linear-gradient(135deg, var(--accent), #c19a2f);
+            border-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .user-info h3 {
+            color: var(--primary);
+        }
+
+        .nav-item {
+            min-height: 44px;
+            color: rgba(10, 10, 10, 0.72);
+            border-color: transparent;
+            opacity: 1;
+            animation: none;
+        }
+
+        .nav-item:hover {
+            color: var(--primary);
+            background: rgba(212, 175, 55, 0.10);
+            transform: translateX(2px);
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+            background: rgba(212, 175, 55, 0.16);
+            border-color: rgba(212, 175, 55, 0.28);
+            box-shadow: none;
+        }
+
+        .nav-item.active::before {
+            background: var(--accent);
+        }
+
+        .logout-btn {
+            color: #9b2c2c;
+            background: rgba(245, 101, 101, 0.10);
+            border-color: rgba(245, 101, 101, 0.18);
+        }
+
+        .logout-btn:hover {
+            color: #742a2a;
+            background: rgba(245, 101, 101, 0.16);
+            transform: translateY(-1px);
+        }
+
+        .main-content {
+            margin-left: calc(var(--sidebar-width) + 32px);
+        }
+
+        .customer-page {
+            padding-top: var(--customer-page-top-padding) !important;
+        }
+
+        .customer-page-progress {
+            left: calc(var(--sidebar-width) + 32px);
+        }
+
+        .mobile-menu-btn {
+            background: var(--primary);
+            box-shadow: var(--shadow-lg);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                top: 0;
+                left: 0;
+                height: 100vh;
+                border-radius: 0 8px 8px 0;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .customer-page-progress {
+                left: 0;
             }
         }
     </style>
