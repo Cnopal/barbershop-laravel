@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AppointmentConfirmedMail;
 use App\Models\Appointment;
 use App\Models\Service;
 use App\Models\User;
 use App\Services\BarberAvailabilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
@@ -295,6 +298,22 @@ class AppointmentController extends Controller
             'status' => Appointment::STATUS_CONFIRMED,
             'paid_at' => now('Asia/Kuala_Lumpur'),
         ]);
+
+        $appointment->refresh()->load(['customer', 'service', 'barber']);
+
+        if ($appointment->customer && $appointment->customer->email) {
+            try {
+                Mail::to($appointment->customer->email)
+                    ->send(new AppointmentConfirmedMail($appointment));
+            } catch (\Throwable $exception) {
+                Log::warning('Appointment confirmation email failed.', [
+                    'appointment_id' => $appointment->id,
+                    'customer_id' => $appointment->customer_id,
+                    'customer_email' => $appointment->customer->email,
+                    'error' => $exception->getMessage(),
+                ]);
+            }
+        }
 
         return redirect()
             ->route('customer.appointments.show', $appointment->id)
