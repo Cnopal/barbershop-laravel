@@ -29,7 +29,7 @@ class AppointmentController extends Controller
             ->where('customer_id', Auth::id())
             ->orderBy('appointment_date', 'desc')
             ->orderBy('start_time', 'desc')
-            ->paginate(10);
+            ->paginate(12);
 
         $appointments->getCollection()->each(function (Appointment $appointment) {
             $appointment->ensurePaymentWindow();

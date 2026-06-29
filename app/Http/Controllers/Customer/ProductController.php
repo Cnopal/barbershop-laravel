@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ProductOrderConfirmedMail;
 use App\Models\Product;
 use App\Models\ProductOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Stripe\Checkout\Session;
@@ -366,10 +369,15 @@ class ProductController extends Controller
                 'paid_at' => $order->paid_at ?: now('Asia/Kuala_Lumpur'),
             ]);
 
+            $this->sendProductOrderConfirmationEmail($order);
+
             return redirect()
                 ->route('customer.product-orders.show', $order)
                 ->with('error', 'Payment received, but stock needs admin review before fulfilment.');
         }
+
+        $order->refresh();
+        $this->sendProductOrderConfirmationEmail($order);
 
         return redirect()
             ->route('customer.product-orders.show', $order)
@@ -439,5 +447,27 @@ class ProductController extends Controller
         }
 
         return $requestedProducts;
+    }
+
+    private function sendProductOrderConfirmationEmail(ProductOrder $order): void
+    {
+        $order->loadMissing(['customer', 'items']);
+
+        if (!$order->customer || !$order->customer->email) {
+            return;
+        }
+
+        try {
+            Mail::to($order->customer->email)
+                ->send(new ProductOrderConfirmedMail($order));
+        } catch (\Throwable $exception) {
+            Log::warning('Product order confirmation email failed.', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'customer_id' => $order->customer_id,
+                'customer_email' => $order->customer->email,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 }

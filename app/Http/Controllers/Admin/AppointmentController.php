@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AppointmentConfirmedMail;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Service;
@@ -10,6 +11,8 @@ use App\Models\Appointment;
 use App\Services\BarberAvailabilityService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rule;
 
 class AppointmentController extends Controller
@@ -180,6 +183,34 @@ class AppointmentController extends Controller
     public function update(Request $request, $id, BarberAvailabilityService $availability)
     {
         $appointment = Appointment::findOrFail($id);
+        $originalStatus = $appointment->status;
+
+        if (!$request->has('customer_id')) {
+            $validated = $request->validate([
+                'status' => 'required|in:pending_payment,confirmed,completed,cancelled',
+                'notes' => 'nullable|string|max:500',
+            ]);
+
+            $updates = ['status' => $validated['status']];
+
+            if ($request->has('notes')) {
+                $updates['notes'] = $validated['notes'] ?? null;
+            }
+
+            if ($this->isAppointmentConfirmationTransition($originalStatus, $validated['status']) && !$appointment->paid_at) {
+                $updates['paid_at'] = now('Asia/Kuala_Lumpur');
+            }
+
+            $appointment->update($updates);
+
+            if ($this->isAppointmentConfirmationTransition($originalStatus, $validated['status'])) {
+                $this->sendAppointmentConfirmationEmail($appointment);
+            }
+
+            return redirect()
+                ->route('admin.appointments.show', $appointment->id)
+                ->with('success', 'Appointment updated successfully');
+        }
 
         $request->validate([
             'customer_id' => 'required|exists:users,id',
@@ -236,7 +267,7 @@ class AppointmentController extends Controller
                 ->withErrors(['start_time' => 'Barber is not available at this time. ' . $availability->walkInConflictMessage($walkInConflict)]);
         }
 
-        $appointment->update([
+        $updates = [
             'customer_id' => $request->customer_id,
             'booking_for' => $recipient['booking_for'],
             'recipient_name' => $recipient['recipient_name'],
@@ -249,7 +280,17 @@ class AppointmentController extends Controller
             'price' => $price,
             'status' => $request->status,
             'notes' => $request->notes,
-        ]);
+        ];
+
+        if ($this->isAppointmentConfirmationTransition($originalStatus, $request->status) && !$appointment->paid_at) {
+            $updates['paid_at'] = now('Asia/Kuala_Lumpur');
+        }
+
+        $appointment->update($updates);
+
+        if ($this->isAppointmentConfirmationTransition($originalStatus, $request->status)) {
+            $this->sendAppointmentConfirmationEmail($appointment);
+        }
 
         return redirect()
             ->route('admin.appointments.show', $appointment->id)
@@ -352,6 +393,33 @@ class AppointmentController extends Controller
             return response()->json([
                 'error' => 'Error fetching available slots: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    private function isAppointmentConfirmationTransition(?string $originalStatus, string $newStatus): bool
+    {
+        return $originalStatus !== Appointment::STATUS_CONFIRMED
+            && $newStatus === Appointment::STATUS_CONFIRMED;
+    }
+
+    private function sendAppointmentConfirmationEmail(Appointment $appointment): void
+    {
+        $appointment->loadMissing(['customer', 'service', 'barber']);
+
+        if (!$appointment->customer || !$appointment->customer->email) {
+            return;
+        }
+
+        try {
+            Mail::to($appointment->customer->email)
+                ->send(new AppointmentConfirmedMail($appointment));
+        } catch (\Throwable $exception) {
+            Log::warning('Appointment confirmation email failed after admin status update.', [
+                'appointment_id' => $appointment->id,
+                'customer_id' => $appointment->customer_id,
+                'customer_email' => $appointment->customer->email,
+                'error' => $exception->getMessage(),
+            ]);
         }
     }
 }

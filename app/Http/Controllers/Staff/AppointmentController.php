@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Staff;
 
 use App\Http\Controllers\Controller;
+use App\Mail\AppointmentConfirmedMail;
 use Illuminate\Http\Request;
 use App\Models\Appointment;
 use App\Models\Service;
@@ -10,6 +11,8 @@ use App\Models\User;
 use App\Services\BarberAvailabilityService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class AppointmentController extends Controller
 {
@@ -222,6 +225,7 @@ class AppointmentController extends Controller
     public function update(Request $request, $id)
     {
         $appointment = Appointment::where('barber_id', auth()->id())->findOrFail($id);
+        $originalStatus = $appointment->status;
 
         // Prevent updating completed or cancelled appointments
         if (in_array($appointment->status, ['completed', 'cancelled'])) {
@@ -230,21 +234,26 @@ class AppointmentController extends Controller
                 ->with('error', 'Cannot update a ' . $appointment->status . ' appointment.');
         }
 
-        // Staff can update status from the show page, but only specific fields
-        $request->validate([
+        // Staff can update status from the show page, but only specific fields.
+        $validated = $request->validate([
             'status' => 'required|in:pending_payment,confirmed,completed,cancelled',
-            'customer_id' => 'required|exists:users,id',
-            'service_id' => 'required|exists:services,id',
-            'appointment_date' => 'required|date',
-            'start_time' => 'required|date_format:H:i',
             'notes' => 'nullable|string|max:500',
         ]);
 
-        // Update the appointment
-        $appointment->update([
-            'status' => $request->status,
-            'notes' => $request->notes,
-        ]);
+        $updates = [
+            'status' => $validated['status'],
+            'notes' => $validated['notes'] ?? null,
+        ];
+
+        if ($this->isAppointmentConfirmationTransition($originalStatus, $validated['status']) && !$appointment->paid_at) {
+            $updates['paid_at'] = now('Asia/Kuala_Lumpur');
+        }
+
+        $appointment->update($updates);
+
+        if ($this->isAppointmentConfirmationTransition($originalStatus, $validated['status'])) {
+            $this->sendAppointmentConfirmationEmail($appointment);
+        }
 
         return redirect()
             ->route('staff.appointments.show', $appointment->id)
@@ -330,5 +339,32 @@ class AppointmentController extends Controller
             'selected_date' => $request->date,
             'current_time' => $now->format('H:i:s'),
         ]);
+    }
+
+    private function isAppointmentConfirmationTransition(?string $originalStatus, string $newStatus): bool
+    {
+        return $originalStatus !== Appointment::STATUS_CONFIRMED
+            && $newStatus === Appointment::STATUS_CONFIRMED;
+    }
+
+    private function sendAppointmentConfirmationEmail(Appointment $appointment): void
+    {
+        $appointment->loadMissing(['customer', 'service', 'barber']);
+
+        if (!$appointment->customer || !$appointment->customer->email) {
+            return;
+        }
+
+        try {
+            Mail::to($appointment->customer->email)
+                ->send(new AppointmentConfirmedMail($appointment));
+        } catch (\Throwable $exception) {
+            Log::warning('Appointment confirmation email failed after staff status update.', [
+                'appointment_id' => $appointment->id,
+                'customer_id' => $appointment->customer_id,
+                'customer_email' => $appointment->customer->email,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 }
